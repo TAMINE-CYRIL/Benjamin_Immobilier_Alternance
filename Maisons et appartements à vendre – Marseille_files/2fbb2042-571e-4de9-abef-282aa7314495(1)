@@ -1,6 +1,0 @@
-(function(){
-function run(n,t,i){var a=new XMLHttpRequest;a.onreadystatechange=function(){if(this.readyState===4&&this.status===200){var t=n.createElement("script");t.type="text/javascript";t.innerHTML="(function() { var load = function() {"+a.responseText+";\n return this;}.bind({}); var _ = load();__CMD__ })()".replace(/__CMD__/g,i);(n.head||n.documentElement).appendChild(t)}};a.onerror=function(){};a.open("GET",t,!0);a.send()}
-function add(t,n){var i=t.createElement("script");i.type="text/javascript";i.src=n;i.async=!0;(t.head||t.documentElement).appendChild(i)}
-run(document, 'https://cdn.pbstck.com/user-sessions-a657a01.js', '_.userSessions.pubstackAutoconfig(' + JSON.stringify({"endpoint":{"gateway":"https://intake.pbstck.com/v1/intake"},"scopeId":"0caf6610-6d3c-40e7-a524-5512eb6299e5","tagId":"2fbb2042-571e-4de9-abef-282aa7314495","sessionTrackingDisabled":false}) + ');');
-run(document, 'https://cdn.pbstck.com/collector-0d1c456.js', '_.collector.pubstackAutoconfig(' + JSON.stringify({"endpoint":{"gateway":"https://intake.pbstck.com/v1/intake"},"scopeId":"0caf6610-6d3c-40e7-a524-5512eb6299e5","tagId":"2fbb2042-571e-4de9-abef-282aa7314495","viewabilityEnabled":true,"refreshEnabled":false,"smartEnabled":false,"pbjsVariableName":"kleanadsPbjs"}) + ');');
-})()

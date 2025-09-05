@@ -44,7 +44,6 @@ async def main():
             if result.success and result.extracted_content:
                 try:
                     listings = json.loads(result.extracted_content)
-                    # Validation Pydantic
                     for listing in listings:
                         try:
                             validated = ImmoObject(**listing)

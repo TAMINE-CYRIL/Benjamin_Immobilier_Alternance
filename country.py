@@ -35,7 +35,6 @@ async def main():
         try:
             result = await crawler.arun(url=url, config=run_config)
 
-            # ⚡ Nettoyage du résultat
             extracted = result.extracted_content
             if not extracted:
                 print("Rien n'a été extrait")
