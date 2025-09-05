@@ -4,23 +4,27 @@ from pydantic import BaseModel, Field
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, JsonCssExtractionStrategy, CacheMode
 
 class ImmoObject(BaseModel):
-    title: str = Field(..., description="Titre de l'annonce")
-    price: str = Field(..., description="Prix")
-    location: str = Field(..., description="Localisation")
-    description: str = Field(..., description="Description")
-    date: str = Field(..., description="Date de publication")
+    title: str = Field(..., description="Titre complet de l'annonce (provenant de l'attribut title du bouton couvrant la carte)")
+    price: str = Field(..., description="Prix affiché, ex: '371 000 €'")
+    price_per_m2: str = Field(..., description="Prix au mètre carré, ex: '3 092 €/m²'")
+    location: str = Field(..., description="Localisation, ex: 'Palais de Justice, Marseille 6ème (13006)'")
+    keyfacts: str = Field(..., description="Caractéristiques clés : nb de pièces, chambres, surface, étage, etc.")
+    description: str = Field(..., description="Texte descriptif court de l'annonce")
+    date: str = Field("", description="Date de publication (si disponible, sinon chaîne vide)")
 
 schema = {
     "name": "Listing",
-    "baseSelector": "li.listing-item",  
+    "baseSelector": "div[data-testid='serp-core-classified-card-testid']",
     "fields": [
-        {"name": "title", "selector": "h2", "type": "text"},
-        {"name": "price", "selector": ".price", "type": "text"},
-        {"name": "location", "selector": ".location", "type": "text"},
-        {"name": "description", "selector": ".description", "type": "text"},
-        {"name": "date", "selector": ".date", "type": "text"},
+        {"name": "title", "selector": "button[data-testid='card-mfe-covering-link-testid']", "type": "attribute", "attribute": "title"},
+        {"name": "price", "selector": "div[data-testid='cardmfe-price-testid']", "type": "text"},
+        {"name": "price_per_m2", "selector": "div[data-testid='cardmfe-price-testid'] span", "type": "text"},
+        {"name": "location", "selector": "div[data-testid='cardmfe-description-box-address']", "type": "text"},
+        {"name": "keyfacts", "selector": "div[data-testid='cardmfe-keyfacts-testid']", "type": "text"},
+        {"name": "description", "selector": "div[data-testid='cardmfe-description-testid']", "type": "text"}
     ]
 }
+
 
 BASE_URL = "https://www.logic-immo.com/vente?page={}" 
 TOTAL_PAGES = 3  
@@ -31,7 +35,9 @@ async def main():
 
     run_config = CrawlerRunConfig(
         extraction_strategy=extraction_strategy,
-        cache_mode=CacheMode.BYPASS
+        cache_mode=CacheMode.BYPASS,
+        wait_for="div[data-testid='serp-core-classified-card-testid']"
+
     )
 
     all_listings = []
