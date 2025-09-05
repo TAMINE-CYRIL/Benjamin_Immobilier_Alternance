@@ -1,0 +1,87 @@
+// This file is used for SEO obfuscation. The name of the file must not contain any words that might raise suspicion to the Google crawlers.
+// The explanation for this file must also be here, separate from where it is being used, which is by the Classified Card and then loaded in the SERP - because Google crawlers read comments!
+// There are 2 variants of the cardHandler.js - one for the flagship and one for the non-flagship brands.
+// The flagship brands use an anchor element where the base url is already set on the Card (href) and we add a "data-plus" property which gets appended to it here.
+// The non-flagship brands use a button element where the base url is being sent through the "data-base" property and the "data-plus" property gets appended to it.
+// The partner links are handled the same for all brands - the url is being sent through a "data-partner" property and being constructed here.
+(function () {
+  function processLinks(root = document) {
+    // Handle buttons with data-base --> case where the CoveringLink on the Card is a button
+    root.querySelectorAll("button[data-base]").forEach((button) => {
+      const baseUrl = decodeURIComponent(button.getAttribute("data-base") || "");
+      const params = decodeURIComponent(button.getAttribute("data-plus") || "");
+
+      let link;
+      try {
+        const url = new URL(baseUrl, window.location.origin);
+        url.search = params;
+        link = url.toString();
+      } catch (error) {
+        console.error("Invalid URL:", error);
+        return;
+      }
+
+      if (!baseUrl) return;
+
+      if (!button.dataset.listenerAttached) {
+        button.addEventListener("click", () => {
+          const isVertical = button.getAttribute("is-vertical") === "true"
+          if (isVertical) {
+            window.location.assign(link)
+          } else {
+            window.open(link, "_blank")
+          }
+        })
+        button.dataset.listenerAttached = "true"
+      }
+    });
+
+    // Handle partner links
+    root.querySelectorAll("button[data-partner]").forEach((button) => {
+      const partnerLink = button.getAttribute("data-partner");
+      if (!partnerLink) return;
+
+      if (!button.dataset.partnerListenerAttached) {
+        button.addEventListener("click", () => {
+          window.open(partnerLink, "_blank", "noopener");
+        });
+        button.dataset.partnerListenerAttached = "true";
+      }
+    });
+  }
+
+  function initObserver() {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (!(node instanceof HTMLElement)) continue;
+          if (
+            node.matches("button[data-base], button[data-partner]") ||
+            node.querySelector("button[data-base], button[data-partner]")
+          ) {
+            processLinks(node);
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    processLinks();
+    initObserver();
+  } else {
+    window.addEventListener("DOMContentLoaded", () => {
+      processLinks();
+      initObserver();
+    });
+  }
+
+  window.addEventListener("serp.update", () => {
+    processLinks();
+  });
+})();
