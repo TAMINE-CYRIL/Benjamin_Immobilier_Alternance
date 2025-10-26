@@ -1,7 +1,7 @@
 from scraper.scrape_atypiques import scrape_atypiques 
 from scraper.scrape_bienici import scrape_bienici
 from scraper.scrape_pap import scrape_pap
-import asyncio
+import asyncio, os, json
 
 
 async def main():
@@ -19,6 +19,13 @@ async def main():
         all_annonces.extend(res)
 
     print(f"{len(all_annonces)} annonces récupérées")
+
+    f = os.path.join("data", "annonces.json")
+    with open(f, "w", encoding="utf-8") as outfile:
+        json.dump(all_annonces, outfile, ensure_ascii=False, indent=4)
+    print(f"Données sauvegardées dans {f}") 
+    
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -9,6 +9,13 @@ schema_path = os.path.join(BASE_DIR, "../schema/bienici.json")
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_bienici = json.load(f)
 
+# Données du site à scraper sous forme de tableau.
+site ={
+        "url": "https://www.bienici.com/recherche/achat/france",
+        "schema": schema_bienici,
+        "wait_for": "css:article.ad-overview",
+        "prefix": "https://www.bienici.com",
+    }
 
 def extract_number(text):
     """
@@ -67,13 +74,17 @@ def filtrage_bienici(annonces):
         clean_annonces.append(annonce)
     return clean_annonces
 
-# Données du site à scraper sous forme de tableau.
-site ={
-        "url": "https://www.bienici.com/recherche/achat/france",
-        "schema": schema_bienici,
-        "wait_for": "css:article.ad-overview",
-        "prefix": "https://www.bienici.com",
-    }
+def right_url(annonces):
+    filtrage = []
+    for annonce in annonces:
+        url = annonce.get("url")
+        if url and not url.startswith("http"):
+            annonce["url"] = site.get("prefix") + url
+        filtrage.append(annonce)
+    return filtrage
+
+    
+
 
 async def scrape_bienici():
     """
@@ -101,6 +112,7 @@ async def scrape_bienici():
                 annonces = json.loads(result.extracted_content)
 
                 annonces = filter_annonces(annonces)
+                annonces = right_url(annonces)
                 annonces = filtrage_bienici(annonces)
                 return annonces
 

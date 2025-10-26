@@ -51,23 +51,6 @@ def filter_annonces(annonces):
     return filtrage
 
 
-def filtrage_bienici(annonces):
-    """
-    Calcule la surface quand on n'a que prix et prix/m².
-    """
-    clean_annonces = []
-    for annonce in annonces:
-        price = annonce.get("price")
-        surface_price = annonce.get("surface")
-
-        if price is not None and surface_price is not None:
-            annonce["surface"] = price // surface_price
-        else:
-            annonce["surface"] = None
-
-        clean_annonces.append(annonce)
-    return clean_annonces
-
 # Données du site à scraper sous forme de tableau.
 site = {
         "url": "https://www.espaces-atypiques.com/ventes/?prj=ventes&pl=&pmax=&critere1=&s=&order=&map=&pt=vente",
