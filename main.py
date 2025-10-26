@@ -1,10 +1,13 @@
+from scraper.scrape_atypiques import scrape_atypiques 
+from scraper.scrape_bienici import scrape_bienici
+from scraper.scrape_pap import scrape_pap
 import asyncio
-from scrape_atypiques import scrape_atypiques 
+
 
 async def main():
-    print("🚀 Démarrage du scraping...")
+    print("Démarrage du scraping...")
 
-    scrapers = [scrape_atypiques()]
+    scrapers = [scrape_atypiques(), scrape_bienici(), scrape_pap()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 

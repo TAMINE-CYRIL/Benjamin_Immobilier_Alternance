@@ -1,10 +1,13 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
-import asyncio, json
-import json
+import json, os
 
-with open("../schema/espace_atypique.json", "r", encoding="utf-8") as f:
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+schema_path = os.path.join(BASE_DIR, "../schema/espace_atypique.json")
+
+with open(schema_path, "r", encoding="utf-8") as f:
     schema_atypiques = json.load(f)
 
 
@@ -75,7 +78,7 @@ site = {
 
 async def scrape_atypiques():
     """
-    Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données des différents sites à l'aide d'une extraction
+    Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site Espaces Atypiques à l'aide d'une extraction
     CSS et d'un schéma JSON.
     """
     browser_config = BrowserConfig(
