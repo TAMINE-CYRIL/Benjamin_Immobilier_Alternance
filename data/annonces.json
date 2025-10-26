@@ -1,5 +1,12 @@
 [
     {
+        "title": "Généreuse familiale au coeur de Thorigné-Fouillard",
+        "url": "https://www.espaces-atypiques.com/ventes/35235-thorigne-fouillard-genereuse-familiale-au-coeur-de-thorigne-fouillard-13378/",
+        "address": "THORIGNE FOUILLARD",
+        "surface": 1902,
+        "price": 35235
+    },
+    {
         "title": "Appartement rénové en dernier étage aux Chalets",
         "url": "https://www.espaces-atypiques.com/ventes/31000-toulouse-appartement-renove-en-dernier-etage-aux-chalets-13425/",
         "address": "TOULOUSE",
@@ -154,290 +161,87 @@
         "price": 94300
     },
     {
-        "title": "Maison contemporaine avec piscine",
-        "url": "https://www.espaces-atypiques.com/ventes/35410-domloup-maison-contemporaine-familiale-avec-piscine-13414/",
-        "address": "DOMLOUP",
-        "surface": 1262,
-        "price": 35410
+        "title": "Vente appartement Paris 20E (75020)",
+        "url": "https://www.pap.fr/annonces/appartement-paris-20e-75020-r458402945",
+        "address": "Paris 20E (75020)",
+        "surface": 74,
+        "price": 690000
     },
     {
-        "title": "Appartement 3 pièces 59 m²",
-        "url": "https://www.bienici.com/annonce/vente/avon/appartement/3pieces/era-2-55508923?q=%2Frecherche%2Fachat%2Ffrance&depuis-mise-en-avant=oui",
-        "address": "77210 Avon (Butte Montceau)",
-        "surface": 58,
-        "price": 125000
-    },
-    {
-        "title": "Appartement 1 pièce 25 m²",
-        "url": "https://www.bienici.com/annonce/vente/paris-13e/appartement/1piece/ag755714-482755496?q=%2Frecherche%2Fachat%2Ffrance&depuis-mise-en-avant=oui",
-        "address": "75013 Paris 13e (Croulebarbe)",
-        "surface": 2620,
-        "price": 380000
-    },
-    {
-        "title": "Appartement 3 pièces 165 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/3pieces/immo-facile-59373690?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33000 Bordeaux (Ravezies)",
-        "surface": 171,
-        "price": 480000
-    },
-    {
-        "title": "Maison 5 pièces 110 m²",
-        "url": "https://www.bienici.com/annonce/vente/la-teste-de-buch/maison/5pieces/immo-facile-57473214?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33260 La Teste-de-Buch (L'Enclos d'Alis - Notre-Dame des Monts - Ninots - Miquelots)",
-        "surface": 115,
-        "price": 681850
-    },
-    {
-        "title": "Appartement 1 pièce 27 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/1piece/immo-facile-57473578?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33000 Bordeaux (Fondaudège)",
-        "surface": 27,
-        "price": 136370
-    },
-    {
-        "title": "Maison 5 pièces 181 m²",
-        "url": "https://www.bienici.com/annonce/vente/merignac/maison/5pieces/immo-facile-57624393?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33700 Mérignac (Capeyron)",
-        "surface": 187,
-        "price": 590000
-    },
-    {
-        "title": "Maison 6 pièces 193 m²",
-        "url": "https://www.bienici.com/annonce/vente/mios/maison/6pieces/immo-facile-57473222?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33380 Mios",
-        "surface": 201,
-        "price": 625000
-    },
-    {
-        "title": "Appartement 3 pièces 89 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/3pieces/immo-facile-59385990?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33000 Bordeaux (Rivière)",
-        "surface": 92,
-        "price": 312000
-    },
-    {
-        "title": "Maison 2 pièces 63 m²",
-        "url": "https://www.bienici.com/annonce/vente/talence/maison/2pieces/immo-facile-57473206?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33400 Talence (Saint-Genès - La Médoquine - Haut-Brion)",
-        "surface": 65,
-        "price": 281340
-    },
-    {
-        "title": "Domaine d’Esperanza (appartements neufs 2 à 4 pièces)",
-        "url": "https://www.bienici.com/annonce/vente/baillargues/programme/2,4piece/ubiflow-neuf-391283379?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "34670 Baillargues",
-        "price": 219000850000,
-        "surface": null
-    },
-    {
-        "title": "Appartement 3 pièces 88 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/3pieces/immo-facile-57782563?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33000 Bordeaux (Ornano)",
-        "surface": 91,
-        "price": 301900
-    },
-    {
-        "title": "Maison 3 pièces 60 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/maison/3pieces/immo-facile-57473590?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33800 Bordeaux (Nansouty)",
-        "surface": 63,
-        "price": 285930
-    },
-    {
-        "title": "Appartement 4 pièces 85 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/4pieces/immo-facile-57431902?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33200 Bordeaux (Parc Bordelais)",
-        "surface": 89,
-        "price": 358000
-    },
-    {
-        "title": "Maison 5 pièces 125 m²",
-        "url": "https://www.bienici.com/annonce/vente/merignac/maison/5pieces/immo-facile-57473567?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33700 Mérignac (Les Eyquems)",
-        "surface": 131,
-        "price": 577500
-    },
-    {
-        "title": "Maison 6 pièces 135 m²",
-        "url": "https://www.bienici.com/annonce/vente/plaisir/maison/6pieces/era-2-58656436?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
-        "surface": 141,
-        "price": 339000
-    },
-    {
-        "title": "Maison 5 pièces 230 m²",
-        "url": "https://www.bienici.com/annonce/vente/vitry-sur-seine/maison/5pieces/ag753659-482166131?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "94400 Vitry-sur-Seine (Plateau)",
-        "surface": 238,
-        "price": 715000
-    },
-    {
-        "title": "Maison 4 pièces 76 m²",
-        "url": "https://www.bienici.com/annonce/vente/plaisir/maison/4pieces/era-2-58362030?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
-        "surface": 80,
-        "price": 336000
-    },
-    {
-        "title": "Maison 6 pièces 102 m²",
-        "url": "https://www.bienici.com/annonce/vente/plaisir/maison/6pieces/era-2-44883978?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
-        "surface": 107,
-        "price": 366450
-    },
-    {
-        "title": "Appartement 2 pièces 24 m²",
-        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/2pieces/immo-facile-57473067?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33800 Bordeaux (Victoire - Sainte-Eulalie)",
-        "surface": 25,
-        "price": 129990
-    },
-    {
-        "title": "Maison 2 pièces 45 m²",
-        "url": "https://www.bienici.com/annonce/vente/le-bouscat/maison/2pieces/immo-facile-57473190?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33110 Le Bouscat (Lyautey - Champ de Courses)",
-        "surface": 47,
-        "price": 211800
-    },
-    {
-        "title": "Appartement 3 pièces 41 m²",
-        "url": "https://www.bienici.com/annonce/vente/arcachon/appartement/3pieces/immo-facile-57473086?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "33120 Arcachon (Aiguillon)",
-        "surface": 42,
-        "price": 272000
-    },
-    {
-        "title": "DOMAINE 14 (2 à 5 pièces)",
-        "url": "https://www.bienici.com/annonce/vente/neuilly-plaisance/programme/2,5piece/mki-52851?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "93360 Neuilly-Plaisance (Bel Air - Clémenceau - Carnot)",
-        "price": 275450,
-        "surface": null
-    },
-    {
-        "title": "Appartement 3 pièces 55 m²",
-        "url": "https://www.bienici.com/annonce/vente/guyancourt/appartement/3pieces/apimo-86282327?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "78280 Guyancourt (Le Pont du Routoir)",
-        "surface": 57,
-        "price": 257145
-    },
-    {
-        "title": "Appartement 3 pièces 57 m²",
-        "url": "https://www.bienici.com/annonce/vente/plaisir/appartement/3pieces/era-2-59241219?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
-        "surface": 59,
-        "price": 242000
-    },
-    {
-        "title": "Maison 5 pièces 114 m²",
-        "url": "https://www.bienici.com/annonce/vente/colombes/maison/5pieces/immo-facile-59254809?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "92700 Colombes (La Petite Garenne)",
-        "surface": 114,
-        "price": 598000
-    },
-    {
-        "title": "Maison 5 pièces 113 m²",
-        "url": "https://www.bienici.com/annonce/vente/voisins-le-bretonneux/maison/5pieces/apimo-86235049?q=%2Frecherche%2Fachat%2Ffrance",
-        "address": "78960 Voisins-le-Bretonneux",
-        "surface": 118,
-        "price": 525000
-    },
-    {
-        "title": "Chelles (77500)",
-        "url": "/annonces/appartement-chelles-77500-r460202465",
-        "address": "Chelles (77500)",
-        "surface": 4998,
-        "price": 197000
-    },
-    {
-        "title": "La Celle-Saint-Cloud (78170)",
-        "url": "/annonces/appartement-la-celle-saint-cloud-78170-r458502448",
-        "address": "La Celle-Saint-Cloud (78170)",
-        "surface": 78,
-        "price": 259000
-    },
-    {
-        "title": "Saint-Médard-D'eyrans (33650)",
-        "url": "/annonces/maison-saint-medard-d-eyrans-33650-r460402420",
-        "address": "Saint-Médard-D'eyrans (33650)",
-        "surface": 209,
-        "price": 500000
-    },
-    {
-        "title": "Malakoff (92240)",
-        "url": "/annonces/maison-malakoff-92240-r460402438",
-        "address": "Malakoff (92240)",
-        "surface": 70,
+        "title": "Vente appartement Chatou (78400)",
+        "url": "https://www.pap.fr/annonces/appartement-chatou-78400-r458502560",
+        "address": "Chatou (78400)",
+        "surface": 97,
         "price": 470000
     },
     {
-        "title": "Appartement neuf à Cergy",
-        "url": "https://www.immoneuf.com/programme/annonce-immobilier-neuf/cergy-95-g43595/p104526?origine=annonce-pap&utm_source=pap&utm_medium=link&utm_campaign=pap_annonces&typelot=",
-        "address": "Appartement neuf à Cergy",
-        "price": 259354,
+        "title": "Vente maison La Chapelle-Saint-Mesmin (45380)",
+        "url": "https://www.pap.fr/annonces/maison-la-chapelle-saint-mesmin-45380-r460302790",
+        "address": "La Chapelle-Saint-Mesmin (45380)",
+        "surface": 150,
+        "price": 398000
+    },
+    {
+        "title": "Vente maison Lalbenque (46230)",
+        "url": "https://www.pap.fr/annonces/maison-lalbenque-46230-r460302827",
+        "address": "Lalbenque (46230)",
+        "surface": 170,
+        "price": 580000
+    },
+    {
+        "title": "Vente appartement Paris 17E (75017)",
+        "url": "https://www.pap.fr/annonces/appartement-paris-17e-75017-r448502731",
+        "address": "Paris 17E (75017)",
+        "surface": 105,
+        "price": 890000
+    },
+    {
+        "title": "Vente maison Brem-Sur-Mer (85470)",
+        "url": "https://www.pap.fr/annonces/maison-brem-sur-mer-85470-r458302755",
+        "address": "Brem-Sur-Mer (85470)",
+        "surface": 202,
+        "price": 684200
+    },
+    {
+        "title": "Vente maison , En Semi Plain-Pied, Coye-La-Forêt (60580)",
+        "url": "https://www.pap.fr/annonces/maison-en-semi-plain-pied-coye-la-foret-60580-r458802890",
+        "address": ", En Semi Plain-Pied, Coye-La-Forêt (60580)",
+        "surface": 160,
+        "price": 459000
+    },
+    {
+        "title": "Vente appartement Suresnes (92150)",
+        "url": "https://www.pap.fr/annonces/appartement-suresnes-92150-r442501616",
+        "address": "Suresnes (92150)",
+        "price": 245000,
         "surface": null
     },
     {
-        "title": "Vert-Le-Petit",
-        "url": "/annonces/maison-vert-le-petit-r458802424",
-        "address": "Vert-Le-Petit",
-        "surface": 130,
-        "price": 410000
+        "title": "Vente appartement Paris 13E (75013)",
+        "url": "https://www.pap.fr/annonces/appartement-paris-13e-75013-r458502559",
+        "address": "Paris 13E (75013)",
+        "surface": 56,
+        "price": 530000
     },
     {
-        "title": "Avec Terrasse",
-        "url": "/annonces/appartement-avec-terrasse-r460002418",
-        "address": "Avec Terrasse",
-        "surface": 46,
-        "price": 230000
+        "title": "Vente maison Charmante Maison Proche Du Port Et Du Marché",
+        "url": "https://www.pap.fr/annonces/maison-charmante-maison-proche-du-port-et-du-marche-r456200706",
+        "address": "Charmante Maison Proche Du Port Et Du Marché",
+        "surface": 110,
+        "price": 630000
     },
     {
-        "title": "Paris 9E (75009)",
-        "url": "/annonces/appartement-paris-9e-75009-r460202409",
-        "address": "Paris 9E (75009)",
-        "surface": 7163,
-        "price": 860000
+        "title": "Vente appartement Toulon (83100)",
+        "url": "https://www.pap.fr/annonces/appartement-toulon-83100-r455702646",
+        "address": "Toulon (83100)",
+        "surface": 67,
+        "price": 199000
     },
     {
-        "title": "Paris 14E (75014)",
-        "url": "/annonces/local-commercial-paris-14e-75014-r455002435",
-        "address": "Paris 14E (75014)",
-        "price": 225000,
-        "surface": null
-    },
-    {
-        "title": "Appartement neuf à Arcachon",
-        "url": "https://www.immoneuf.com/programme/annonce-immobilier-neuf/arcachon-33120-g19817/p1300970?origine=annonce-pap&utm_source=pap&utm_medium=link&utm_campaign=pap_annonces&typelot=",
-        "address": "Appartement neuf à Arcachon",
-        "price": 329000,
-        "surface": null
-    },
-    {
-        "title": "Nice - Cyrille Besset",
-        "url": "/annonces/appartement-nice-cyrille-besset-r460302762",
-        "address": "Nice - Cyrille Besset",
-        "surface": 55,
-        "price": 210000
-    },
-    {
-        "title": "Notre-Dame-De-L'osier (38470)",
-        "url": "/annonces/maison-notre-dame-de-l-osier-38470-r449300374",
-        "address": "Notre-Dame-De-L'osier (38470)",
-        "surface": 292,
-        "price": 549000
-    },
-    {
-        "title": "La Teste-De-Buch (33260)",
-        "url": "/annonces/maison-la-teste-de-buch-33260-r459203062",
-        "address": "La Teste-De-Buch (33260)",
-        "surface": 108,
-        "price": 750000
-    },
-    {
-        "title": "Fontainebleau (77300)",
-        "url": "/annonces/maison-fontainebleau-77300-r458303268",
-        "address": "Fontainebleau (77300)",
-        "surface": 80,
-        "price": 340000
+        "title": "Vente appartement Paris 16E (75016)",
+        "url": "https://www.pap.fr/annonces/appartement-paris-16e-75016-r460600243",
+        "address": "Paris 16E (75016)",
+        "surface": 132,
+        "price": 1795000
     }
 ]

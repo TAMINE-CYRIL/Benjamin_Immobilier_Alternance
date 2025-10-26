@@ -9,49 +9,31 @@ schema_path = os.path.join(BASE_DIR, "../schema/pap.json")
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_pap = json.load(f)
 
-
-def extract_number(text):
-    """
-    Extrait un nombre entier d'une chaîne de caractères.
-    Retourne None si 'N/A' ou pas de chiffre.
-    """
-    if text is None or text == "N/A":
-        return
-    digits = ""
-    for c in text:
-        if c in "0123456789":
-            digits += c
-    if digits == "":
-        return None
-    return int(digits)
-
-def normalization(annonces):
-    """
-    Normalise les champs prix et surface en entiers (ou None).
-    """
-    clean_annonces = []
-    for annonce in annonces:
-        annonce["price"] = extract_number(annonce.get("price"))
-        annonce["surface"] = extract_number(annonce.get("surface"))
-        
-        clean_annonces.append(annonce)
-
-    return clean_annonces
-
-def filter_annonces(annonces):
+def format_url(annonces):
     filtrage = []
-    clean_annonces=normalization(annonces)
-    for annonce in clean_annonces:
-        price = annonce.get("price")
-        surface = annonce.get("surface")
-        if price is None and surface is None :
-            continue
+    for annonce in annonces:
+        url = annonce.get("url")
+        if url and not url.startswith("http"):
+            annonce["url"] = site.get("prefix") + url
         filtrage.append(annonce)
     return filtrage
 
+def format_title(annonces):
+    filtrage = []
+    for annonce in annonces:  
+        title = annonce.get("title") 
+        url = annonce.get("url")
+
+        if "www.immoneuf.com" in url:
+            continue
+        if url:
+            url_clean = url.replace("/annonces/", "-").split("-")
+            annonce["title"] = "Vente " + url_clean[1] + " "+ title
+        filtrage.append(annonce)
+    return filtrage
 
 # Données du site à scraper sous forme de tableau.
-site ={
+site = {
         "url": "https://www.pap.fr/annonce/vente-immobiliere-france-g25",
         "schema": schema_pap,
         "wait_for": "css:.search-list-item-alt",
@@ -79,12 +61,12 @@ async def scrape_pap():
                 )
                 result = await crawler.arun(url=site.get("url"), config=crawler_config, wait_after_load=10)
 
-                if not result and result.extracted_content:
+                if not result or not result.extracted_content:
                     return []
                 
                 annonces = json.loads(result.extracted_content)
-
-                annonces = filter_annonces(annonces)
+                annonces = format_url(annonces)
+                annonces = format_title(annonces)
                 return annonces
 
 

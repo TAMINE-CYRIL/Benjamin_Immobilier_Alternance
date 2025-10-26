@@ -1,8 +1,8 @@
 from scraper.scrape_atypiques import scrape_atypiques 
 from scraper.scrape_bienici import scrape_bienici
 from scraper.scrape_pap import scrape_pap
+from utils.cleaning import filter_annonces
 import asyncio, os, json
-
 
 async def main():
     print("Démarrage du scraping...")
@@ -16,6 +16,7 @@ async def main():
         if isinstance(res, Exception):
             print(f"Erreur lors du scraping : {res}")
             continue
+        res = filter_annonces(res)
         all_annonces.extend(res)
 
     print(f"{len(all_annonces)} annonces récupérées")
