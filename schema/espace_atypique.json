@@ -1,0 +1,11 @@
+{
+  "name": "Espace Atypiques Immobilier",
+  "baseSelector": "div.preview-annonce",
+  "fields": [
+    { "name": "title", "selector": ".infos .titre a", "type": "text" },
+    { "name": "url", "selector": ".infos .titre a", "type": "attribute", "attribute": "href" },
+    { "name": "address", "selector": ".infos .localisation .ville", "type": "text" },
+    { "name": "surface", "selector": ".infos span.info.font2:not(.orange)", "type": "text" },
+    { "name": "price", "selector": ".infos span.info.orange.font2", "type": "text"}
+  ]
+}

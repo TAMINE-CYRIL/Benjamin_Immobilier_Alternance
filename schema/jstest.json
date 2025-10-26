@@ -1,0 +1,83 @@
+[
+    {
+        "title": "Rez-de-jardin dans une résidence cossue et prisée avec tennis et piscine",
+        "price": "685 000 €",
+        "address": "CHARBONNIERES LES BAINS",
+        "postal_code": "69260",
+        "surface": "122 M2",
+        "url": "https://www.espaces-atypiques.com/ventes/69260-charbonnieres-les-bains-rez-de-jardin-dans-une-residence-cossue-et-prisee-avec-tennis-et-piscine-12800/",
+        "error": false
+    },
+    {
+        "title": "Élégante maison des années 50 avec dépendance et piscine",
+        "price": "1 195 000 €",
+        "address": "AIX EN PROVENCE",
+        "postal_code": "13100",
+        "surface": "145 M2",
+        "url": "https://www.espaces-atypiques.com/ventes/13100-aix-en-provence-elegante-maison-des-annees-50-avec-dependance-et-piscine-12771/",
+        "error": false
+    },
+    {
+        "title": "Charme contemporain avec piscine Rezé St Paul",
+        "price": null,
+        "address": "REZE",
+        "postal_code": "44400",
+        "surface": null,
+        "url": "https://www.espaces-atypiques.com/ventes/44400-reze-charme-contemporain-avec-piscine-reze-st-paul-2760/",
+        "error": false
+    },
+    {
+        "title": "Maison contemporaine avec piscine",
+        "price": "850000",
+        "address": "AIX-EN-PROVENCE",
+        "postal_code": "13100",
+        "surface": "180",
+        "url": "https://www.espaces-atypiques.com/ventes/13100-aix-maison-contemporaine-12345/",
+        "error": false
+    },
+    {
+        "title": "Maison contemporaine avec piscine",
+        "price": "850000",
+        "address": "AIX-EN-PROVENCE",
+        "postal_code": "13100",
+        "surface": "180",
+        "url": "https://www.espaces-atypiques.com/ventes/13100-aix-maison-contemporaine-12345/",
+        "error": false
+    },
+    {
+        "title": "Le magazine",
+        "price": "N/A",
+        "address": "",
+        "postal_code": "",
+        "surface": "N/A",
+        "url": "",
+        "error": false
+    },
+    {
+        "title": "Maison contemporaine avec piscine",
+        "price": "850000",
+        "address": "AIX-EN-PROVENCE",
+        "postal_code": "13100",
+        "surface": "180",
+        "url": "https://www.espaces-atypiques.com/ventes/13100-aix-maison-contemporaine-12345/",
+        "error": false
+    },
+    {
+        "title": "Le magazine",
+        "price": "N/A",
+        "address": "",
+        "postal_code": "",
+        "surface": "N/A",
+        "url": "",
+        "error": false
+    },
+    {
+        "title": "",
+        "price": null,
+        "address": "",
+        "postal_code": "",
+        "surface": null,
+        "url": "",
+        "error": false
+    }
+]
