@@ -1,18 +1,26 @@
+import regex as re
+
 
 def extract_number(text):
     """
     Extrait un nombre entier d'une chaîne de caractères.
     Retourne None si 'N/A' ou pas de chiffre.
     """
-    if text is None or text == "N/A":
-        return
+    if not text or text == "N/A":
+        return None
     digits = ""
-    for c in text:
+
+    # Supprimer les unités courantes
+    text_cleaned = re.sub(r'M2|m2|m²|M²', '', text)
+    
+
+    for c in text_cleaned:
         if c in "0123456789":
             digits += c
     if digits == "":
         return None
     return int(digits)
+
 
 def normalization(annonces):
     """
