@@ -2,10 +2,31 @@
   "name": "Bienici Immobilier",
   "baseSelector": "article.ad-overview",
   "fields": [
-    { "name": "title", "selector": ".ad-overview-details__ad-title", "type": "text" },
-    { "name": "url", "selector": "a.detailedSheetLink", "type": "attribute", "attribute": "href" },
-    { "name": "address", "selector": ".ad-overview-details__address-title", "type": "text" },
-    { "name": "surface", "selector": ".ad-price__price-per-square-meter", "type": "text" },
-    { "name": "price", "selector": ".ad-price__the-price", "type": "text" }
+    {
+      "name": "title",
+      "selector": ".ad-overview-details__ad-title",
+      "type": "text"
+    },
+    {
+      "name": "url",
+      "selector": "a.detailedSheetLink",
+      "type": "attribute",
+      "attribute": "href"
+    },
+    {
+      "name": "address",
+      "selector": ".ad-overview-details__address-title",
+      "type": "text"
+    },
+    {
+      "name": "surface",
+      "selector": ".ad-price__price-per-square-meter",
+      "type": "text"
+    },
+    {
+      "name": "price",
+      "selector": ".ad-price__the-price",
+      "type": "text"
+    }
   ]
 }

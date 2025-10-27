@@ -2,6 +2,7 @@ from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
 import json, os
+from utils.cleaning import extract_number
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/bienici.json")
@@ -20,8 +21,10 @@ def filtrage_bienici(annonces):
     """Calcule la surface quand on n’a que le prix et le prix/m²."""
     clean_annonces = []
     for annonce in annonces:
-        price = annonce.get("price")
-        surface_price = annonce.get("surface")
+        price = extract_number(annonce.get("price"))
+        surface_price = extract_number(annonce.get("surface"))
+
+        annonce["price"] = price
 
         if price and surface_price:
             annonce["surface"] = price // surface_price

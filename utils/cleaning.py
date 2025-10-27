@@ -8,6 +8,11 @@ def extract_number(text):
     """
     if not text or text == "N/A":
         return None
+    
+    # Condition de sécurité au cas où la fonction est déjà utilisée sur un entier (BienIci).
+    if isinstance(text, int):
+        return text
+    
     digits = ""
 
     # Supprimer les unités courantes

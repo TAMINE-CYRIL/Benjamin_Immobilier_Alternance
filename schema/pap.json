@@ -2,11 +2,36 @@
   "name": "PAP Immobilier",
   "baseSelector": ".search-list-item-alt",
   "fields": [
-    { "name": "title", "selector": "a.item-title span.h1", "type": "text" },
-    { "name": "url", "selector": "a.item-title", "type": "attribute", "attribute": "href" },
-    { "name": "address", "selector": ".item-title span.h1", "type": "text" },
-    { "name": "postal_code", "selector": "", "type": "text" },
-    { "name": "surface", "selector": ".item-tags li:nth-child(3)", "type": "text" },
-    { "name": "price", "selector": ".item-price", "type": "text" }
+    {
+      "name": "title",
+      "selector": "a.item-title span.h1",
+      "type": "text"
+    },
+    {
+      "name": "url",
+      "selector": "a.item-title",
+      "type": "attribute",
+      "attribute": "href"
+    },
+    {
+      "name": "address",
+      "selector": ".item-title span.h1",
+      "type": "text"
+    },
+    {
+      "name": "postal_code",
+      "selector": "",
+      "type": "text"
+    },
+    {
+      "name": "surface",
+      "selector": ".item-tags li:nth-child(3)",
+      "type": "text"
+    },
+    {
+      "name": "price",
+      "selector": ".item-price",
+      "type": "text"
+    }
   ]
 }
