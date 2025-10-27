@@ -17,7 +17,7 @@ site = {
     "prefix": "https://www.bienici.com",
 }
 
-def filtrage_bienici(annonces):
+def format_surface(annonces):
     """Calcule la surface quand on n’a que le prix et le prix/m²."""
     clean_annonces = []
     for annonce in annonces:
@@ -60,5 +60,5 @@ async def scrape_bienici():
 
         annonces = json.loads(result.extracted_content)
         annonces = format_url(annonces)
-        annonces = filtrage_bienici(annonces)
+        annonces = format_surface(annonces)
         return annonces

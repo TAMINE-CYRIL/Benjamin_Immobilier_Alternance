@@ -18,14 +18,14 @@
       "selector": ".infos .localisation .ville", 
       "type": "text" 
     },
-    { 
+    {
       "name": "surface", 
-      "selector": ".infos span.info.font2:nth-of-type(1)", 
+      "selector": ".infos span:-soup-contains('M2'), .infos span:-soup-contains('m²'), .infos span:-soup-contains('M²')", 
       "type": "text" 
     },
-    { 
+    {
       "name": "price", 
-      "selector": ".infos span.info.orange.font2", 
+      "selector": ".infos span:-soup-contains('€')", 
       "type": "text"
     }
   ]

@@ -1,5 +1,6 @@
 from scraper.scrape_atypiques import scrape_atypiques 
 from scraper.scrape_bienici import scrape_bienici
+from scraper.scraper_seloger import scrape_seloger
 from scraper.scrape_pap import scrape_pap
 from utils.cleaning import filter_annonces
 import asyncio, os, json
@@ -7,7 +8,7 @@ import asyncio, os, json
 async def main():
     print("Démarrage du scraping...")
 
-    scrapers = [scrape_atypiques(), scrape_bienici(), scrape_pap()]
+    scrapers = [scrape_seloger()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 

@@ -1,0 +1,70 @@
+# --- Environnements Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-wheel-metadata/
+pip-log.txt
+
+# --- Configuration et caches ---
+*.log
+*.pid
+*.seed
+*.cover
+*.py,cover
+*.DS_Store
+.cache/
+.cache_crawl4ai/
+.crawl4ai_cache/
+.crawl4ai_browser/
+crawl4ai_cache/
+crawl4ai_logs/
+.cache_dir/
+__cache__/
+scraper/__pycache__/
+logs/
+tmp/
+temp/
+
+# --- Crawl4AI ---
+# (Ces fichiers sont créés quand tu exécutes le crawler)
+crawl4ai_output/
+crawl4ai_temp/
+*.har
+*.mhtml
+*.db
+*.sqlite
+*.jsonl
+
+# --- Données extraites ---
+data/
+output/
+results/
+exports/
+*.csv
+*.json
+*.xlsx
+
+# --- Fichiers système et IDE ---
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# --- Clés/API ---
+.env
+.env.local
+.env.*
+*.pem
+*.key

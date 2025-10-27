@@ -19,11 +19,6 @@
       "type": "text"
     },
     {
-      "name": "postal_code",
-      "selector": "",
-      "type": "text"
-    },
-    {
       "name": "surface",
       "selector": ".item-tags li:nth-child(3)",
       "type": "text"

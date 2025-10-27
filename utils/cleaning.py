@@ -3,28 +3,34 @@ import regex as re
 
 def extract_number(text):
     """
-    Extrait un nombre entier d'une chaîne de caractères.
+    Extrait un nombre d'une chaîne de caractères.
     Retourne None si 'N/A' ou pas de chiffre.
     """
     if not text or text == "N/A":
         return None
+    if isinstance(text, (int, float)):
+        return float(text)
     
-    # Condition de sécurité au cas où la fonction est déjà utilisée sur un entier (BienIci).
-    if isinstance(text, int):
-        return text
     
-    digits = ""
-
-    # Supprimer les unités courantes
-    text_cleaned = re.sub(r'M2|m2|m²|M²', '', text)
+    text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR', '', text)
+    text_cleaned = text_cleaned.replace(',', '.')
+    text_cleaned = text_cleaned.replace(' ', '')
+    part_text = ''
     
-
-    for c in text_cleaned:
-        if c in "0123456789":
-            digits += c
-    if digits == "":
+    parts = text_cleaned.split('.')    
+    if len(parts) > 2:
+        text_cleaned = part_text.join(parts[:-1]) + '.' + parts[-1]
+    elif len(parts) == 2 and len(parts[1]) > 2:
+        text_cleaned = part_text.join(parts)
+    
+    # Extraire tous les chiffres et le point décimal
+    digits = re.sub(r'[^\d.]', '', text_cleaned)
+    
+    if not digits or digits == '.':
         return None
-    return int(digits)
+    
+    return float(digits)
+
 
 
 def normalization(annonces):
@@ -46,7 +52,7 @@ def filter_annonces(annonces):
     for annonce in clean_annonces:
         price = annonce.get("price")
         surface = annonce.get("surface")
-        if price is None and surface is None :
+        if price is None or surface is None :
             continue
         filtrage.append(annonce)
     return filtrage
