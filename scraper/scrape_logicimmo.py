@@ -19,6 +19,10 @@ site = {
 }
 
 async def scrape_logicimmo():
+    """
+    Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site LogicImmo à l'aide d'une extraction
+    CSS et d'un schéma JSON.
+    """
     browser_config = get_browser_config()
     async with AsyncWebCrawler(config= browser_config) as crawler:
         crawler_config = CrawlerRunConfig()

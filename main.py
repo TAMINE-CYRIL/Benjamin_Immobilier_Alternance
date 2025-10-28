@@ -6,7 +6,15 @@ from utils.cleaning import filter_annonces
 import asyncio, os, json
 
 async def main():
+    """
+    Fonction principale asynchrone pour lancer le scraping de plusieurs sites immobiliers
+    et sauvegarder les résultats dans un fichier JSON.
+    """
+    
     print("Démarrage du scraping...")
+
+    # On crée le dossier qui va servir à stocker les données.
+    os.mkdir("data") if not os.path.exists("data") else None
 
     scrapers = [scrape_bienici(), scrape_seloger()]
 
@@ -22,6 +30,7 @@ async def main():
 
     print(f"{len(all_annonces)} annonces récupérées")
 
+    # Sauvegarde des données dans un fichier JSON.
     f = os.path.join("data", "annonces.json")
     with open(f, "w", encoding="utf-8") as outfile:
         json.dump(all_annonces, outfile, ensure_ascii=False, indent=4)

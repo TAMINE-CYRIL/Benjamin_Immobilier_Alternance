@@ -10,6 +10,9 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_pap = json.load(f)
 
 def format_url(annonces):
+    """
+    Ajoute le préfixe du site aux URLs relatives.
+    """
     filtrage = []
     for annonce in annonces:
         url = annonce.get("url")
@@ -19,6 +22,11 @@ def format_url(annonces):
     return filtrage
 
 def format_title(annonces):
+    """
+    Formate le titre des annonces en fonction de l'URL.
+    Ajoute "Vente" suivi du type de bien et de la localisation extraite de l'URL.
+    On évite également les publicités provenant d'ImmoNeuf.
+    """
     filtrage = []
     for annonce in annonces:  
         title = annonce.get("title") 
