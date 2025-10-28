@@ -48,7 +48,6 @@ crawl4ai_temp/
 
 # --- Données extraites ---
 data/
-data/annonces.json
 output/
 results/
 exports/
@@ -73,4 +72,3 @@ Thumbs.db
 .env.*
 *.pem
 *.key
-

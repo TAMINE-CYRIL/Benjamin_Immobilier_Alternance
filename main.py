@@ -16,7 +16,7 @@ async def main():
     # On crée le dossier qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
-    scrapers = [scrape_seloger(), scrape_bienici(), scrape_atypiques(), scrape_pap()]
+    scrapers = [scrape_atypiques(), scrape_bienici()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 

@@ -2,8 +2,7 @@ from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
 from utils.cleaning import extract_number
-import json, os
-
+import json, os, time, random
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/bienici.json")
@@ -43,23 +42,34 @@ def format_url(annonces):
             annonce["url"] = site["prefix"] + url
     return annonces
 
-async def scrape_bienici():
-    """Scrape le site BienIci à l’aide de Crawl4AI et du schéma JSON."""
+async def scrape_bienici(max_pages=4):
+    """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
+    all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        crawler_config = CrawlerRunConfig(
-            cache_mode=CacheMode.BYPASS,
-            wait_for=site["wait_for"],
-            extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
-        )
+        for page in range(1, max_pages + 1):
+            url = f"{site['url']}?page={page}"
 
-        result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
+            crawler_config = CrawlerRunConfig(
+                cache_mode=CacheMode.BYPASS,
+                wait_for=site["wait_for"],
+                extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
+            )
 
-        if not result or not result.extracted_content:
-            return []
+            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
 
-        annonces = json.loads(result.extracted_content)
-        annonces = format_url(annonces)
-        annonces = format_surface(annonces)
-        return annonces
+            time.sleep(random.uniform(1, 3))
+
+            if not result or not result.extracted_content:
+                break  
+
+            annonces = json.loads(result.extracted_content)
+            if not annonces:
+                break  
+
+            annonces = format_url(annonces)
+            annonces = format_surface(annonces)
+            all_annonces.extend(annonces)
+
+    return all_annonces

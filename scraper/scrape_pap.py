@@ -64,7 +64,8 @@ async def scrape_pap():
                     cache_mode=CacheMode.BYPASS,
                     wait_for=site.get("wait_for"),
                     extraction_strategy=JsonCssExtractionStrategy(
-                        schema=site.get("schema")),
+                    schema=site.get("schema")),
+                    scroll_delay=2
                 )
                 result = await crawler.arun(url=site.get("url"), config=crawler_config, wait_after_load=10)
 

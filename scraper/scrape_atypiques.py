@@ -1,7 +1,7 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
-import json, os
+import json, os, time, random
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/espace_atypique.json")
@@ -9,30 +9,43 @@ schema_path = os.path.join(BASE_DIR, "../schema/espace_atypique.json")
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_atypiques = json.load(f)
 
+
+
 site = {
-    "url": "https://www.espaces-atypiques.com/ventes/?prj=ventes&pl=&pmax=&critere1=&s=&order=&map=&pt=vente",
+    "url": "https://www.espaces-atypiques.com/ventes/page/1/?prj=ventes&pl&pmax&critere1&s&order&map&pt=vente",
     "schema": schema_atypiques,
     "wait_for": "css:.preview-annonce",
     "prefix": "https://www.espaces-atypiques.com",
 }
 
-async def scrape_atypiques():
+async def scrape_atypiques(max_pages=4):
     """
-    Scrape le site Espaces Atypiques à l’aide de Crawl4AI et du schéma JSON.
+    Scrape plusieurs pages du site Espaces Atypiques à l’aide de Crawl4AI et du schéma JSON.
     """
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
-
+    all_annonces = []
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        crawler_config = CrawlerRunConfig(
-            cache_mode=CacheMode.BYPASS,
-            wait_for=site["wait_for"],
-            extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
-        )
+        for page in range(1, max_pages + 1):
+            site["url"] = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes&pl&pmax&critere1&s&order&map&pt=vente"
+            crawler_config = CrawlerRunConfig(
+                cache_mode=CacheMode.BYPASS,
+                wait_for=site["wait_for"],
+                extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
+            )
 
-        result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
+            result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
+            
+            time.sleep(random.uniform(1, 3))
 
-        if not result or not result.extracted_content:
-            return []
+            if not result or not result.extracted_content:
+                break  
 
-        annonces = json.loads(result.extracted_content)
-        return annonces
+            annonces = json.loads(result.extracted_content)
+            if not annonces:
+                break  
+
+            annonces = json.loads(result.extracted_content)
+
+            all_annonces.extend(annonces)
+
+        return all_annonces
