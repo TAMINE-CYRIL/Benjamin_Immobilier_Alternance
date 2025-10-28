@@ -3,20 +3,20 @@ from scraper.scrape_bienici import scrape_bienici
 from scraper.scraper_seloger import scrape_seloger
 from scraper.scrape_pap import scrape_pap
 from utils.cleaning import filter_annonces
-import asyncio, os, json
+import asyncio, os, json, time, random
 
 async def main():
     """
     Fonction principale asynchrone pour lancer le scraping de plusieurs sites immobiliers
     et sauvegarder les résultats dans un fichier JSON.
     """
-    
+
     print("Démarrage du scraping...")
 
     # On crée le dossier qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
-    scrapers = [scrape_bienici(), scrape_seloger()]
+    scrapers = [scrape_seloger(), scrape_bienici(), scrape_atypiques(), scrape_pap()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 
@@ -27,6 +27,7 @@ async def main():
             continue
         res = filter_annonces(res)
         all_annonces.extend(res)
+        time.sleep(random.uniform(3,6))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
 

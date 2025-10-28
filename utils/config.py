@@ -12,10 +12,9 @@ def get_browser_config():
     """Retourne une configuration de navigateur standardisée pour les scrapers."""
     browser_config = BrowserConfig(
         browser_type="chromium", 
-        headless=True,
+        headless=False,
         viewport_width=1920,
         viewport_height=1080,
         headers=HEADERS
     )
-    
     return browser_config

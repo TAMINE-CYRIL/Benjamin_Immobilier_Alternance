@@ -20,15 +20,15 @@
       "type": "text"
     },
     {
+      "name": "surface",
+      "selector": "div[data-testid='cardmfe-price-testid'] span",
+      "type": "text"
+    },
+    {
       "name": "price",
       "selector": "div[data-testid='cardmfe-price-testid']",
       "type": "attribute",
       "attribute": "aria-label"
-    },
-    {
-      "name": "surface",
-      "selector": "div[data-testid='cardmfe-price-testid'] span",
-      "type": "text"
     }
   ]
 }
