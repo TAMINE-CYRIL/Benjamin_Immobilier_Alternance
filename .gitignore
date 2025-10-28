@@ -1,6 +1,8 @@
-# --- Environnements Python ---
+# --- Caches Python ---
 __pycache__/
+**/__pycache__/
 *.py[cod]
+*.pyc
 *.pyo
 *.pyd
 *.so
@@ -30,14 +32,12 @@ pip-log.txt
 crawl4ai_cache/
 crawl4ai_logs/
 .cache_dir/
-__cache__/
 scraper/__pycache__/
 logs/
 tmp/
 temp/
 
 # --- Crawl4AI ---
-# (Ces fichiers sont créés quand tu exécutes le crawler)
 crawl4ai_output/
 crawl4ai_temp/
 *.har
@@ -54,6 +54,10 @@ exports/
 *.csv
 *.json
 *.xlsx
+
+# --- Ne PAS ignorer les schémas JSON ---
+!schema/
+!schema/*.json
 
 # --- Fichiers système et IDE ---
 .vscode/

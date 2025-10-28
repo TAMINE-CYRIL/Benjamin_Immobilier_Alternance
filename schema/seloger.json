@@ -1,0 +1,34 @@
+{
+  "name": "SeLoger",
+  "baseSelector": "div[data-testid^='classified-card-mfe-']",
+  "fields": [
+    {
+      "name": "title",
+      "selector": "a[data-testid='card-mfe-covering-link-testid']",
+      "type": "attribute",
+      "attribute": "title"
+    },
+    {
+      "name": "url",
+      "selector": "a[data-testid='card-mfe-covering-link-testid']",
+      "type": "attribute",
+      "attribute": "href"
+    },
+    {
+      "name": "address",
+      "selector": "div[data-testid='cardmfe-description-box-address']",
+      "type": "text"
+    },
+    {
+      "name": "price",
+      "selector": "div[data-testid='cardmfe-price-testid']",
+      "type": "attribute",
+      "attribute": "aria-label"
+    },
+    {
+      "name": "surface",
+      "selector": "div[data-testid='cardmfe-price-testid'] span",
+      "type": "text"
+    }
+  ]
+}

@@ -1,1 +1,380 @@
-[]
+[
+    {
+        "title": "Appartement 2 pièces 65 m²",
+        "url": "https://www.bienici.com/annonce/vente/aix-les-bains/appartement/2pieces/ag732552-466576718?q=%2Frecherche%2Fachat%2Ffrance&depuis-mise-en-avant=oui",
+        "address": "73100 Aix-les-Bains (Est)",
+        "surface": 64.0,
+        "price": 330000.0
+    },
+    {
+        "title": "Appartement 2 pièces 48 m²",
+        "url": "https://www.bienici.com/annonce/vente/montmorency/appartement/2pieces/immo-facile-59386797?q=%2Frecherche%2Fachat%2Ffrance&depuis-mise-en-avant=oui",
+        "address": "95160 Montmorency (Bas Montmorency)",
+        "surface": 47.0,
+        "price": 272954.0
+    },
+    {
+        "title": "Appartement 3 pièces 165 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/3pieces/immo-facile-59373690?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33000 Bordeaux (Ravezies)",
+        "surface": 171.0,
+        "price": 480000.0
+    },
+    {
+        "title": "Maison 5 pièces 110 m²",
+        "url": "https://www.bienici.com/annonce/vente/la-teste-de-buch/maison/5pieces/immo-facile-57473214?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33260 La Teste-de-Buch (L'Enclos d'Alis - Notre-Dame des Monts - Ninots - Miquelots)",
+        "surface": 115.0,
+        "price": 681850.0
+    },
+    {
+        "title": "Appartement 1 pièce 27 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/1piece/immo-facile-57473578?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33000 Bordeaux (Fondaudège)",
+        "surface": 27.0,
+        "price": 136370.0
+    },
+    {
+        "title": "Maison 5 pièces 181 m²",
+        "url": "https://www.bienici.com/annonce/vente/merignac/maison/5pieces/immo-facile-57624393?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33700 Mérignac (Capeyron)",
+        "surface": 187.0,
+        "price": 590000.0
+    },
+    {
+        "title": "Maison 6 pièces 193 m²",
+        "url": "https://www.bienici.com/annonce/vente/mios/maison/6pieces/immo-facile-57473222?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33380 Mios",
+        "surface": 201.0,
+        "price": 625000.0
+    },
+    {
+        "title": "Appartement 3 pièces 89 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/3pieces/immo-facile-59385990?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33000 Bordeaux (Rivière)",
+        "surface": 92.0,
+        "price": 312000.0
+    },
+    {
+        "title": "Maison 2 pièces 63 m²",
+        "url": "https://www.bienici.com/annonce/vente/talence/maison/2pieces/immo-facile-57473206?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33400 Talence (Saint-Genès - La Médoquine - Haut-Brion)",
+        "surface": 65.0,
+        "price": 281340.0
+    },
+    {
+        "title": "Appartement 3 pièces 88 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/3pieces/immo-facile-57782563?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33000 Bordeaux (Ornano)",
+        "surface": 91.0,
+        "price": 301900.0
+    },
+    {
+        "title": "Maison 3 pièces 60 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/maison/3pieces/immo-facile-57473590?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33800 Bordeaux (Nansouty)",
+        "surface": 63.0,
+        "price": 285930.0
+    },
+    {
+        "title": "Appartement 4 pièces 85 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/4pieces/immo-facile-57431902?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33200 Bordeaux (Parc Bordelais)",
+        "surface": 89.0,
+        "price": 358000.0
+    },
+    {
+        "title": "Maison 5 pièces 125 m²",
+        "url": "https://www.bienici.com/annonce/vente/merignac/maison/5pieces/immo-facile-57473567?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33700 Mérignac (Les Eyquems)",
+        "surface": 131.0,
+        "price": 577500.0
+    },
+    {
+        "title": "Maison 6 pièces 135 m²",
+        "url": "https://www.bienici.com/annonce/vente/plaisir/maison/6pieces/era-2-58656436?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
+        "surface": 141.0,
+        "price": 339000.0
+    },
+    {
+        "title": "Maison 5 pièces 230 m²",
+        "url": "https://www.bienici.com/annonce/vente/vitry-sur-seine/maison/5pieces/ag753659-482166131?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "94400 Vitry-sur-Seine (Plateau)",
+        "surface": 238.0,
+        "price": 715000.0
+    },
+    {
+        "title": "Maison 4 pièces 76 m²",
+        "url": "https://www.bienici.com/annonce/vente/plaisir/maison/4pieces/era-2-58362030?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
+        "surface": 80.0,
+        "price": 336000.0
+    },
+    {
+        "title": "Maison 6 pièces 102 m²",
+        "url": "https://www.bienici.com/annonce/vente/plaisir/maison/6pieces/era-2-44883978?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
+        "surface": 107.0,
+        "price": 366450.0
+    },
+    {
+        "title": "Appartement 2 pièces 24 m²",
+        "url": "https://www.bienici.com/annonce/vente/bordeaux/appartement/2pieces/immo-facile-57473067?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33800 Bordeaux (Victoire - Sainte-Eulalie)",
+        "surface": 25.0,
+        "price": 129990.0
+    },
+    {
+        "title": "Maison 2 pièces 45 m²",
+        "url": "https://www.bienici.com/annonce/vente/le-bouscat/maison/2pieces/immo-facile-57473190?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33110 Le Bouscat (Lyautey - Champ de Courses)",
+        "surface": 47.0,
+        "price": 211800.0
+    },
+    {
+        "title": "Appartement 3 pièces 41 m²",
+        "url": "https://www.bienici.com/annonce/vente/arcachon/appartement/3pieces/immo-facile-57473086?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "33120 Arcachon (Aiguillon)",
+        "surface": 42.0,
+        "price": 272000.0
+    },
+    {
+        "title": "Appartement 3 pièces 55 m²",
+        "url": "https://www.bienici.com/annonce/vente/guyancourt/appartement/3pieces/apimo-86282327?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "78280 Guyancourt (Le Pont du Routoir)",
+        "surface": 57.0,
+        "price": 257145.0
+    },
+    {
+        "title": "Appartement 3 pièces 57 m²",
+        "url": "https://www.bienici.com/annonce/vente/plaisir/appartement/3pieces/era-2-59241219?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "78370 Plaisir (Gâtines - Boissière - Mare aux Saules)",
+        "surface": 59.0,
+        "price": 242000.0
+    },
+    {
+        "title": "Maison 5 pièces 114 m²",
+        "url": "https://www.bienici.com/annonce/vente/colombes/maison/5pieces/immo-facile-59254809?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "92700 Colombes (La Petite Garenne)",
+        "surface": 114.0,
+        "price": 598000.0
+    },
+    {
+        "title": "Maison 5 pièces 113 m²",
+        "url": "https://www.bienici.com/annonce/vente/voisins-le-bretonneux/maison/5pieces/apimo-86235049?q=%2Frecherche%2Fachat%2Ffrance",
+        "address": "78960 Voisins-le-Bretonneux",
+        "surface": 118.0,
+        "price": 525000.0
+    },
+    {
+        "title": "Maison à vendre - L'Isle-d'Abeau - 239 000 € - 5 pièces, 4 chambres, 103 m², 190 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/l-isle-d-abeau-38/247145729.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "L'Isle-d'Abeau (38080)",
+        "price": 239000.0,
+        "surface": 103.01724137931035
+    },
+    {
+        "title": "Villa à vendre - Rueil-Malmaison - 1 770 000 € - 6 pièces, 5 chambres, 192 m², 600 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/rueil-malmaison-92/buzenval/253045625.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Buzenval, Rueil-Malmaison (92500)",
+        "price": 1770000.0,
+        "surface": 191.99479336153595
+    },
+    {
+        "title": "Maison à vendre - Le Coteau - 235 000 € - 8 pièces, 5 chambres, 201 m², 425 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/le-coteau-42/252781023.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Le Coteau (42120)",
+        "price": 235000.0,
+        "surface": 201.02651839178785
+    },
+    {
+        "title": "Maison à vendre - Ternand - 420 000 € - 5 pièces, 4 chambres, 155 m², 1 972 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/ternand-69/252780997.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Ternand (69620)",
+        "price": 420000.0,
+        "surface": 154.98154981549814
+    },
+    {
+        "title": "Maison à vendre - Sausset-les-Pins - 1 145 000 € - 7 pièces, 5 chambres, 185 m², 1 200 m² de terrain",
+        "url": "https://www.bellesdemeures.com/252831993/detail.htm",
+        "address": "Le Brulot-Valapoux, Sausset-les-Pins (13960)",
+        "price": 1145000.0,
+        "surface": 185.00565519470027
+    },
+    {
+        "title": "Maison à vendre - Chennevières-sur-Marne - 980 000 € - 8 pièces, 5 chambres, 206 m², 1 011 m² de terrain",
+        "url": "https://www.bellesdemeures.com/252816785/detail.htm",
+        "address": "Coteaux, Chennevières-sur-Marne (94430)",
+        "price": 980000.0,
+        "surface": 206.01219255833507
+    },
+    {
+        "title": "Maison de plain-pied à vendre - Jouy en Josas - 505 000 € - 4 pièces, 3 chambres, 100 m², 120 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/jouy-en-josas-78/les-metz-pont-colbert/252217797.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Les Metz-Pont Colbert, Jouy en Josas (78350)",
+        "price": 505000.0,
+        "surface": 100.0
+    },
+    {
+        "title": "Pavillon à vendre - L'Haÿ-les-Roses - 420 000 € - 4 pièces, 3 chambres, 78 m², 100 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/l-hay-les-roses-94/252766037.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Centre, L'Haÿ-les-Roses (94240)",
+        "price": 420000.0,
+        "surface": 77.99442896935933
+    },
+    {
+        "title": "Maison à vendre - Étampes - 475 000 € - 8 pièces, 6 chambres, 200 m², 258 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/etampes-91/centre-ville/252870249.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Centre Ville, Étampes (91150)",
+        "price": 475000.0,
+        "surface": 200.0
+    },
+    {
+        "title": "Maison de plain-pied à vendre - Bouguenais - 290 000 € - 3 pièces, 2 chambres, 89 m², 481 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/bouguenais-44/les-couets-ouest/252067703.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Les Couëts Ouest, Bouguenais (44340)",
+        "price": 290000.0,
+        "surface": 89.01166359729896
+    },
+    {
+        "title": "Maison à vendre - Villiers sur Marne - 349 000 € - 3 pièces, 2 chambres, 55,5 m², 150 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/villiers-sur-marne-94/252501019.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Villiers sur Marne (94350)",
+        "price": 349000.0,
+        "surface": 55.50254452926209
+    },
+    {
+        "title": "Maison à vendre - Coudoux - 540 000 € - 5 pièces, 4 chambres, 106 m², 500 m² de terrain",
+        "url": "https://www.bellesdemeures.com/253053679/detail.htm",
+        "address": "Coudoux (13111)",
+        "price": 540000.0,
+        "surface": 106.00706713780919
+    },
+    {
+        "title": "Maison de plain-pied à vendre - Cabriès - 649 000 € - 5 pièces, 4 chambres, 120 m², 900 m² de terrain",
+        "url": "https://www.bellesdemeures.com/253053707/detail.htm",
+        "address": "Calas, Cabriès (13480)",
+        "price": 649000.0,
+        "surface": 120.00739644970415
+    },
+    {
+        "title": "Maison à vendre - Combrit - 980 000 € - 7 pièces, 4 chambres, 325 m², 714 m² de terrain",
+        "url": "https://www.bellesdemeures.com/252651997/detail.htm",
+        "address": "Combrit (29120)",
+        "price": 980000.0,
+        "surface": 325.0414593698176
+    },
+    {
+        "title": "Maison à vendre - Guerville - 384 800 € - 6 pièces, 3 chambres, 160 m², 209 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/guerville-78/252646077.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Guerville (78930)",
+        "price": 384800.0,
+        "surface": 160.0
+    },
+    {
+        "title": "Maison à vendre - Paris 14ème - 2 450 000 € - 7 pièces, 3 chambres, 200,4 m²",
+        "url": "https://www.bellesdemeures.com/252632899/detail.htm",
+        "address": "Montsouris Dareau, Paris 14ème (75014)",
+        "price": 2450000.0,
+        "surface": 200.392605921806
+    },
+    {
+        "title": "Maison à vendre - La Broque - 212 500 € - 4 pièces, 3 chambres, 108 m², 6 164 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/la-broque-67/252553111.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "La Broque (67130)",
+        "price": 212500.0,
+        "surface": 107.97764227642277
+    },
+    {
+        "title": "Maison à vendre - Andresy - 499 900 € - 6 pièces, 4 chambres, 136 m², 905 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/andresy-78/252720671.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Andresy (78570)",
+        "price": 499900.0,
+        "surface": 135.99020674646354
+    },
+    {
+        "title": "Maison à vendre - Sanary-sur-Mer - 865 000 € - 6 pièces, 4 chambres, 155 m², 1 509 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/sanary-sur-mer-83/beaucours-la-gorguette-la-morvenede/252572479.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Beaucours-La Gorguette-La Morvenede, Sanary-sur-Mer (83110)",
+        "price": 865000.0,
+        "surface": 154.99014513528041
+    },
+    {
+        "title": "Maison à vendre - Chambost Allieres - 209 000 € - 7 pièces, 6 chambres, 171 m², 349 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/chambost-allieres-69/252781017.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Chambost Allieres (69870)",
+        "price": 209000.0,
+        "surface": 171.03109656301146
+    },
+    {
+        "title": "Maison à vendre - St Clement sur Valsonne - 209 000 € - 7 pièces, 6 chambres, 171 m², 349 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/saint-clement-sur-valsonne-69/252781029.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "St Clement sur Valsonne (69170)",
+        "price": 209000.0,
+        "surface": 171.03109656301146
+    },
+    {
+        "title": "Maison de plain-pied à vendre - Aups - 875 000 € - 12 pièces, 8 chambres, 261,2 m², 2 251 m² de terrain",
+        "url": "https://www.bellesdemeures.com/252875841/detail.htm",
+        "address": "Aups (83630)",
+        "price": 875000.0,
+        "surface": 261.1940298507463
+    },
+    {
+        "title": "Maison à vendre - Aulnay-sous-Bois - 388 400 € - 7 pièces, 2 chambres, 107 m², 493 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/aulnay-sous-bois-93/tour-eiffel-marie-paul-bert/252680601.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Tour Eiffel-Marie-Paul Bert, Aulnay-sous-Bois (93600)",
+        "price": 388400.0,
+        "surface": 106.99724517906336
+    },
+    {
+        "title": "Maison à vendre - Colomars - 980 000 € - 5 pièces, 4 chambres, 142 m²",
+        "url": "https://www.bellesdemeures.com/252769195/detail.htm",
+        "address": "Colomars (06670)",
+        "price": 980000.0,
+        "surface": 142.00840457904653
+    },
+    {
+        "title": "Maison à vendre - Deuil-la-Barre - 435 000 € - 5 pièces, 3 chambres, 114 m², 213 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/deuil-la-barre-95/lac-marchais-blancport/252122009.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Lac Marchais-Blancport, Deuil-la-Barre (95170)",
+        "price": 435000.0,
+        "surface": 113.99371069182389
+    },
+    {
+        "title": "Maison à vendre - neuf - Meaux - 949 000 € - 10 pièces, 7 chambres, 400 m²",
+        "url": "https://www.seloger.com/annonces/achat/maison/meaux-77/croix-saint-loup-saint-nicolas/249000117.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Croix Saint Loup-Saint Nicolas, Meaux (77100)",
+        "price": 949000.0,
+        "surface": 399.9157184997893
+    },
+    {
+        "title": "Maison à vendre - neuf - Saint-Gilles-Croix-de-Vie - 33 000 € - 4 pièces, 2 chambres, 43 m², 247 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/saint-gilles-croix-de-vie-85/saint-gilles-sud/247335965.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Saint Gilles Sud, Saint-Gilles-Croix-de-Vie (85800)",
+        "price": 33000.0,
+        "surface": 43.02477183833116
+    },
+    {
+        "title": "Maison à vendre - Noisy-le-Roi - 780 000 € - 7 pièces, 4 chambres, 152,5 m², 478 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/noisy-le-roi-78/le-village/252146437.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Le Village, Noisy-le-Roi (78590)",
+        "price": 780000.0,
+        "surface": 152.4926686217009
+    },
+    {
+        "title": "Maison à vendre - neuf - Saint Laurent d Aigouze - 790 000 € - 15 pièces, 5 chambres, 320 m², 1 474 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/saint-laurent-d-aigouze-30/242229335.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Saint Laurent d Aigouze (30220)",
+        "price": 790000.0,
+        "surface": 319.967598217902
+    },
+    {
+        "title": "Maison à vendre - Caluire-et-Cuire - 579 000 € - 7 pièces, 5 chambres, 138 m², 920 m² de terrain",
+        "url": "https://www.seloger.com/annonces/achat/maison/caluire-et-cuire-69/252428175.htm?serp_view=list&search=distributionTypes%3DBuy%26estateTypes%3DHouse%26locations%3DAD02FR1#ln=classified_search_results&m=classified_search_results_classified_classified_detail_XL",
+        "address": "Caluire-et-Cuire (69300)",
+        "price": 579000.0,
+        "surface": 137.98856053384176
+    }
+]

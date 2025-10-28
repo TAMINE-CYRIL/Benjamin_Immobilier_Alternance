@@ -11,13 +11,13 @@ schema_path = os.path.join(BASE_DIR, "../schema/seloger.json")
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_seloger = json.load(f)
 
+
 site = {
     "url": "https://www.seloger.com/immobilier/pays/achat/bien-maison/france.htm",
     "schema": schema_seloger,
     "prefix": "https://www.seloger.com",
     "wait_for": "div[data-testid^='classified-card-mfe-']",
 }
-
 
 def format_surface(annonces):
     """Calcule la surface quand on n’a que le prix et le prix/m²."""
@@ -36,6 +36,7 @@ def format_surface(annonces):
         clean_annonces.append(annonce)
     return clean_annonces
 
+
 async def scrape_seloger():
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
@@ -52,21 +53,16 @@ async def scrape_seloger():
             override_navigator=True,
         )
 
-        try:
-            result = await crawler.arun(
-                url=site["url"], 
-                config=crawler_config, 
-                wait_after_load=15
-            )
+        
+        result = await crawler.arun(
+            url=site["url"], 
+            config=crawler_config, 
+            wait_after_load=15
+        )
 
-            if not result or not result.extracted_content:
-                print("Aucun contenu extrait")
-                return []
-                
-            annonces = json.loads(result.extracted_content)
-            annonces = format_surface(annonces)
-            return annonces
-            
-        except Exception as e:
-            print(f"Erreur: {e}")
+        if not result or not result.extracted_content:
             return []
+                        
+        annonces = json.loads(result.extracted_content)
+        annonces = format_surface(annonces)
+        return annonces
