@@ -3,7 +3,10 @@ from scraper.scrape_bienici import scrape_bienici
 from scraper.scraper_seloger import scrape_seloger
 from scraper.scrape_pap import scrape_pap
 from utils.cleaning import filter_annonces
+from utils.db import create_tables
 import asyncio, os, json, time, random
+
+
 
 async def main():
     """
@@ -11,6 +14,7 @@ async def main():
     et sauvegarder les résultats dans un fichier JSON.
     """
 
+    create_tables()
     print("Démarrage du scraping...")
 
     # On crée le dossier qui va servir à stocker les données.
