@@ -17,7 +17,7 @@ def extract_number(text):
     else:
         multiplier = 1
     
-    text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR|/', '', text)
+    text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR|/|\s+', '', text)
     text_cleaned = text_cleaned.replace(',', '.')
     text_cleaned = text_cleaned.replace(' ', '')
     part_text = ''

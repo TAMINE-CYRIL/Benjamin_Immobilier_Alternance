@@ -46,7 +46,7 @@ def insert_annonces(annonces):
     for annonce in annonces:
         cursor.execute( 
             "INSERT INTO annonces (title, url, address, surface, price) VALUES (%s, %s, %s, %s, %s)"
-            "ON CONFLICT (url) DO NOTHING""",
+            "ON CONFLICT (url) DO UPDATE SET title = EXCLUDED.title, address = EXCLUDED.address, surface = EXCLUDED.surface, price = EXCLUDED.price;""",
             (annonce['title'], annonce['url'], annonce['address'], annonce['surface'], annonce['price'])
         )
 
