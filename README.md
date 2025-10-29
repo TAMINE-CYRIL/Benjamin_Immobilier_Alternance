@@ -19,27 +19,13 @@ Objectif : extraire, normaliser (prix, surface) et produire des jeux de données
 - Python 3.9+
 - (Optionnel) Git
 
-## Architecture
-Le projet est organisé en couches pour séparer ingestion, traitement et persistance.
-
-Composants principaux
-- `scrapers/` — couche d'ingestion
-  - Scrapers spécialisés par source (bienici, seloger, pap, atypiques).
-  - Responsabilité : récupérer les annonces brutes (HTML/JSON) et retourner une liste de dicts "bruts".
-- `utils/` — utilitaires et traitement
-  - `cleaning.py` : normalisation (extract_number, normalization, filter_annonces).
-  - `db.py` : abstraction de persistance (fichiers, base, ES).
-  - `config.py` : paramètres et variables d'environnement.
-- `schema/` — contrats et validation
-  - Schémas JSON par source pour documenter et valider les champs attendus (ex. jsonschema).
-- `data/` — exemples et sorties
-  - Exemples d'annonces, exports JSON pour tests/QA.
-- `tests/` — validation automatisée
-  - pytest pour couvrir parsing et normalisation.
-- `/` — Dossier racine
-  - Scripts principaux lançant le scraping.
-  - Fichier requirements permettant d'installer toutes les dépendances.
-
+## Structure du dépôt
+- `scraper/` — scripts de scraping par source
+- `utils/` — fonctions utilitaires (nettoyage, config, db)
+- `data/` — exemples / sorties, dossier crée grâce au fichier `main.py`.
+- `schema/` — schémas JSON pour chaque source
+- `tests/` — tests unitaires
+  
 ## Installation
 Installer les dépendances :
    ```
@@ -68,11 +54,6 @@ Installer les dépendances :
   pytest -v
   ```
 
-## Structure du dépôt
-- `scraper/` — scripts de scraping par source
-- `utils/` — fonctions utilitaires (nettoyage, config, db)
-- `data/` — exemples / sorties, dossier crée grâce au fichier `main.py`.
-- `schema/` — schémas JSON pour chaque source
-- `tests/` — tests unitaires
+
 
 
