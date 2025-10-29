@@ -3,7 +3,7 @@ from scraper.scrape_bienici import scrape_bienici
 from scraper.scraper_seloger import scrape_seloger
 from scraper.scrape_pap import scrape_pap
 from utils.cleaning import filter_annonces
-from utils.db import create_tables
+from utils.db import create_tables, insert_annonces
 import asyncio, os, json, time, random
 
 
@@ -17,7 +17,7 @@ async def main():
     create_tables()
     print("Démarrage du scraping...")
 
-    # On crée le dossier qui va servir à stocker les données.
+    # On crée le dossier (si il n'existe pas) qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
     scrapers = [scrape_atypiques(), scrape_bienici()]
@@ -34,6 +34,7 @@ async def main():
         time.sleep(random.uniform(3,6))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
+    insert_annonces(all_annonces)
 
     # Sauvegarde des données dans un fichier JSON.
     f = os.path.join("data", "annonces.json")

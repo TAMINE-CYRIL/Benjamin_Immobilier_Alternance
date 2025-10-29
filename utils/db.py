@@ -25,13 +25,31 @@ def create_tables():
 
     cursor.execute("""CREATE TABLE IF NOT EXISTS annonces (
             id SERIAL PRIMARY KEY,
-            name TEXT,
-            price INT,
+            title TEXT,
+            url TEXT UNIQUE,
+            address TEXT,
             surface INT,
-            url TEXT);
+            price INT);
         """)
 
     connexion.commit()
 
+    cursor.close()
+    connexion.close()
+
+def insert_annonces(annonces):
+    """
+    Insère une liste d'annonces dans la table 'annonces'.
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+    for annonce in annonces:
+        cursor.execute( 
+            "INSERT INTO annonces (title, url, address, surface, price) VALUES (%s, %s, %s, %s, %s)"
+            "ON CONFLICT (url) DO NOTHING""",
+            (annonce['title'], annonce['url'], annonce['address'], annonce['surface'], annonce['price'])
+        )
+
+    connexion.commit()
     cursor.close()
     connexion.close()

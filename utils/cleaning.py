@@ -11,8 +11,13 @@ def extract_number(text):
     if isinstance(text, (int, float)):
         return float(text)
     
+    if re.search(r'k|K', text):
+        multiplier = 1000
+        text = re.sub(r'k|K', '', text)
+    else:
+        multiplier = 1
     
-    text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR', '', text)
+    text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR|/', '', text)
     text_cleaned = text_cleaned.replace(',', '.')
     text_cleaned = text_cleaned.replace(' ', '')
     part_text = ''
@@ -25,11 +30,10 @@ def extract_number(text):
     
     # Extraire tous les chiffres et le point décimal
     digits = re.sub(r'[^\d.]', '', text_cleaned)
-    
     if not digits or digits == '.':
         return None
     
-    return float(digits)
+    return float(digits) * multiplier
 
 
 
