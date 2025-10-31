@@ -1,0 +1,48 @@
+{
+  "leboncoin": {
+    "baseSelector": "li.styles_adCard__JzKik article[data-test-id='ad']",
+    "fields": [
+      {
+        "name": "title",
+        "selector": "p[aria-label]",
+        "type": "text"
+      },
+      {
+        "name": "url",
+        "selector": "a[aria-label='Voir l’annonce']",
+        "type": "attribute",
+        "attribute": "href"
+      },
+      {
+        "name": "address",
+        "selector": "div.flex.items-center.justify-between > p.text-caption",
+        "type": "text"
+      },
+      {
+        "name": "price",
+        "selector": "p[data-test-id='price'] span.text-success",
+        "type": "text"
+      },
+      {
+        "name": "price_per_m2",
+        "selector": "div.text-caption.flex.items-center.ml-sm > p",
+        "type": "text"
+      },
+      {
+        "name": "surface",
+        "selector": "p[aria-label]",
+        "type": "text"
+      },
+      {
+        "name": "rooms",
+        "selector": "p[aria-label]",
+        "type": "text"
+      },
+      {
+        "name": "type",
+        "selector": "p[aria-label]",
+        "type": "text"
+      }
+    ]
+  }
+}

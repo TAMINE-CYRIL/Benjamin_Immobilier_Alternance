@@ -1,7 +1,5 @@
 import regex as re
 
-import regex as re
-
 
 def normalisation_language(text):
     """
@@ -72,8 +70,6 @@ def extract_number(text):
 
 
 
-
-
 def normalization(annonces):
     """
     Normalise les champs prix et surface en entiers (ou None).
@@ -85,6 +81,24 @@ def normalization(annonces):
         clean_annonces.append(annonce)
 
     return clean_annonces
+
+
+
+def extract_zip_code(address):
+    """
+    Extrait le code postal en provenance des adresses.
+    """
+    count=0
+    zip_code = ""
+    for a in address:
+        if a.isdigit:
+            count+=1
+            zip_code+=a
+            if count == 5:
+                break
+    return zip_code
+
+
 
 def filter_annonces(annonces):
     """

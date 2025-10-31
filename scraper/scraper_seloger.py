@@ -37,7 +37,7 @@ def format_surface(annonces):
     return clean_annonces
 
 
-async def scrape_seloger(max_pages=4):
+async def scrape_seloger(max_pages=3):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
     CSS et d'un schéma JSON.
@@ -62,8 +62,15 @@ async def scrape_seloger(max_pages=4):
                 wait_after_load=15
             )
 
+            time.sleep(random.uniform(1, 3))
+
+
             if not result or not result.extracted_content:
-                return []
+                break  
+
+            annonces = json.loads(result.extracted_content)
+            if not annonces:
+                break
                                 
             annonces = json.loads(result.extracted_content)
             annonces = format_surface(annonces)

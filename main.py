@@ -20,7 +20,7 @@ async def main():
     # On crée le dossier (si il n'existe pas) qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
-    scrapers = [scrape_pap(), scrape_seloger(), scrape_atypiques(), scrape_bienici()]
+    scrapers = [scrape_atypiques()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 
@@ -29,12 +29,12 @@ async def main():
         if isinstance(res, Exception) or res is None:
             print(f"Erreur lors du scraping : {res}")
             continue
-        res = filter_annonces(res)
+        #res = filter_annonces(res)
         all_annonces.extend(res)
         time.sleep(random.uniform(3,6))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
-    insert_annonces(all_annonces)
+    #insert_annonces(all_annonces)
 
     # Sauvegarde des données dans un fichier JSON.
     f = os.path.join("data", "annonces.json")

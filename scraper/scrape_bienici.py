@@ -11,7 +11,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_bienici = json.load(f)
 
 site = {
-    "url": "https://www.bienici.com/recherche/achat/france",
+    "url": "https://www.bienici.com/recherche/achat/france/maisonvilla,appartement,parking,terrain,loft,commerce,batiment,chateau,local,bureau,hotel,autres",
     "schema": schema_bienici,
     "wait_for": "css:article.ad-overview",
     "prefix": "https://www.bienici.com",
@@ -42,7 +42,7 @@ def format_url(annonces):
             annonce["url"] = site["prefix"] + url
     return annonces
 
-async def scrape_bienici(max_pages=4):
+async def scrape_bienici(max_pages=3):
     """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
     all_annonces = []

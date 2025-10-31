@@ -2,30 +2,35 @@
   "name": "Espace Atypiques Immobilier",
   "baseSelector": "div.preview-annonce",
   "fields": [
-    { 
-      "name": "title", 
-      "selector": ".infos .titre a", 
-      "type": "text" 
-    },
-    { 
-      "name": "url", 
-      "selector": ".infos .titre a", 
-      "type": "attribute", 
-      "attribute": "href" 
-    },
-    { 
-      "name": "address", 
-      "selector": ".infos .localisation .ville", 
-      "type": "text" 
+    {
+      "name": "title",
+      "selector": "div.titre a",
+      "type": "text"
     },
     {
-      "name": "surface", 
-      "selector": ".infos span:-soup-contains('M2'), .infos span:-soup-contains('m²'), .infos span:-soup-contains('M²')", 
-      "type": "text" 
+      "name": "url",
+      "selector": "div.titre a",
+      "type": "attribute",
+      "attribute": "href"
     },
     {
-      "name": "price", 
-      "selector": ".infos span:-soup-contains('€')", 
+      "name": "ville",
+      "selector": "span.ville",
+      "type": "text"
+    },
+    {
+      "name": "surface",
+      "selector": "span.info.font2:-soup-contains('M2'), span.info.font2:-soup-contains('m²'), span.info.font2:-soup-contains('M²')",
+      "type": "text"
+    },
+    {
+      "name": "price",
+      "selector": "span.info.orange.font2:-soup-contains('€')",
+      "type": "text"
+    },
+    {
+      "name": "agency",
+      "selector": "div.agence",
       "type": "text"
     }
   ]

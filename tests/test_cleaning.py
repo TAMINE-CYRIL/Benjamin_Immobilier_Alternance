@@ -40,3 +40,5 @@ def test_extract_number():
     assert extract_number("Une chaine de caractère") is None
     assert extract_number("N/A") is None
     assert extract_number("") is None
+
+
