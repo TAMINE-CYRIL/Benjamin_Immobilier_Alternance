@@ -15,6 +15,7 @@ def get_browser_config():
         headless=False,
         viewport_width=1920,
         viewport_height=1080,
-        headers=HEADERS
+        headers=HEADERS,
+        enable_stealth=True
     )
     return browser_config

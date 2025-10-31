@@ -2,6 +2,7 @@ from scraper.scrape_atypiques import scrape_atypiques
 from scraper.scrape_bienici import scrape_bienici
 from scraper.scraper_seloger import scrape_seloger
 from scraper.scrape_pap import scrape_pap
+from scraper.scrape_leboncoin import scrape_leboncoin
 from utils.cleaning import filter_annonces
 from utils.db import create_tables, insert_annonces
 import asyncio, os, json, time, random
@@ -29,9 +30,9 @@ async def main():
         if isinstance(res, Exception) or res is None:
             print(f"Erreur lors du scraping : {res}")
             continue
-        #res = filter_annonces(res)
+        res = filter_annonces(res)
         all_annonces.extend(res)
-        time.sleep(random.uniform(3,6))  # Pause aléatoire entre les scrapers
+        time.sleep(random.uniform(2,4))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
     #insert_annonces(all_annonces)

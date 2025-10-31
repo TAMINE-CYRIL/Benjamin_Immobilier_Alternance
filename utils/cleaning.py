@@ -39,11 +39,12 @@ def normalisation_language(text):
     return text
 
 
-def extract_number(text):
+def extract_number(text, as_int=False):
     if not text or text == "N/A":
         return None
     if isinstance(text, (int, float)):
-        return float(text)
+        value = float(text)
+        return int(text) if as_int else value
     
     # Nettoyage initial
     text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR|/|\s+', '', text)
@@ -66,7 +67,8 @@ def extract_number(text):
     if not match:
         return None
 
-    return float(match.group()) * multiplier
+    value = float(match.group()) * multiplier
+    return int(value) if as_int else value
 
 
 
@@ -78,6 +80,8 @@ def normalization(annonces):
     for annonce in annonces:
         annonce["price"] = extract_number(annonce.get("price"))
         annonce["surface"] = extract_number(annonce.get("surface"))
+        annonce["bedrooms"] = extract_number(annonce.get("bedrooms"), as_int=True)
+        annonce["zip_code"] = extract_number(annonce.get("zip_code"), as_int=True)
         clean_annonces.append(annonce)
 
     return clean_annonces
