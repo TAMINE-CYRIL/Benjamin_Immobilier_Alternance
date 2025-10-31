@@ -1,7 +1,7 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
-import json, os
+import json, os, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/pap.json")
@@ -40,9 +40,17 @@ def format_title(annonces):
         filtrage.append(annonce)
     return filtrage
 
+def extract_zip_code(address: str):
+    if not address:
+        return None
+
+    match = re.search(r"\b(\d{5})\b", address)
+    return match.group(1) if match else None
+
+
 # Données du site à scraper sous forme de tableau.
 site = {
-        "url": "https://www.pap.fr/annonce/vente-immobiliere-france-g25",
+        "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager",
         "schema": schema_pap,
         "wait_for": "css:.search-list-item-alt",
         "prefix": "https://www.pap.fr",
@@ -72,9 +80,14 @@ async def scrape_pap():
                 if not result or not result.extracted_content:
                     return []
                 
+                print(result.status_code)
                 annonces = json.loads(result.extracted_content)
                 annonces = format_url(annonces)
                 annonces = format_title(annonces)
+                for annonce in annonces:
+                    adresse = annonce.get("address", "")
+                    annonce["zip_code"] = extract_zip_code(adresse)
+                    
                 return annonces
 
 

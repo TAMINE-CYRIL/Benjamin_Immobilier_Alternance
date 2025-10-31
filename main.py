@@ -21,7 +21,7 @@ async def main():
     # On crée le dossier (si il n'existe pas) qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
-    scrapers = [scrape_atypiques()]
+    scrapers = [scrape_pap()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 
@@ -32,7 +32,7 @@ async def main():
             continue
         res = filter_annonces(res)
         all_annonces.extend(res)
-        time.sleep(random.uniform(2,4))  # Pause aléatoire entre les scrapers
+        time.sleep(random.uniform(3,5))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
     #insert_annonces(all_annonces)

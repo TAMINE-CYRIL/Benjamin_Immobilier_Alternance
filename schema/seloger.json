@@ -20,15 +20,36 @@
       "type": "text"
     },
     {
-      "name": "surface",
-      "selector": "div[data-testid='cardmfe-price-testid'] span",
-      "type": "text"
+      "name": "agency",
+      "selector": "div[data-testid='cardmfe-agency-publisher-xl-test-id'] img",
+      "type": "attribute",
+      "attribute": "alt"
     },
     {
       "name": "price",
       "selector": "div[data-testid='cardmfe-price-testid']",
       "type": "attribute",
       "attribute": "aria-label"
+    },
+    {
+      "name": "price_square_meter",
+      "selector": "div[data-testid='cardmfe-price-testid'] span",
+      "type": "text"
+    },
+    {
+      "name": "rooms",
+      "selector": "div[data-testid='cardmfe-keyfacts-testid'] div:nth-child(1)",
+      "type": "text"
+    },
+    {
+      "name": "bedrooms",
+      "selector": "div[data-testid='cardmfe-keyfacts-testid'] div:nth-child(3)",
+      "type": "text"
+    },
+    {
+      "name": "surface",
+      "selector": "div[data-testid='cardmfe-keyfacts-testid'] div:nth-child(5)",
+      "type": "text"
     }
   ]
 }

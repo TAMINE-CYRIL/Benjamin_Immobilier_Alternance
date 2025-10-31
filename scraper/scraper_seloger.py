@@ -1,4 +1,4 @@
-from crawl4ai import AsyncWebCrawler, CacheMode
+from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import CrawlerRunConfig
 from utils.config import get_browser_config
@@ -42,10 +42,10 @@ async def scrape_seloger(max_pages=3):
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
     CSS et d'un schéma JSON.
     """
-    browser_config = get_browser_config()
+    browser_config = BrowserConfig(browser_type="chromium", headless=True)
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        for page in range(1, max_pages + 1):
-            site["url"] = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}"
+        #for page in range(1, max_pages + 1):
+            #site["url"] = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}"
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for_timeout=60000,
@@ -53,6 +53,7 @@ async def scrape_seloger(max_pages=3):
                     extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
                     simulate_user=True,
                     override_navigator=True,
+                    scroll_delay=1
                 )
 
                 
@@ -62,16 +63,17 @@ async def scrape_seloger(max_pages=3):
                 wait_after_load=15
             )
 
-            time.sleep(random.uniform(1, 3))
-
-
+            time.sleep(random.uniform(2,4))
+            print(result.status_code)
+            """
             if not result or not result.extracted_content:
                 break  
-
+            """
             annonces = json.loads(result.extracted_content)
+            """
             if not annonces:
                 break
-                                
+            """                    
             annonces = json.loads(result.extracted_content)
             annonces = format_surface(annonces)
     return annonces

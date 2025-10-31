@@ -71,6 +71,24 @@ def extract_number(text, as_int=False):
     return int(value) if as_int else value
 
 
+def calculation_price_square_meter(annonces):
+    clean_annonces = []
+    for annonce in annonces:
+        if annonce.get("price_square_meter"):
+            continue
+
+        price = annonce.get("price")
+        surface = annonce.get("surface")
+
+        if price is None or surface is None or surface == 0:
+            continue
+
+        annonce["price_square_meter"] = round(price / surface, 2)
+        clean_annonces.append(annonce)
+
+    return clean_annonces
+
+
 
 def normalization(annonces):
     """
@@ -88,19 +106,7 @@ def normalization(annonces):
 
 
 
-def extract_zip_code(address):
-    """
-    Extrait le code postal en provenance des adresses.
-    """
-    count=0
-    zip_code = ""
-    for a in address:
-        if a.isdigit:
-            count+=1
-            zip_code+=a
-            if count == 5:
-                break
-    return zip_code
+
 
 
 
@@ -109,7 +115,8 @@ def filter_annonces(annonces):
     Filtre les annonces pour ne garder que celles avec un prix et une surface valides.
     """
     filtrage = []
-    clean_annonces=normalization(annonces)
+    clean_annonces = normalization(annonces)
+    clean_annonces = calculation_price_square_meter(clean_annonces) 
     for annonce in clean_annonces:
         price = annonce.get("price")
         surface = annonce.get("surface")

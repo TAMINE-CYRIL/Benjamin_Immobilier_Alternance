@@ -22,6 +22,10 @@ site = {
     "prefix": "https://www.espaces-atypiques.com",
 }
 
+
+
+
+
 async def scrape_details(crawler, url, schema):
     config = CrawlerRunConfig(
         cache_mode=CacheMode.BYPASS,
@@ -78,8 +82,7 @@ async def scrape_atypiques(max_pages=3):
                         if len(zip_code) == 5:
                             annonce['zip_code'] = zip_code
                         
-                    time.sleep(random.uniform(2,5))
-
+                    time.sleep(random.uniform(1,3))
             all_annonces.extend(annonces)
 
     return all_annonces

@@ -48,8 +48,8 @@ async def scrape_bienici(max_pages=3):
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        for page in range(1, max_pages + 1):
-            url = f"{site['url']}?page={page}"
+        #for page in range(1, max_pages + 1):
+            #url = f"{site['url']}?page={page}"
 
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
@@ -57,17 +57,19 @@ async def scrape_bienici(max_pages=3):
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
             )
 
-            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
+            result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
 
             time.sleep(random.uniform(1, 3))
-
+            """
             if not result or not result.extracted_content:
                 break  
-
+            """
             annonces = json.loads(result.extracted_content)
+            """
             if not annonces:
                 break  
-
+            """
+            print(result.status_code)
             annonces = format_url(annonces)
             annonces = format_surface(annonces)
             all_annonces.extend(annonces)
