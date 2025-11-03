@@ -17,6 +17,7 @@ site = {
     "schema": schema_seloger,
     "prefix": "https://www.seloger.com",
     "wait_for": "div[data-testid^='classified-card-mfe-']",
+    "source": "SeLoger"
 }
 
 def format_surface(annonces):
@@ -73,5 +74,7 @@ async def scrape_seloger(max_pages=3):
                 break
             """                    
             annonces = json.loads(result.extracted_content)
+            for annonce in annonces:
+                annonce["source"] = site.get("source")
             annonces = format_surface(annonces)
     return annonces

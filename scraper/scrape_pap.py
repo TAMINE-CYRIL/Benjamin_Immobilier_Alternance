@@ -54,7 +54,7 @@ site = {
         "schema": schema_pap,
         "wait_for": "css:.search-list-item-alt",
         "prefix": "https://www.pap.fr",
-        "filter": "pap"
+        "source": "PAP"
     }
 
 async def scrape_pap(max_pages=3):
@@ -70,8 +70,8 @@ async def scrape_pap(max_pages=3):
     
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
-                #for page in range(1, max_pages + 1):
-                    #url = f"{site['url']}?page={page}"
+                for page in range(1, max_pages + 1):
+                    url = f"{site['url']}-{page}"
                 
                     crawler_config = CrawlerRunConfig(
                         cache_mode=CacheMode.BYPASS,
@@ -95,6 +95,7 @@ async def scrape_pap(max_pages=3):
                     for annonce in annonces:
                         adresse = annonce.get("address", "")
                         annonce["zip_code"] = extract_zip_code(adresse)
+                        annonce["source"] = site.get("source")
                     
                     return annonces
 

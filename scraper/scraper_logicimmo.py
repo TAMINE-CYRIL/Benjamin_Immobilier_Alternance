@@ -15,6 +15,7 @@ site = {
     "schema": schema_logicimmo,
     "wait_for": "div[data-testid='serp-core-classified-card-testid']",
     "prefix": "https://www.logic-immo.com",
+    "source": "Logic Immo"
 }
 
 def extract_zip_code(address: str):
@@ -74,6 +75,7 @@ async def scrape_logicimmo(max_pages=3):
             for annonce in annonces:
                     adresse = annonce.get("address", "")
                     annonce["zip_code"] = extract_zip_code(adresse)
+                    annonce["source"] = site.get("source")
             all_annonces.extend(annonces)
 
     return all_annonces

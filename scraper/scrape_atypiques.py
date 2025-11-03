@@ -20,6 +20,7 @@ site = {
     "schema": schema_atypiques,
     "wait_for": "css:.preview-annonce",
     "prefix": "https://www.espaces-atypiques.com",
+    "source": "Espaces Atypiques"
 }
 
 
@@ -49,8 +50,8 @@ async def scrape_atypiques(max_pages=3):
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
     all_annonces = []
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        #for page in range(1, max_pages + 1):
-            #site["url"] = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes&pl&pmax&critere1&s&order&map&pt=vente"
+        for page in range(1, max_pages + 1):
+            site["url"] = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes&pl&pmax&critere1&s&order&map&pt=vente"
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],
@@ -60,14 +61,16 @@ async def scrape_atypiques(max_pages=3):
             result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
             
             time.sleep(random.uniform(1, 3))
-            """
+            
             if not result or not result.extracted_content:
-                break  
+                print("Aucun résultat extrait.")
+                return []  
 
             annonces = json.loads(result.extracted_content)
             if not annonces:
-                break  
-            """
+                print("Aucune annonce trouvée.")
+                return []  
+            
 
             annonces = json.loads(result.extracted_content)
 
@@ -81,8 +84,9 @@ async def scrape_atypiques(max_pages=3):
                         zip_code = ''.join(filter(str.isdigit, detail['value']))
                         if len(zip_code) == 5:
                             annonce['zip_code'] = zip_code
+                annonce["source"] = site.get("source")
                         
-                    time.sleep(random.uniform(1,3))
+                time.sleep(random.uniform(1,3))
             all_annonces.extend(annonces)
 
     return all_annonces

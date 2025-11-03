@@ -15,6 +15,7 @@ site = {
     "schema": schema_bienici,
     "wait_for": "css:article.ad-overview",
     "prefix": "https://www.bienici.com",
+    "source": "BienIci"
 }
 
 def extract_zip_code(address: str):
@@ -55,8 +56,8 @@ async def scrape_bienici(max_pages=3):
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        #for page in range(1, max_pages + 1):
-            #url = f"{site['url']}?page={page}"
+        for page in range(1, max_pages + 1):
+            url = f"{site['url']}?page={page}"
 
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
@@ -67,21 +68,20 @@ async def scrape_bienici(max_pages=3):
             result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
 
             time.sleep(random.uniform(1, 3))
-            """
             if not result or not result.extracted_content:
-                break  
-            """
+                print("Aucun résultat extrait.")
+                return []  
             annonces = json.loads(result.extracted_content)
-            """
             if not annonces:
-                break  
-            """
-            print(result.status_code)
+                print("Aucune annonce trouvée.")
+                return []  
+            
             annonces = format_url(annonces)
             annonces = format_surface(annonces)
             for annonce in annonces:
                     adresse = annonce.get("address", "")
                     annonce["zip_code"] = extract_zip_code(adresse)
+                    annonce["source"] = site.get("source")
             all_annonces.extend(annonces)
 
     return all_annonces
