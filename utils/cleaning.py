@@ -83,7 +83,7 @@ def calculation_price_square_meter(annonces):
         if price is None or surface is None or surface == 0:
             continue
 
-        annonce["price_square_meter"] = round(price / surface, 2)
+        annonce["price_square_meter"] = price // surface
         clean_annonces.append(annonce)
 
     return clean_annonces
@@ -98,7 +98,7 @@ def normalization(annonces):
     for annonce in annonces:
         annonce["price"] = extract_number(annonce.get("price"))
         annonce["surface"] = extract_number(annonce.get("surface"))
-        annonce["bedrooms"] = extract_number(annonce.get("bedrooms"), as_int=True)
+        annonce["rooms"] = extract_number(annonce.get("rooms"), as_int=True)
         annonce["zip_code"] = extract_number(annonce.get("zip_code"), as_int=True)
         clean_annonces.append(annonce)
 

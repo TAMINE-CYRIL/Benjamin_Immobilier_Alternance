@@ -3,6 +3,7 @@ from scraper.scrape_bienici import scrape_bienici
 from scraper.scraper_seloger import scrape_seloger
 from scraper.scrape_pap import scrape_pap
 from scraper.scrape_leboncoin import scrape_leboncoin
+from scraper.scraper_logicimmo import scrape_logicimmo
 from utils.cleaning import filter_annonces
 from utils.db import create_tables, insert_annonces
 import asyncio, os, json, time, random

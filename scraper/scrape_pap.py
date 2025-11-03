@@ -1,7 +1,7 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
-import json, os, regex as re
+import json, os, time, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/pap.json")
@@ -57,7 +57,7 @@ site = {
         "filter": "pap"
     }
 
-async def scrape_pap():
+async def scrape_pap(max_pages=3):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site PAP à l'aide d'une extraction
     CSS et d'un schéma JSON.
@@ -67,28 +67,36 @@ async def scrape_pap():
         headless=True
     )
 
-    async with AsyncWebCrawler(config=browser_config) as crawler:
-                crawler_config = CrawlerRunConfig(
-                    cache_mode=CacheMode.BYPASS,
-                    wait_for=site.get("wait_for"),
-                    extraction_strategy=JsonCssExtractionStrategy(
-                    schema=site.get("schema")),
-                    scroll_delay=2
-                )
-                result = await crawler.arun(url=site.get("url"), config=crawler_config, wait_after_load=10)
+    
 
-                if not result or not result.extracted_content:
-                    return []
+    async with AsyncWebCrawler(config=browser_config) as crawler:
+                #for page in range(1, max_pages + 1):
+                    #url = f"{site['url']}?page={page}"
                 
-                print(result.status_code)
-                annonces = json.loads(result.extracted_content)
-                annonces = format_url(annonces)
-                annonces = format_title(annonces)
-                for annonce in annonces:
-                    adresse = annonce.get("address", "")
-                    annonce["zip_code"] = extract_zip_code(adresse)
+                    crawler_config = CrawlerRunConfig(
+                        cache_mode=CacheMode.BYPASS,
+                        wait_for=site.get("wait_for"),
+                        extraction_strategy=JsonCssExtractionStrategy(
+                        schema=site.get("schema")),
+                        scan_full_page=True,
+                        scroll_delay=2
+                    )
+                    result = await crawler.arun(url=site.get("url"), config=crawler_config, wait_after_load=10)
+
+                    time.sleep(random.uniform(1, 3))
+
+                    if not result or not result.extracted_content:
+                        return []
                     
-                return annonces
+                    print(result.status_code)
+                    annonces = json.loads(result.extracted_content)
+                    annonces = format_url(annonces)
+                    annonces = format_title(annonces)
+                    for annonce in annonces:
+                        adresse = annonce.get("address", "")
+                        annonce["zip_code"] = extract_zip_code(adresse)
+                    
+                    return annonces
 
 
 

@@ -5,16 +5,16 @@ from utils.cleaning import extract_number
 import json, os, time, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/bienici.json")
+schema_path = os.path.join(BASE_DIR, "../schema/logic_immo.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
-    schema_bienici = json.load(f)
+    schema_logicimmo = json.load(f)
 
 site = {
-    "url": "https://www.bienici.com/recherche/achat/france/maisonvilla,appartement,parking,terrain,loft,commerce,batiment,chateau,local,bureau,hotel,autres",
-    "schema": schema_bienici,
-    "wait_for": "css:article.ad-overview",
-    "prefix": "https://www.bienici.com",
+    "url": "https://www.logic-immo.com/classified-search?distributionTypes=Buy&estateTypes=House,Apartment&locations=AD02FR1&order=DateDesc",
+    "schema": schema_logicimmo,
+    "wait_for": "div[data-testid='serp-core-classified-card-testid']",
+    "prefix": "https://www.logic-immo.com",
 }
 
 def extract_zip_code(address: str):
@@ -41,17 +41,10 @@ def format_surface(annonces):
         clean_annonces.append(annonce)
     return clean_annonces
 
-def format_url(annonces):
-    """Ajoute le préfixe du site aux URLs relatives."""
-    for annonce in annonces:
-        url = annonce.get("url")
-        if url and not url.startswith("http"):
-            annonce["url"] = site["prefix"] + url
-    return annonces
 
-async def scrape_bienici(max_pages=3):
-    """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
-    browser_config = BrowserConfig(browser_type="chromium", headless=True)
+async def scrape_logicimmo(max_pages=3):
+    """Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination."""
+    browser_config = BrowserConfig(browser_type="chromium", headless=False)
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
@@ -77,7 +70,6 @@ async def scrape_bienici(max_pages=3):
                 break  
             """
             print(result.status_code)
-            annonces = format_url(annonces)
             annonces = format_surface(annonces)
             for annonce in annonces:
                     adresse = annonce.get("address", "")

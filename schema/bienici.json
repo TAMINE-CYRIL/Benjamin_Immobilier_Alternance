@@ -27,6 +27,11 @@
       "name": "price",
       "selector": ".ad-price__the-price",
       "type": "text"
+    },
+    {
+      "name": "agency",
+      "selector": ".account-logo__display-name",
+      "type": "text"
     }
   ]
 }

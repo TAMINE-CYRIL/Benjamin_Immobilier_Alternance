@@ -1,0 +1,44 @@
+{
+  "name": "LogicImmo Immobilier",
+  "baseSelector": "[data-testid='serp-core-classified-card-testid']",
+  "fields": [
+    {
+      "name": "title",
+      "selector": "[data-testid='cardmfe-description-box-text-test-id'] .css-1e55dlz",
+      "type": "text"
+    },
+    {
+      "name": "url",
+      "selector": "button[data-base]",
+      "type": "attribute",
+      "attribute": "data-base"
+    },
+    {
+      "name": "address",
+      "selector": "[data-testid='cardmfe-description-box-address']",
+      "type": "text"
+    },
+    {
+      "name": "surface",
+      "selector": "[data-testid='cardmfe-keyfacts-testid']",
+      "type": "text"
+    },
+    {
+      "name": "price",
+      "selector": "[data-testid='cardmfe-price-testid']",
+      "type": "attribute",
+      "attribute": "aria-label"
+    },
+    {
+      "name": "price_square_meter",
+      "selector": "div[data-testid='cardmfe-price-testid'] span",
+      "type": "text"
+    },
+    {
+      "name": "agency",
+      "selector": "[data-testid='cardmfe-agency-publisher-xl-test-id'] img",
+      "type": "attribute",
+      "attribute": "alt"
+    }
+  ]
+}

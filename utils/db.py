@@ -24,13 +24,18 @@ def create_tables():
     cursor = connexion.cursor()
 
     cursor.execute("""CREATE TABLE IF NOT EXISTS annonces (
-            id SERIAL PRIMARY KEY,
-            title TEXT,
-            url TEXT UNIQUE,
-            address TEXT,
-            surface INT,
-            price INT);
-        """)
+        id SERIAL PRIMARY KEY,
+        title TEXT,
+        url TEXT UNIQUE,
+        address TEXT,
+        surface NUMERIC,
+        price NUMERIC,
+        zip_code INTEGER,
+        rooms INTEGER,
+        price_square_meter NUMERIC,
+        agency TEXT
+    );
+    """)
 
     connexion.commit()
 
@@ -39,15 +44,39 @@ def create_tables():
 
 def insert_annonces(annonces):
     """
-    Insère une liste d'annonces dans la table 'annonces'.
+    Insère une liste d'annonces dans la table 'annonces' avec gestion des doublons sur l'URL.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
+
+    insert_query = """
+    INSERT INTO annonces (title, url, address, surface, price, zip_code, rooms, price_square_meter, agency)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT (url) DO UPDATE
+    SET title = EXCLUDED.title,
+        address = EXCLUDED.address,
+        surface = EXCLUDED.surface,
+        price = EXCLUDED.price,
+        zip_code = EXCLUDED.zip_code,
+        rooms = EXCLUDED.rooms,
+        price_square_meter = EXCLUDED.price_square_meter,
+        agency = EXCLUDED.agency;
+    """
+
     for annonce in annonces:
-        cursor.execute( 
-            "INSERT INTO annonces (title, url, address, surface, price) VALUES (%s, %s, %s, %s, %s)"
-            "ON CONFLICT (url) DO UPDATE SET title = EXCLUDED.title, address = EXCLUDED.address, surface = EXCLUDED.surface, price = EXCLUDED.price;""",
-            (annonce['title'], annonce['url'], annonce['address'], annonce['surface'], annonce['price'])
+        cursor.execute(
+            insert_query,
+            (
+                annonce.get("title"),
+                annonce.get("url"),
+                annonce.get("address"),
+                annonce.get("surface"),
+                annonce.get("price"),
+                annonce.get("zip_code"),
+                annonce.get("rooms"),
+                annonce.get("price_square_meter"),
+                annonce.get("agency"),
+            )
         )
 
     connexion.commit()

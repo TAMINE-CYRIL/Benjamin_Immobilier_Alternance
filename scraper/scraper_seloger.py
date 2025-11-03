@@ -43,17 +43,15 @@ async def scrape_seloger(max_pages=3):
     CSS et d'un schéma JSON.
     """
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
+    
     async with AsyncWebCrawler(config=browser_config) as crawler:
         #for page in range(1, max_pages + 1):
             #site["url"] = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}"
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
-                wait_for_timeout=60000,
-                    wait_for=site["wait_for"],
-                    extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
-                    simulate_user=True,
-                    override_navigator=True,
-                    scroll_delay=1
+                wait_for=site["wait_for"],
+                extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
+                scroll_delay=1
                 )
 
                 

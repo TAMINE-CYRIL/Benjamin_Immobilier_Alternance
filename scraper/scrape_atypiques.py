@@ -76,7 +76,7 @@ async def scrape_atypiques(max_pages=3):
                 details = await scrape_details(crawler, url, schema_detail)                
                 for detail in details:
                     if detail['label'] == 'Chambres':
-                        annonce['bedrooms'] = detail['value']
+                        annonce['rooms'] = detail['value']
                     elif detail['label'] == details[0]['label']: 
                         zip_code = ''.join(filter(str.isdigit, detail['value']))
                         if len(zip_code) == 5:
