@@ -7,7 +7,7 @@ from scraper.scraper_logicimmo import scrape_logicimmo
 from scraper.scraper_avoventes import scrape_avoventes 
 from utils.cleaning import filter_annonces
 from utils.db import create_tables, insert_annonces
-import asyncio, os, json, time, random
+import asyncio, os, json, time, random, datetime
 
 
 
@@ -23,7 +23,8 @@ async def main():
     # On crée le dossier (si il n'existe pas) qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
-    scrapers = [scrape_avoventes()]
+    print(datetime.datetime.now())
+    scrapers = [scrape_pap()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 
@@ -32,19 +33,19 @@ async def main():
         if isinstance(res, Exception) or res is None:
             print(f"Erreur lors du scraping : {res}")
             continue
-        #res = filter_annonces(res)
+        res = filter_annonces(res)
         all_annonces.extend(res)
         time.sleep(random.uniform(3,5))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
-    #insert_annonces(all_annonces)
+    insert_annonces(all_annonces)
 
     # Sauvegarde des données dans un fichier JSON.
     f = os.path.join("data", "annonces.json")
     with open(f, "w", encoding="utf-8") as outfile:
         json.dump(all_annonces, outfile, ensure_ascii=False, indent=4)
     print(f"Données sauvegardées dans {f}") 
-    
+    print(datetime.datetime.now())
 
 
 if __name__ == "__main__":

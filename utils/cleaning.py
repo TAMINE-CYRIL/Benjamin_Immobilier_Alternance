@@ -72,7 +72,7 @@ def extract_number(text, as_int=False):
 
 
 def calculation_price_square_meter(annonces):
-    clean_annonces = []
+    
     for annonce in annonces:
         if annonce.get("price_square_meter"):
             continue
@@ -84,9 +84,7 @@ def calculation_price_square_meter(annonces):
             continue
 
         annonce["price_square_meter"] = price // surface
-        clean_annonces.append(annonce)
-
-    return clean_annonces
+    return annonces
 
 
 
@@ -95,19 +93,15 @@ def normalization(annonces):
     Normalise les champs prix et surface en entiers (ou None).
     """
     clean_annonces = []
+    
     for annonce in annonces:
         annonce["price"] = extract_number(annonce.get("price"))
         annonce["surface"] = extract_number(annonce.get("surface"))
+        annonce["price_adjuged"] = extract_number(annonce.get("price_adjuged"))
         annonce["rooms"] = extract_number(annonce.get("rooms"), as_int=True)
         annonce["zip_code"] = extract_number(annonce.get("zip_code"), as_int=True)
         clean_annonces.append(annonce)
-
     return clean_annonces
-
-
-
-
-
 
 
 def filter_annonces(annonces):
@@ -120,8 +114,7 @@ def filter_annonces(annonces):
     for annonce in clean_annonces:
         price = annonce.get("price")
         surface = annonce.get("surface")
-        if price is None or surface is None :
+        if price is None and surface is None :
             continue
         filtrage.append(annonce)
     return filtrage
-

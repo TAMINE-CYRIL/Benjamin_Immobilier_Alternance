@@ -15,6 +15,7 @@ def test_extract_number():
     assert extract_number("1,500,000") == 1500000
     assert extract_number("3.000.000,75") == 3000000.75
     assert extract_number("3,000,000.75") == 3000000.75
+    assert extract_number("31 000,00") == 31000.00
     
     # On test les abréviations k/K et m/M
     assert extract_number("300k") == 300000.0

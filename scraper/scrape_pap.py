@@ -70,34 +70,35 @@ async def scrape_pap(max_pages=3):
     
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
-                for page in range(1, max_pages + 1):
-                    url = f"{site['url']}-{page}"
+        for page in range(1, max_pages + 1):
+            url = f"{site['url']}-{page}"
                 
-                    crawler_config = CrawlerRunConfig(
-                        cache_mode=CacheMode.BYPASS,
-                        wait_for=site.get("wait_for"),
-                        extraction_strategy=JsonCssExtractionStrategy(
-                        schema=site.get("schema")),
-                        scan_full_page=True,
-                        scroll_delay=2
-                    )
-                    result = await crawler.arun(url=site.get("url"), config=crawler_config, wait_after_load=10)
+            crawler_config = CrawlerRunConfig(
+                cache_mode=CacheMode.BYPASS,
+                wait_for=site.get("wait_for"),
+                extraction_strategy=JsonCssExtractionStrategy(
+                schema=site.get("schema")),
+                scan_full_page=True,
+                scroll_delay=2
+                )
+            
+            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
 
-                    time.sleep(random.uniform(1, 3))
+            time.sleep(random.uniform(1, 3))
 
-                    if not result or not result.extracted_content:
-                        return []
+            if not result or not result.extracted_content:
+                return []
                     
-                    print(result.status_code)
-                    annonces = json.loads(result.extracted_content)
-                    annonces = format_url(annonces)
-                    annonces = format_title(annonces)
-                    for annonce in annonces:
-                        adresse = annonce.get("address", "")
-                        annonce["zip_code"] = extract_zip_code(adresse)
-                        annonce["source"] = site.get("source")
+            print(result.status_code)
+            annonces = json.loads(result.extracted_content)
+            annonces = format_url(annonces)
+            annonces = format_title(annonces)
+            for annonce in annonces:
+                adresse = annonce.get("address", "")
+                annonce["zip_code"] = extract_zip_code(adresse)
+                annonce["source"] = site.get("source")
                     
-                    return annonces
+        return annonces
 
 
 

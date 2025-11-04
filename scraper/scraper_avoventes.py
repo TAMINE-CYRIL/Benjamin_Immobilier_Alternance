@@ -10,7 +10,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_avoventes = json.load(f)
 
 site = {
-    "url": "https://avoventes.fr/recherche/toutes",
+    "url": "https://avoventes.fr/recherche/toutes?sort=date&order=asc&display=liste",
     "schema": schema_avoventes,
     "wait_for": "css:div.row.mb-4.bg-white",
     "prefix": "https://avoventes.fr",
@@ -22,6 +22,33 @@ def extract_zip_code(address: str):
         return None
     match = re.search(r"\b\d{5}\b", address)
     return match.group(0) if match else None
+
+
+def parse_avoventes_dates(date_text):
+
+    import datetime
+    import re
+
+    # retirer les jours de semaine
+    text = re.sub(r"^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+", "", date_text, flags=re.I)
+
+    # remplacer mois français par mois numérique
+    months = {
+        "janvier": "01", "février": "02", "mars": "03", "avril": "04",
+        "mai": "05", "juin": "06", "juillet": "07", "août": "08",
+        "septembre": "09", "octobre": "10", "novembre": "11", "décembre": "12"
+    }
+
+
+    for fr, num in months.items():
+        text = text.lower().replace(fr, num)
+
+    text = text.replace(" à ", " ")
+    text = text.replace("h", ":")
+
+    return datetime.datetime.strptime(text, "%d %m %Y %H:%M")
+
+
 
 def format_sale(annonces):
     """
@@ -71,7 +98,10 @@ async def scrape_avoventes():
             annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
             annonce["surface"] = None
             annonce["price_meter_square"] = None
+            annonce["rooms"] = None
             annonce["source"] = site.get("source")
+            #annonce["sale_date"] = parse_avoventes_dates(annonce.get("sale_date", ""))
+            #annonce["visit_date"] = parse_avoventes_dates(annonce.get("visit_date", ""))
 
         all_annonces.extend(annonces)
 

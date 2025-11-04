@@ -72,3 +72,4 @@ Thumbs.db
 .env.*
 *.pem
 *.key
+proxy.py

@@ -23,6 +23,11 @@
       "type": "text"
     },
     {
+      "name": "adjuged_price",
+      "selector": "div.my-2 div:nth-of-type(2) strong",
+      "type": "text"
+    },
+    {
       "name": "agency",
       "selector": "div.mb-1 strong",
       "type": "text"
@@ -44,9 +49,11 @@
     },
     {
       "name": "url",
-      "selector": "[data-link]",
+      "selector": null,
       "type": "attribute",
       "attribute": "data-link"
     }
+
+
   ]
 }
