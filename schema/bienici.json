@@ -32,6 +32,11 @@
       "name": "agency",
       "selector": ".account-logo__display-name",
       "type": "text"
+    },
+    {
+      "name": "price_square_meter",
+      "selector": ".ad-price__price-per-square-meter",
+      "type": "text"
     }
   ]
 }

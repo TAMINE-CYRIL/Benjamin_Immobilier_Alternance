@@ -1,69 +1,55 @@
 import regex as re
 
-
 def normalisation_language(text):
     """
-    Normalise le nombre donnée selon l'insertion des virgules/points dans le paramètre.
+    Normalise le nombre selon l'insertion des virgules/points dans le paramètre.
     """
-    # Dans le cas où nous avons des virgules et des points
     if ',' in text and '.' in text:
-        
-        # Si on a la virgule avant le point : Format US
         if text.find(',') < text.find('.'):
             text = text.replace(',', '')
-            
-            
-        # Sinon format européen
         else:
             text = text.replace('.', '')
             text = text.replace(',', '.')
-            
-    # Si on a que des points
     elif '.' in text:
         if text.count('.') > 1:
             text = text.replace('.', '')
         elif text.count('.') == 1:
             if re.match(r'\d+\.\d{3}$', text):
                 text = text.replace('.', '')  
-            
-            
-    # Si on a que des virgules
     elif ',' in text:
         if text.count(',') > 1:
             text = text.replace(',', '')
-            
-
         else:
             text = text.replace(',', '.')
-
     return text
-
 
 def extract_number(text, as_int=False):
     if not text or text == "N/A":
         return None
     if isinstance(text, (int, float)):
-        value = float(text)
-        return int(text) if as_int else value
-    
-    # Nettoyage initial
+        return int(text) if as_int else float(text)
+
+    text = text.strip()
+
+    # Détection du multiplicateur k/K ou M/m (juste avant symbole ou fin)
+    multiplier = 1
+    m = re.search(r'([kK]|M|m)(?=[^\d²]|$)', text)
+    if m:
+        if m.group(1).lower() == 'k':
+            multiplier = 1_000
+        else:
+            multiplier = 1_000_000
+        # retirer uniquement le multiplicateur
+        text = text[:m.start()] + text[m.end():]
+
+    # Nettoyage : retirer €, m², m2, M2, /, espaces
     text_cleaned = re.sub(r'M2|m2|m²|M²|€|EUR|/|\s+', '', text)
 
-    # Gestion des multiplicateurs
-    multiplier = 1
-    if re.search(r'[kK]', text_cleaned):
-        multiplier = 1000
-        text_cleaned = re.sub(r'[kK]', '', text_cleaned)
-    elif re.search(r'[mM](?!\d)', text_cleaned):
-        multiplier = 1000000
-        text_cleaned = re.sub(r'[mM](?!\d)', '', text_cleaned)
-
-
-    # Détection et normalisation du format numérique
+    # Normalisation format européen / US
     text_cleaned = normalisation_language(text_cleaned)
 
-    # Extraction finale du nombre
-    match = re.search(r'\d*\.?\d+', text_cleaned)
+    # Extraction du nombre
+    match = re.search(r'\d+(\.\d+)?', text_cleaned)
     if not match:
         return None
 
@@ -97,7 +83,7 @@ def normalization(annonces):
     for annonce in annonces:
         annonce["price"] = extract_number(annonce.get("price"))
         annonce["surface"] = extract_number(annonce.get("surface"))
-        annonce["price_adjuged"] = extract_number(annonce.get("price_adjuged"))
+        annonce["adjuged_price"] = extract_number(annonce.get("adjuged_price"))
         annonce["rooms"] = extract_number(annonce.get("rooms"), as_int=True)
         annonce["zip_code"] = extract_number(annonce.get("zip_code"), as_int=True)
         clean_annonces.append(annonce)

@@ -1,7 +1,7 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
-import json, os, time, random
+import json, os, time, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/espace_atypique.json")
@@ -25,6 +25,28 @@ site = {
 
 
 
+def format_address(address: str):
+    if not address:
+        return address
+
+
+    address = address.lower().strip()
+
+    lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l'", "d'", "aux", "au"}
+
+    def format_word(word):
+        if "'" in word:
+            parts = word.split("'")
+            return parts[0].capitalize() + "'" + parts[1].capitalize()
+
+        if "-" in word:
+            return "-".join([w.capitalize() if w not in lower_words else w for w in word.split("-")])
+
+        return word.capitalize() if word not in lower_words else word
+
+    formatted = " ".join(format_word(w) for w in re.split(r"\s+", address))
+
+    return formatted
 
 
 async def scrape_details(crawler, url, schema):
@@ -43,7 +65,7 @@ async def scrape_details(crawler, url, schema):
 
 
 
-async def scrape_atypiques(max_pages=3):
+async def scrape_atypiques(max_pages=2):
     """
     Scrape plusieurs pages du site Espaces Atypiques à l’aide de Crawl4AI et du schéma JSON.
     """
@@ -85,6 +107,7 @@ async def scrape_atypiques(max_pages=3):
                         if len(zip_code) == 5:
                             annonce['zip_code'] = zip_code
                 annonce["source"] = site.get("source")
+                annonce["address"] = format_address(annonce.get("address", ""))
                         
                 time.sleep(random.uniform(1,3))
             all_annonces.extend(annonces)

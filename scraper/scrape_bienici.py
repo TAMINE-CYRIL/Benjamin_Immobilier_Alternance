@@ -19,36 +19,105 @@ site = {
 }
 
 def extract_zip_code(address: str):
+    """
+    Extrait le code postal (5 chiffres) de l'adresse à l'aide de regex.
+    """
     if not address:
         return None
     match = re.search(r"\b\d{5}\b", address)
     return match.group(0) if match else None
 
+def extract_type_from_url(url: str):
+    """
+    Extrait le type de bien à partir de l'URL de l'annonce.
+    """
+    if not url:
+        return None
 
-def format_surface(annonces):
+    patterns = {
+        "maison": "Maison",
+        "appartement": "Appartement",
+        "programme": "Programme neuf",
+        "parking": "Parking",
+        "terrain": "Terrain",
+        "loft": "Loft",
+        "commerce": "Commerce",
+        "bureau": "Bureau",
+        "chateau": "Château",
+        "hotel": "Hôtel",
+        "local": "Local commercial",
+        "autres": "Autre bien"
+    }
+
+    for key, value in patterns.items():
+        if f"/{key}/" in url.lower():
+            return value
+
+    return None
+
+def format_address(address: str):
+    """
+    Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
+    """
+    if not address:
+        return address
+
+    address = address.replace("\u00A0", " ").replace("\u202F", " ")
+
+    address = address.replace("’", "'")
+
+    address = re.sub(r"\(?\b\d{5}\b\)?", " ", address)
+
+    address = re.sub(r"[(),/]", " ", address)
+
+    address = address.lower().strip()
+
+    address = re.sub(r"\s+", " ", address)
+
+    lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l", "d", "aux", "au", "et"}
+
+    def cap_token(token: str):
+        if token.isdigit():
+            return token
+
+        if "'" in token:
+            parts = token.split("'")
+            return "'".join(
+                p.capitalize() if p and p not in lower_words else p
+                for p in parts
+            )
+
+        if "-" in token:
+            parts = token.split("-")
+            return "-".join(
+                p.capitalize() if p and p not in lower_words else p
+                for p in parts
+            )
+
+        return token if token in lower_words else token.capitalize()
+
+    tokens = [cap_token(t) for t in address.split(" ") if t]
+    formatted = " ".join(tokens)
+
+    formatted = re.sub(r"\bl'", "L'", formatted)
+
+    return formatted
+
+def format_surface(price: float, price_square_meter: float):
     """Calcule la surface quand on n’a que le prix et le prix/m²."""
-    clean_annonces = []
-    for annonce in annonces:
-        price = extract_number(annonce.get("price"))
-        surface_price = extract_number(annonce.get("surface"))
+    if price and price_square_meter:
+        surface = round(price // price_square_meter, 2)
+    else:
+        surface = None
 
-        annonce["price"] = price
+    return surface
 
-        if price and surface_price:
-            annonce["surface"] = price // surface_price
-        else:
-            annonce["surface"] = None
 
-        clean_annonces.append(annonce)
-    return clean_annonces
-
-def format_url(annonces):
+def format_url(url: str):
     """Ajoute le préfixe du site aux URLs relatives."""
-    for annonce in annonces:
-        url = annonce.get("url")
-        if url and not url.startswith("http"):
-            annonce["url"] = site["prefix"] + url
-    return annonces
+    if url and not url.startswith("http"):
+        url = site["prefix"] + url
+    return url
 
 async def scrape_bienici(max_pages=3):
     """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
@@ -75,13 +144,18 @@ async def scrape_bienici(max_pages=3):
             if not annonces:
                 print("Aucune annonce trouvée.")
                 return []  
-            
-            annonces = format_url(annonces)
-            annonces = format_surface(annonces)
+        
             for annonce in annonces:
+                    url = annonce.get("url")
                     adresse = annonce.get("address", "")
                     annonce["zip_code"] = extract_zip_code(adresse)
                     annonce["source"] = site.get("source")
+                    annonce["address"] = format_address(adresse)
+                    annonce["type"] = extract_type_from_url(url)
+                    annonce["url"] = format_url(url)
+                    annonce["price"] = extract_number(annonce.get("price"))
+                    annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
+                    annonce["surface"] = format_surface(annonce.get("price"), annonce.get("price_square_meter"))
             all_annonces.extend(annonces)
 
     return all_annonces
