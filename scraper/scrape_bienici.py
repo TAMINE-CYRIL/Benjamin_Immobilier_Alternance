@@ -15,7 +15,7 @@ site = {
     "schema": schema_bienici,
     "wait_for": "css:article.ad-overview",
     "prefix": "https://www.bienici.com",
-    "source": "BienIci"
+    "source_site": "BienIci"
 }
 
 def extract_zip_code(address: str):
@@ -112,14 +112,13 @@ def format_surface(price: float, price_square_meter: float):
 
     return surface
 
-
 def format_url(url: str):
     """Ajoute le préfixe du site aux URLs relatives."""
     if url and not url.startswith("http"):
         url = site["prefix"] + url
     return url
 
-async def scrape_bienici(max_pages=3):
+async def scrape_bienici(max_pages=4):
     """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
     all_annonces = []
@@ -134,7 +133,7 @@ async def scrape_bienici(max_pages=3):
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
             )
 
-            result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
+            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
 
             time.sleep(random.uniform(1, 3))
             if not result or not result.extracted_content:
@@ -149,9 +148,9 @@ async def scrape_bienici(max_pages=3):
                     url = annonce.get("url")
                     adresse = annonce.get("address", "")
                     annonce["zip_code"] = extract_zip_code(adresse)
-                    annonce["source"] = site.get("source")
+                    annonce["source_site"] = site.get("source_site")
                     annonce["address"] = format_address(adresse)
-                    annonce["type"] = extract_type_from_url(url)
+                    annonce["type_bien"] = extract_type_from_url(url)
                     annonce["url"] = format_url(url)
                     annonce["price"] = extract_number(annonce.get("price"))
                     annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))

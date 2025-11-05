@@ -24,6 +24,10 @@ def normalisation_language(text):
     return text
 
 def extract_number(text, as_int=False):
+    """
+    Extrait un nombre depuis une chaîne de caractères.
+    Gère les formats avec k/K (milliers) et m/M (millions).
+    """
     if not text or text == "N/A":
         return None
     if isinstance(text, (int, float)):
@@ -56,33 +60,13 @@ def extract_number(text, as_int=False):
     value = float(match.group()) * multiplier
     return int(value) if as_int else value
 
-
-def calculation_price_square_meter(annonces):
-    
-    for annonce in annonces:
-        if annonce.get("price_square_meter"):
-            continue
-
-        price = annonce.get("price")
-        surface = annonce.get("surface")
-
-        if price is None or surface is None or surface == 0:
-            continue
-
-        annonce["price_square_meter"] = price // surface
-    return annonces
-
-
-
 def normalization(annonces):
     """
-    Normalise les champs prix et surface en entiers (ou None).
+    Normalise les champs, afin de récupérer des nombres pour certaines valeurs de nos annonces. (ou None).
     """
     clean_annonces = []
     
     for annonce in annonces:
-        annonce["price"] = extract_number(annonce.get("price"))
-        annonce["surface"] = extract_number(annonce.get("surface"))
         annonce["adjuged_price"] = extract_number(annonce.get("adjuged_price"))
         annonce["rooms"] = extract_number(annonce.get("rooms"), as_int=True)
         annonce["zip_code"] = extract_number(annonce.get("zip_code"), as_int=True)
@@ -96,7 +80,6 @@ def filter_annonces(annonces):
     """
     filtrage = []
     clean_annonces = normalization(annonces)
-    clean_annonces = calculation_price_square_meter(clean_annonces) 
     for annonce in clean_annonces:
         price = annonce.get("price")
         surface = annonce.get("surface")

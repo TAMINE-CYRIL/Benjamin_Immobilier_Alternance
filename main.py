@@ -33,12 +33,12 @@ async def main():
         if isinstance(res, Exception) or res is None:
             print(f"Erreur lors du scraping : {res}")
             continue
-        #res = filter_annonces(res)
+        res = filter_annonces(res)
         all_annonces.extend(res)
         time.sleep(random.uniform(3,5))  # Pause aléatoire entre les scrapers
 
     print(f"{len(all_annonces)} annonces récupérées")
-    #insert_annonces(all_annonces)
+    insert_annonces(all_annonces)
 
     # Sauvegarde des données dans un fichier JSON.
     f = os.path.join("data", "annonces.json")

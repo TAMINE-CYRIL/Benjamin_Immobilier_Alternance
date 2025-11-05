@@ -1,7 +1,6 @@
 import psycopg2, os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 def get_connection():
@@ -23,7 +22,8 @@ def create_tables():
     connexion = get_connection()
     cursor = connexion.cursor()
 
-    cursor.execute("""CREATE TABLE IF NOT EXISTS annonces (
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS annonces (
         id SERIAL PRIMARY KEY,
         title TEXT,
         url TEXT UNIQUE,
@@ -34,28 +34,31 @@ def create_tables():
         rooms INTEGER,
         price_square_meter NUMERIC,
         agency TEXT,
-        source TEXT,
-        type TEXT,
+        source_site TEXT,
+        type_bien TEXT,
         sale_date TEXT,    
         visit_date TEXT              
     );
     """)
 
     connexion.commit()
-
     cursor.close()
     connexion.close()
 
 def insert_annonces(annonces):
     """
-    Insère une liste d'annonces dans la table 'annonces' avec gestion des doublons sur l'URL.
+    Insère ou met à jour les annonces avec logs détaillés.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
 
     insert_query = """
-    INSERT INTO annonces (title, url, address, surface, price, zip_code, rooms, price_square_meter, agency, source, type, sale_date, visit_date)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO annonces (
+        title, url, address, surface, price, zip_code, rooms, 
+        price_square_meter, agency, source_site, type_bien, 
+        sale_date, visit_date
+    )
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (url) DO UPDATE
     SET title = EXCLUDED.title,
         address = EXCLUDED.address,
@@ -65,18 +68,28 @@ def insert_annonces(annonces):
         rooms = EXCLUDED.rooms,
         price_square_meter = EXCLUDED.price_square_meter,
         agency = EXCLUDED.agency,
-        source = EXCLUDED.source,
-        type = EXCLUDED.type,
+        source_site = EXCLUDED.source_site,
+        type_bien = EXCLUDED.type_bien,
         sale_date = EXCLUDED.sale_date,
         visit_date = EXCLUDED.visit_date;
     """
 
+    inserted = 0
+    updated = 0
+    skipped = 0
+
     for annonce in annonces:
-        cursor.execute(
-            insert_query,
-            (
+        url = annonce.get("url")
+        
+        if not url or url.strip() == "":
+            skipped += 1
+            print(f"[SKIPPED] Annonce sans URL : {annonce.get('title')}")
+            continue
+
+        try:
+            cursor.execute(insert_query, (
                 annonce.get("title"),
-                annonce.get("url"),
+                url,
                 annonce.get("address"),
                 annonce.get("surface"),
                 annonce.get("price"),
@@ -84,13 +97,32 @@ def insert_annonces(annonces):
                 annonce.get("rooms"),
                 annonce.get("price_square_meter"),
                 annonce.get("agency"),
-                annonce.get("source"),
-                annonce.get("type"),
+                annonce.get("source_site"), 
+                annonce.get("type_bien"),    
                 annonce.get("sale_date"),
-                annonce.get("visit_date")
-            )
-        )
+                annonce.get("visit_date"),
+            ))
+
+            if cursor.rowcount == 1:
+                inserted += 1
+                print(f"[INSERT] {url}")
+            else:
+                updated += 1
+                print(f"[UPDATE] {url}")
+
+        except Exception as e:
+            skipped += 1
+            print(f"[ERROR] {url} -> {e}")
+            connexion.rollback()
+            continue
 
     connexion.commit()
     cursor.close()
     connexion.close()
+
+    print("\n========== SUMMARY ==========")
+    print(f"Total annonces traitées : {len(annonces)}")
+    print(f"Insertions : {inserted}")
+    print(f"Mises à jour : {updated}")
+    print(f"Skipped/Errors : {skipped}")
+    print("================================\n")
