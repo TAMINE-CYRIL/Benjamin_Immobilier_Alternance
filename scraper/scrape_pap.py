@@ -83,7 +83,7 @@ site = {
         "source": "PAP"
     }
 
-async def scrape_pap(max_pages=2):
+async def scrape_pap(max_pages=3):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site PAP à l'aide d'une extraction
     CSS et d'un schéma JSON.

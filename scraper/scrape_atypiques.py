@@ -1,6 +1,7 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
+from utils.cleaning import extract_number
 import json, os, time, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +24,16 @@ site = {
     "source": "Espaces Atypiques"
 }
 
-
+def calculate_price_square_meter(price, surface):
+    """
+    Calcule le prix au m², en divisant le prix total par la surface.
+    """
+    if not price or not surface:
+        return None
+    price = extract_number(price)
+    surface = extract_number(surface)
+    price_square_meter = round(price // surface, 2)
+    return price_square_meter
 
 def format_address(address: str):
     if not address:
@@ -65,7 +75,7 @@ async def scrape_details(crawler, url, schema):
 
 
 
-async def scrape_atypiques(max_pages=2):
+async def scrape_atypiques(max_pages=3):
     """
     Scrape plusieurs pages du site Espaces Atypiques à l’aide de Crawl4AI et du schéma JSON.
     """
@@ -108,7 +118,7 @@ async def scrape_atypiques(max_pages=2):
                             annonce['zip_code'] = zip_code
                 annonce["source"] = site.get("source")
                 annonce["address"] = format_address(annonce.get("address", ""))
-                        
+                annonce["price_square_meter"] = calculate_price_square_meter(annonce.get("price"), annonce.get("surface"))                        
                 time.sleep(random.uniform(1,3))
             all_annonces.extend(annonces)
 

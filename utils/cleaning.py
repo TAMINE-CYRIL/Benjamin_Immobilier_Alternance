@@ -67,6 +67,9 @@ def normalization(annonces):
     clean_annonces = []
     
     for annonce in annonces:
+        annonce["price"] = extract_number(annonce.get("price"))
+        annonce["surface"] = extract_number(annonce.get("surface"))
+        annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
         annonce["adjuged_price"] = extract_number(annonce.get("adjuged_price"))
         annonce["rooms"] = extract_number(annonce.get("rooms"), as_int=True)
         annonce["zip_code"] = extract_number(annonce.get("zip_code"), as_int=True)

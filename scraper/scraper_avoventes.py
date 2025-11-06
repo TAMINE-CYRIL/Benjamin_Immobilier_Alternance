@@ -14,7 +14,7 @@ site = {
     "schema": schema_avoventes,
     "wait_for": "css:div.row.mb-4.bg-white",
     "prefix": "https://avoventes.fr",
-    "source": "AvoVentes"
+    "source_site": "AvoVentes"
 }
 
 def extract_zip_code(address: str):
@@ -23,6 +23,24 @@ def extract_zip_code(address: str):
     match = re.search(r"\b\d{5}\b", address)
     return match.group(0) if match else None
 
+def format_price(price: str):
+    if not price:
+        return None
+    
+    match = re.search(r"(\d[\d\s.,]*)", price)
+    if not match:
+        return None
+
+    price = match.group(1)
+
+    price = price.replace("€", "").replace("\u00A0", "").strip()
+    price = price.replace(" ", "").replace(",", ".")
+
+    try:
+        value = float(price)
+        return int(value) if value.is_integer() else value
+    except:
+        return None
 
 def parse_avoventes_dates(date_text):
 
@@ -47,8 +65,6 @@ def parse_avoventes_dates(date_text):
     text = text.replace("h", ":")
 
     return datetime.datetime.strptime(text, "%d %m %Y %H:%M")
-
-
 
 def format_sale(annonces):
     """
@@ -93,16 +109,17 @@ async def scrape_avoventes():
             return []
 
         annonces = json.loads(result.extracted_content)
-        annonces = format_sale(annonces)
-        for annonce in annonces:
-            annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
-            annonce["surface"] = None
-            annonce["price_meter_square"] = None
-            annonce["rooms"] = None
-            annonce["source"] = site.get("source")
+        #annonces = format_sale(annonces)
+        #for annonce in annonces:
+            #annonce["price"] = format_price(annonce.get("price", ""))
+            #annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
+            #annonce["surface"] = None
+            #annonce["price_meter_square"] = None
+            #annonce["rooms"] = None
+            #annonce["source_site"] = site.get("source_site")
             #annonce["sale_date"] = parse_avoventes_dates(annonce.get("sale_date", ""))
             #annonce["visit_date"] = parse_avoventes_dates(annonce.get("visit_date", ""))
 
-        all_annonces.extend(annonces)
+        #all_annonces.extend(annonces)
 
-        return all_annonces
+        return annonces

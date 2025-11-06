@@ -7,13 +7,19 @@
       "selector": ".font-bold.text-16",
       "type": "text"
     },
-{
+    {
       "name": "address",
       "selector": ".d-flex .inline-block:nth-of-type(2)",
       "type": "text"
     },
     {
-      "name": "type",
+    "name": "url",
+    "selector": "..",
+    "type": "attribute",
+    "attribute": "data-link"
+    },
+    {
+      "name": "type_bien",
       "selector": "div > span.badge.badge-secondary",
       "type": "text"
     },
@@ -41,19 +47,6 @@
       "name": "visit_date",
       "selector": "div.bg-light .px-3.py-2:nth-of-type(2)",
       "type": "text"
-    },
-    {
-      "name": "status",
-      "selector": ".ribbon-inner",
-      "type": "text"
-    },
-    {
-      "name": "url",
-      "selector": null,
-      "type": "attribute",
-      "attribute": "data-link"
     }
-
-
   ]
 }
