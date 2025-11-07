@@ -1,7 +1,8 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
-from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
+from crawl4ai.async_configs import CrawlerRunConfig
 from utils.cleaning import extract_number
+from utils.config import get_browser_config
 import json, os, time, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,37 +16,108 @@ site = {
     "schema": schema_logicimmo,
     "wait_for": "div[data-testid='serp-core-classified-card-testid']",
     "prefix": "https://www.logic-immo.com",
-    "source": "Logic Immo"
+    "source_site": "Logic Immo"
 }
 
+def calculate_surface(price: float, price_square_meter: float):
+    """Calcule la surface quand on n’a que le prix et le prix/m²."""
+    if price and price_square_meter:
+        surface = round(price // price_square_meter, 2)
+    else:
+        surface = None
+
+    return surface
+
+def extract_type_bien(url: str):
+    """
+    Extrait le type de bien (appartement, maison, etc.) à partir de l'URL de l'annonce.
+    Fonctionne même si le segment d'URL est 'achat', 'vente' ou 'location'.
+    """
+    if not url:
+        return None
+
+    try:
+        parts = url.split('/')
+        categories = {"achat", "vente", "location"}
+        for cat in categories:
+            if cat in parts:
+                idx = parts.index(cat)
+                if idx + 1 < len(parts):
+                    return parts[idx + 1].lower()
+        return None
+    except Exception:
+        return None
+
+def format_address(address: str):
+    """
+    Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
+    """
+    if not address:
+        return address
+
+    address = address.replace("\u00A0", " ").replace("\u202F", " ")
+
+    address = address.replace("’", "'")
+
+    address = re.sub(r"\(?\b\d{5}\b\)?", " ", address)
+
+    address = re.sub(r"[(),/]", " ", address)
+
+    address = address.lower().strip()
+
+    address = re.sub(r"\s+", " ", address)
+
+    lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l", "d", "aux", "au", "et"}
+
+    def cap_token(token: str):
+        if token.isdigit():
+            return token
+
+        if "'" in token:
+            parts = token.split("'")
+            return "'".join(
+                p.capitalize() if p and p not in lower_words else p
+                for p in parts
+            )
+
+        if "-" in token:
+            parts = token.split("-")
+            return "-".join(
+                p.capitalize() if p and p not in lower_words else p
+                for p in parts
+            )
+
+        return token if token in lower_words else token.capitalize()
+
+    tokens = [cap_token(t) for t in address.split(" ") if t]
+    formatted = " ".join(tokens)
+
+    formatted = re.sub(r"\bl'", "L'", formatted)
+
+    return formatted
+
 def extract_zip_code(address: str):
+
+    """
+    Extrait le code postal (5 chiffres) de l'adresse.
+    """
     if not address:
         return None
-    match = re.search(r"\b\d{5}\b", address)
-    return match.group(0) if match else None
 
+    match = re.search(r"\b(\d{5})\b", address)
+    return match.group(1) if match else None
 
-def format_surface(annonces):
-    """Calcule la surface quand on n’a que le prix et le prix/m²."""
-    clean_annonces = []
-    for annonce in annonces:
-        price = extract_number(annonce.get("price"))
-        surface_price = extract_number(annonce.get("surface"))
-
-        annonce["price"] = price
-
-        if price and surface_price:
-            annonce["surface"] = price // surface_price
-        else:
-            annonce["surface"] = None
-
-        clean_annonces.append(annonce)
-    return clean_annonces
+def format_url(url: str):
+    """
+    Ajoute le préfixe du site aux URLs relatives.
+    """
+    url = url.replace("https%3A%2F%2F", "https://").replace("%2F", "/")
+    return url
 
 
 async def scrape_logicimmo(max_pages=3):
     """Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination."""
-    browser_config = BrowserConfig(browser_type="chromium", headless=False)
+    browser_config = get_browser_config()
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
@@ -71,11 +143,15 @@ async def scrape_logicimmo(max_pages=3):
                 break  
             """
             print(result.status_code)
-            annonces = format_surface(annonces)
             for annonce in annonces:
-                    adresse = annonce.get("address", "")
-                    annonce["zip_code"] = extract_zip_code(adresse)
-                    annonce["source"] = site.get("source")
+                annonce["source_site"] = site.get("source_site")
+                annonce["price"] = extract_number(annonce.get("price"))
+                annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
+                #annonce["surface"] = calculate_surface(annonce.get("price"), annonce.get("price_square_meter"))
+                annonce["url"] = format_url(annonce.get("url", ""))
+                annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
+                annonce["rooms"] = extract_number(annonce.get("rooms"))
+                annonce["address"] = format_address(annonce.get("address", ""))
             all_annonces.extend(annonces)
 
     return all_annonces

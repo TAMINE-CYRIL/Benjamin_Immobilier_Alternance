@@ -1,11 +1,50 @@
 {
-  "name": "Leboncoin Immobilier",
+  "name": "Leboncoin",
   "baseSelector": "li[data-test-id='ad']",
   "fields": [
     {
       "name": "title",
-      "selector": "p[data-testid='adTitle']",
+      "selector": "h3",
       "type": "text"
+    },
+    {
+      "name": "url",
+      "selector": "a[aria-label='Voir l\\'annonce']",
+      "type": "attribute",
+      "attribute": "href"
+    },
+    {
+      "name": "address",
+      "selector": "p[aria-hidden='true']:has-text('77410'), p[aria-hidden='true']:has-text('75'), p[aria-hidden='true']:has-text('92'), p[aria-hidden='true']:has-text('93'), p[aria-hidden='true']:has-text('94'), p[aria-hidden='true']:has-text('95')",
+      "type": "text"
+    },
+    {
+      "name": "agency",
+      "selector": "p[data-test-id='pro-store-name'] strong",
+      "type": "text"
+    },
+    {
+      "name": "price",
+      "selector": "p[data-test-id='price']",
+      "type": "attribute",
+      "attribute": "aria-label"
+    },
+    {
+      "name": "price_square_meter",
+      "selector": "div.text-caption.text-on-background\\/dim-1 p",
+      "type": "text"
+    },
+    {
+      "name": "rooms",
+      "selector": "p[aria-label*='pièces']",
+      "type": "regex",
+      "pattern": "(\\d+)\\s+pièces"
+    },
+    {
+      "name": "surface",
+      "selector": "p[aria-label*='mètres carrés']",
+      "type": "regex",
+      "pattern": "(\\d+)\\s+mètres carrés"
     }
   ]
 }

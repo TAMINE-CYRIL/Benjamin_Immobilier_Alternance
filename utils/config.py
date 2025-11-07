@@ -1,7 +1,6 @@
 from crawl4ai import BrowserConfig
 import random
 
-
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
@@ -21,28 +20,26 @@ USER_AGENTS = [
     "Mozilla/5.0 (Linux; U; Android 11; fr-fr; Redmi Note 10) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/106.0.5249.126 Mobile Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
     "Mozilla/5.0 (Linux; Android 13; SM-S918B Build/TP1A.220624.014) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-
 ]
 
-HEADERS= {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Accept-Encoding": "gzip, deflate, br",
-}
-
 def get_random_user_agent():
-    """Retourne un User-Agent aléatoire à partir de la liste définie."""
-
+    """Retourne un User-Agent aléatoire."""
     return random.choice(USER_AGENTS)
 
 def get_browser_config():
-    """Retourne une configuration de navigateur standardisée pour les scrapers."""
+    """
+    Retourne une configuration de navigateur avec User-Agent rotatif.
+    """
     browser_config = BrowserConfig(
-        browser_type="chromium", 
-        headless=False,
+        browser_type="chromium",
+        headless=True,
+        user_agent=get_random_user_agent(),
         viewport_width=1920,
         viewport_height=1080,
-        headers=HEADERS,
+        extra_args=[
+            "--disable-blink-features=AutomationControlled",
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+        ]
     )
     return browser_config

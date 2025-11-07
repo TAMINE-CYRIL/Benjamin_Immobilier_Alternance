@@ -42,11 +42,6 @@
       "type": "text"
     },
     {
-      "name": "bedrooms",
-      "selector": "div[data-testid='cardmfe-keyfacts-testid'] div:nth-child(3)",
-      "type": "text"
-    },
-    {
       "name": "surface",
       "selector": "div[data-testid='cardmfe-keyfacts-testid'] div:nth-child(5)",
       "type": "text"

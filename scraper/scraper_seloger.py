@@ -3,7 +3,7 @@ from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import CrawlerRunConfig
 from utils.config import get_browser_config
 from utils.cleaning import extract_number
-import json, os, time, random
+import json, os, time, random, regex as re
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,33 +17,103 @@ site = {
     "schema": schema_seloger,
     "prefix": "https://www.seloger.com",
     "wait_for": "div[data-testid^='classified-card-mfe-']",
-    "source": "SeLoger"
+    "source_site": "SeLoger"
 }
 
-def format_surface(annonces):
+def extract_type_bien(url: str):
+    """
+    Extrait le type de bien (appartement, maison, etc.) à partir de l'URL de l'annonce.
+    Fonctionne même si le segment d'URL est 'achat', 'vente' ou 'location'.
+    """
+    if not url:
+        return None
+
+    try:
+        parts = url.split('/')
+        categories = {"achat", "vente", "location"}
+        for cat in categories:
+            if cat in parts:
+                idx = parts.index(cat)
+                if idx + 1 < len(parts):
+                    return parts[idx + 1].lower()
+        return None
+    except Exception:
+        return None
+
+
+def format_surface(price: float, price_square_meter: float):
     """Calcule la surface quand on n’a que le prix et le prix/m²."""
-    clean_annonces = []
-    for annonce in annonces:
-        price = extract_number(annonce.get("price"))
-        surface_price = extract_number(annonce.get("surface"))
+    if price and price_square_meter:
+        surface = round(price // price_square_meter, 2)
+    else:
+        surface = None
 
-        annonce["price"] = price
+    return surface
 
-        if price and surface_price:
-            annonce["surface"] = price // surface_price
-        else:
-            annonce["surface"] = None
+def format_address(address: str):
+    """
+    Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
+    """
+    if not address:
+        return address
 
-        clean_annonces.append(annonce)
-    return clean_annonces
+    address = address.replace("\u00A0", " ").replace("\u202F", " ")
 
+    address = address.replace("’", "'")
+
+    address = re.sub(r"\(?\b\d{5}\b\)?", " ", address)
+
+    address = re.sub(r"[(),/]", " ", address)
+
+    address = address.lower().strip()
+
+    address = re.sub(r"\s+", " ", address)
+
+    lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l", "d", "aux", "au", "et"}
+
+    def cap_token(token: str):
+        if token.isdigit():
+            return token
+
+        if "'" in token:
+            parts = token.split("'")
+            return "'".join(
+                p.capitalize() if p and p not in lower_words else p
+                for p in parts
+            )
+
+        if "-" in token:
+            parts = token.split("-")
+            return "-".join(
+                p.capitalize() if p and p not in lower_words else p
+                for p in parts
+            )
+
+        return token if token in lower_words else token.capitalize()
+
+    tokens = [cap_token(t) for t in address.split(" ") if t]
+    formatted = " ".join(tokens)
+
+    formatted = re.sub(r"\bl'", "L'", formatted)
+
+    return formatted
+
+def extract_zip_code(address: str):
+    """
+    Extrait le code postal (5 chiffres) de l'adresse.
+    """
+    if not address:
+        return None
+
+    match = re.search(r"\b(\d{5})\b", address)
+    return match.group(1) if match else None
 
 async def scrape_seloger(max_pages=3):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
     CSS et d'un schéma JSON.
     """
-    browser_config = BrowserConfig(browser_type="chromium", headless=True)
+    browser_config = get_browser_config()
     
     async with AsyncWebCrawler(config=browser_config) as crawler:
         #for page in range(1, max_pages + 1):
@@ -75,6 +145,11 @@ async def scrape_seloger(max_pages=3):
             """                    
             annonces = json.loads(result.extracted_content)
             for annonce in annonces:
-                annonce["source"] = site.get("source")
-            annonces = format_surface(annonces)
+                annonce["source_site"] = site.get("source_site")
+                annonce["price"] = extract_number(annonce.get("price"))
+                annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
+                annonce["surface"] = format_surface(annonce.get("price"), annonce.get("price_square_meter"))
+                annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
+                annonce["address"] = format_address(annonce.get("address", ""))
+                annonce["type_bien"] = extract_type_bien(annonce.get("url", ""))
     return annonces
