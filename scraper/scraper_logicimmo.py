@@ -12,7 +12,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_logicimmo = json.load(f)
 
 site = {
-    "url": "https://www.logic-immo.com/classified-search?distributionTypes=Buy&estateTypes=House,Apartment&locations=AD02FR1&order=DateDesc",
+    "url": "https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page=1&order=DateDesc",
     "schema": schema_logicimmo,
     "wait_for": "div[data-testid='serp-core-classified-card-testid']",
     "prefix": "https://www.logic-immo.com",
@@ -115,14 +115,14 @@ def format_url(url: str):
     return url
 
 
-async def scrape_logicimmo(max_pages=4):
+async def scrape_logicimmo(max_pages=5):
     """Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination."""
     browser_config = get_browser_config()
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
-            url = f"{site['url']}?page={page}"
+            url = f"https://www.logic-immo.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}&order=DateDesc"
 
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,

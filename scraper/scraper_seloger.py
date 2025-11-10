@@ -13,7 +13,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
 
 
 site = {
-    "url": "https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page=1",
+    "url": "https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page=1&order=DateDesc",
     "schema": schema_seloger,
     "prefix": "https://www.seloger.com",
     "wait_for": "div[data-testid^='classified-card-mfe-']",
@@ -108,16 +108,16 @@ def extract_zip_code(address: str):
     match = re.search(r"\b(\d{5})\b", address)
     return match.group(1) if match else None
 
-async def scrape_seloger(max_pages=3):
+async def scrape_seloger(max_pages=5):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
     CSS et d'un schéma JSON.
     """
     browser_config = get_browser_config()
-    
+    all_annonces = []
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
-            url = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}"
+            url = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}&order=DateDesc"
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],
@@ -132,14 +132,17 @@ async def scrape_seloger(max_pages=3):
                 wait_after_load=15
             )
 
+
+
             time.sleep(random.uniform(2,4))
             print(result.status_code)
             
+
             if not result or not result.extracted_content:
-                break  
-            
+                break
+        
             annonces = json.loads(result.extracted_content)
-            
+
             if not annonces:
                 break
                                 
@@ -151,4 +154,5 @@ async def scrape_seloger(max_pages=3):
                 annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
                 annonce["address"] = format_address(annonce.get("address", ""))
                 annonce["type_bien"] = extract_type_bien(annonce.get("url", ""))
-    return annonces
+            all_annonces.extend(annonces)
+    return all_annonces

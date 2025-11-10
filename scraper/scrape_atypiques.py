@@ -21,7 +21,7 @@ site = {
     "schema": schema_atypiques,
     "wait_for": "css:.preview-annonce",
     "prefix": "https://www.espaces-atypiques.com",
-    "source": "Espaces Atypiques"
+    "source_site": "Espaces Atypiques"
 }
 
 def calculate_price_square_meter(price, surface):
@@ -75,7 +75,7 @@ async def scrape_details(crawler, url, schema):
 
 
 
-async def scrape_atypiques(max_pages=3):
+async def scrape_atypiques(max_pages=5):
     """
     Scrape plusieurs pages du site Espaces Atypiques à l’aide de Crawl4AI et du schéma JSON.
     """
@@ -116,7 +116,7 @@ async def scrape_atypiques(max_pages=3):
                         zip_code = ''.join(filter(str.isdigit, detail['value']))
                         if len(zip_code) == 5:
                             annonce['zip_code'] = zip_code
-                annonce["source"] = site.get("source")
+                annonce["source_site"] = site.get("source_site")
                 annonce["address"] = format_address(annonce.get("address", ""))
                 annonce["price_square_meter"] = calculate_price_square_meter(annonce.get("price"), annonce.get("surface"))                        
                 time.sleep(random.uniform(1,3))

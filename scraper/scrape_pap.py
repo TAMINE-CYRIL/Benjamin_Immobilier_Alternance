@@ -2,12 +2,43 @@ from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
 import json, os, time, random, regex as re
+from utils.cleaning import extract_number
+
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/pap.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_pap = json.load(f)
+
+def extract_type_from_url(url: str):
+    """
+    Extrait le type de bien à partir de l'URL de l'annonce.
+    """
+    if not url:
+        return None
+
+    patterns = {
+        "maison": "Maison",
+        "appartement": "Appartement",
+        "programme": "Programme neuf",
+        "parking": "Parking",
+        "terrain": "Terrain",
+        "loft": "Loft",
+        "commerce": "Commerce",
+        "bureau": "Bureau",
+        "chateau": "Château",
+        "hotel": "Hôtel",
+        "local": "Local commercial",
+        "autres": "Autre bien"
+    }
+
+    for key, value in patterns.items():
+        if f"/{key}/" in url.lower():
+            return value
+
+    return None
 
 def format_url(annonces: list):
     """
@@ -75,15 +106,29 @@ def extract_type_from_url(url: str):
     return None
 
 
+def calculate_price_square_meter(price: float, surface: float):
+    """
+    Calcule le prix au mètre carré.
+    """
+    if not price or not surface:
+        return None
+    try:
+        if surface == 0:
+            return None
+        price_per_sqm = price / surface
+        return int(price_per_sqm) if price_per_sqm.is_integer() else round(price_per_sqm, 2)
+    except:
+        return None
+
 site = {
         "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager",
         "schema": schema_pap,
         "wait_for": "css:.search-list-item-alt",
         "prefix": "https://www.pap.fr",
-        "source": "PAP"
+        "source_site": "PAP"
     }
 
-async def scrape_pap(max_pages=3):
+async def scrape_pap(max_pages=5):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site PAP à l'aide d'une extraction
     CSS et d'un schéma JSON.
@@ -119,10 +164,13 @@ async def scrape_pap(max_pages=3):
             # Nettoyage des données
             for annonce in annonces:
                 adresse = annonce.get("address", "")
+                price = extract_number(annonce.get("price"))
+                surface = extract_number(annonce.get("surface"))
                 annonce["zip_code"] = extract_zip_code(adresse)
-                annonce["source"] = site.get("source")
+                annonce["source_site"] = site.get("source_site")
                 annonce["address"] = clean_address(adresse)
-                annonce["type"] = extract_type_from_url(annonce.get("url", ""))
+                annonce["type_bien"] = extract_type_from_url(annonce.get("url", ""))
+                annonce["price_square_meter"] = calculate_price_square_meter(price, surface)
                     
         return annonces
 
