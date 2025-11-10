@@ -115,14 +115,14 @@ def format_url(url: str):
     return url
 
 
-async def scrape_logicimmo(max_pages=3):
+async def scrape_logicimmo(max_pages=4):
     """Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination."""
     browser_config = get_browser_config()
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        #for page in range(1, max_pages + 1):
-            #url = f"{site['url']}?page={page}"
+        for page in range(1, max_pages + 1):
+            url = f"{site['url']}?page={page}"
 
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
@@ -130,24 +130,24 @@ async def scrape_logicimmo(max_pages=3):
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
             )
 
-            result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
+            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
 
             time.sleep(random.uniform(1, 3))
-            """
+            
             if not result or not result.extracted_content:
                 break  
-            """
+            
+            print(result.status_code)
             annonces = json.loads(result.extracted_content)
-            """
+            
             if not annonces:
                 break  
-            """
-            print(result.status_code)
+            
+            
             for annonce in annonces:
                 annonce["source_site"] = site.get("source_site")
                 annonce["price"] = extract_number(annonce.get("price"))
                 annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
-                #annonce["surface"] = calculate_surface(annonce.get("price"), annonce.get("price_square_meter"))
                 annonce["url"] = format_url(annonce.get("url", ""))
                 annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
                 annonce["rooms"] = extract_number(annonce.get("rooms"))

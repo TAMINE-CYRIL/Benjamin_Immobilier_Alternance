@@ -116,8 +116,8 @@ async def scrape_seloger(max_pages=3):
     browser_config = get_browser_config()
     
     async with AsyncWebCrawler(config=browser_config) as crawler:
-        #for page in range(1, max_pages + 1):
-            #site["url"] = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}"
+        for page in range(1, max_pages + 1):
+            url = f"https://www.seloger.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page={page}"
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],
@@ -127,23 +127,22 @@ async def scrape_seloger(max_pages=3):
 
                 
             result = await crawler.arun(
-                url=site["url"], 
+                url=url, 
                 config=crawler_config, 
                 wait_after_load=15
             )
 
             time.sleep(random.uniform(2,4))
             print(result.status_code)
-            """
+            
             if not result or not result.extracted_content:
                 break  
-            """
+            
             annonces = json.loads(result.extracted_content)
-            """
+            
             if not annonces:
                 break
-            """                    
-            annonces = json.loads(result.extracted_content)
+                                
             for annonce in annonces:
                 annonce["source_site"] = site.get("source_site")
                 annonce["price"] = extract_number(annonce.get("price"))

@@ -24,7 +24,7 @@ async def main():
     os.mkdir("data") if not os.path.exists("data") else None
 
     print(datetime.datetime.now())
-    scrapers = [scrape_leboncoin()]
+    scrapers = [scrape_logicimmo()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 
@@ -33,7 +33,7 @@ async def main():
         if isinstance(res, Exception) or res is None:
             print(f"Erreur lors du scraping : {res}")
             continue
-        #res = filter_annonces(res)
+        res = filter_annonces(res)
         all_annonces.extend(res)
         time.sleep(random.uniform(3,5))  # Pause aléatoire entre les scrapers
 

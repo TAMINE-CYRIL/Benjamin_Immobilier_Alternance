@@ -2,6 +2,12 @@
   "name": "Avoventes Immobilier",
   "baseSelector": "div.row.mb-4.bg-white",
   "fields": [
+{
+  "name": "url",
+  "selector": ".row.mb-4.bg-white",
+  "type": "attribute",
+  "attribute": "data-link"
+},
     {
       "name": "title",
       "selector": ".font-bold.text-16",
@@ -11,12 +17,6 @@
       "name": "address",
       "selector": ".d-flex .inline-block:nth-of-type(2)",
       "type": "text"
-    },
-    {
-    "name": "url",
-    "selector": "..",
-    "type": "attribute",
-    "attribute": "data-link"
     },
     {
       "name": "type_bien",

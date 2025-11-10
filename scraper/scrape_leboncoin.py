@@ -26,7 +26,7 @@ async def scrape_leboncoin(max_pages=3):
         for page in range(1, max_pages + 1):
             url = f"{site['url']}&page={page}"
             
-            print(f"📄 Scraping page {page}: {url}")
+            print(f"Scraping page {page}: {url}")
 
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,

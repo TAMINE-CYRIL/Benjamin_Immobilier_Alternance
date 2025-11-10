@@ -42,29 +42,6 @@ def format_price(price: str):
     except:
         return None
 
-def parse_avoventes_dates(date_text):
-
-    import datetime
-    import re
-
-    # retirer les jours de semaine
-    text = re.sub(r"^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+", "", date_text, flags=re.I)
-
-    # remplacer mois français par mois numérique
-    months = {
-        "janvier": "01", "février": "02", "mars": "03", "avril": "04",
-        "mai": "05", "juin": "06", "juillet": "07", "août": "08",
-        "septembre": "09", "octobre": "10", "novembre": "11", "décembre": "12"
-    }
-
-
-    for fr, num in months.items():
-        text = text.lower().replace(fr, num)
-
-    text = text.replace(" à ", " ")
-    text = text.replace("h", ":")
-
-    return datetime.datetime.strptime(text, "%d %m %Y %H:%M")
 
 def format_sale(annonces):
     """
@@ -109,17 +86,25 @@ async def scrape_avoventes():
             return []
 
         annonces = json.loads(result.extracted_content)
-        #annonces = format_sale(annonces)
-        #for annonce in annonces:
-            #annonce["price"] = format_price(annonce.get("price", ""))
-            #annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
-            #annonce["surface"] = None
-            #annonce["price_meter_square"] = None
-            #annonce["rooms"] = None
-            #annonce["source_site"] = site.get("source_site")
-            #annonce["sale_date"] = parse_avoventes_dates(annonce.get("sale_date", ""))
-            #annonce["visit_date"] = parse_avoventes_dates(annonce.get("visit_date", ""))
 
-        #all_annonces.extend(annonces)
+        if result.html:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(result.html, 'html.parser')
+            blocks = soup.select('div.row.mb-4.bg-white[data-link]')
+            
+            # Associer les URLs aux annonces extraites
+            for i, (annonce, block) in enumerate(zip(annonces, blocks)):
+                url = block.get('data-link', '')
+                annonces[i]['url'] = url
+        annonces = format_sale(annonces)
+        for annonce in annonces:
+            annonce["price"] = format_price(annonce.get("price", ""))
+            annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
+            annonce["surface"] = None
+            annonce["price_square_meter"] = None
+            annonce["rooms"] = None
+            annonce["source_site"] = site.get("source_site")
+
+        all_annonces.extend(annonces)
 
         return annonces

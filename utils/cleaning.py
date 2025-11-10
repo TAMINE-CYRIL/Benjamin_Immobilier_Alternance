@@ -81,12 +81,5 @@ def filter_annonces(annonces):
     """
     Filtre les annonces pour ne garder que celles avec un prix et une surface valides.
     """
-    filtrage = []
     clean_annonces = normalization(annonces)
-    for annonce in clean_annonces:
-        price = annonce.get("price")
-        surface = annonce.get("surface")
-        if price is None and surface is None :
-            continue
-        filtrage.append(annonce)
-    return filtrage
+    return clean_annonces
