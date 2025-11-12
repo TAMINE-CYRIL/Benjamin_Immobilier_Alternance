@@ -115,6 +115,16 @@ def format_url(url: str):
     return url
 
 
+def extract_type_from_title(title: str):
+    """
+    Extrait le type de bien (appartement, maison, etc.) à partir du titre.
+    Pour Logic Immo, le type de bien est souvent le premier mot du titre.
+    """
+    parts = title.split()
+    return parts[0] if parts else None
+
+
+
 async def scrape_logicimmo(max_pages=5):
     """Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination."""
     browser_config = get_browser_config()
@@ -152,6 +162,7 @@ async def scrape_logicimmo(max_pages=5):
                 annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
                 annonce["rooms"] = extract_number(annonce.get("rooms"))
                 annonce["address"] = format_address(annonce.get("address", ""))
+                annonce["type_bien"] = extract_type_from_title(annonce.get("title", ""))
             all_annonces.extend(annonces)
 
     return all_annonces

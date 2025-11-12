@@ -59,6 +59,17 @@ def format_address(address: str):
     return formatted
 
 
+def extract_type_from_title(title: str):
+    """
+    Extrait le type de bien (appartement, maison, etc.) à partir du titre.
+    Pour Espaces Atypiques, le type de bien est souvent dans le titre
+    """
+    parts = title.split()
+    for part in parts:
+        if part.lower() in ["maison", "appartement", "loft", "atelier", "duplex", "villa", "chalet", "terrain"]:
+            return part.capitalize()
+    return None
+
 async def scrape_details(crawler, url, schema):
     config = CrawlerRunConfig(
         cache_mode=CacheMode.BYPASS,
@@ -118,7 +129,8 @@ async def scrape_atypiques(max_pages=5):
                             annonce['zip_code'] = zip_code
                 annonce["source_site"] = site.get("source_site")
                 annonce["address"] = format_address(annonce.get("address", ""))
-                annonce["price_square_meter"] = calculate_price_square_meter(annonce.get("price"), annonce.get("surface"))                        
+                annonce["price_square_meter"] = calculate_price_square_meter(annonce.get("price"), annonce.get("surface"))  
+                annonce["type_bien"] = extract_type_from_title(annonce.get("title", ""))                   
                 time.sleep(random.uniform(1,3))
             all_annonces.extend(annonces)
 

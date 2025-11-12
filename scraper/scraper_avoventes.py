@@ -43,6 +43,25 @@ def format_price(price: str):
         return None
 
 
+def format_address(address: str):
+    parts = address.split(',')
+    if parts:
+        if len(parts) == 2:
+            address = parts[0].strip()
+            address = re.sub(r'^\s*\d{5}\s*', '', address).strip()
+            return address
+        else:
+            address = parts[1].strip()
+            address = re.sub(r'^\s*\d{5}\s*', '', address).strip()
+            return address
+
+def format_address_details(address: str):
+    parts = address.split(',')
+    if parts and len(parts) >= 2:
+        details = parts[0].strip()
+        return details
+    return None
+
 def format_sale(annonces):
     """
     Formate les indications sur la vente :
@@ -104,6 +123,9 @@ async def scrape_avoventes():
             annonce["price_square_meter"] = None
             annonce["rooms"] = None
             annonce["source_site"] = site.get("source_site")
+            annonce["address_details"] = format_address_details(annonce.get("address", ""))
+            annonce["address"] = format_address(annonce.get("address", ""))
+            
 
         all_annonces.extend(annonces)
 
