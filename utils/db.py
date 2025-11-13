@@ -31,12 +31,13 @@ def create_tables():
         surface NUMERIC,
         price NUMERIC,
         adjuged_price NUMERIC,
-        zip_code INTEGER,
+        zip_code TEXT,
         rooms INTEGER,
         price_square_meter NUMERIC,
         agency TEXT,
         source_site TEXT,
         type_bien TEXT,
+        energy_class TEXT,
         sale_date TEXT,    
         visit_date TEXT              
     );
@@ -56,10 +57,10 @@ def insert_annonces(annonces):
     insert_query = """
     INSERT INTO annonces (
         title, url, address, surface, price, adjuged_price, zip_code, rooms, 
-        price_square_meter, agency, source_site, type_bien, 
+        price_square_meter, agency, source_site, type_bien, energy_class,
         sale_date, visit_date
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (url) DO UPDATE
     SET title = EXCLUDED.title,
         address = EXCLUDED.address,
@@ -72,6 +73,7 @@ def insert_annonces(annonces):
         agency = EXCLUDED.agency,
         source_site = EXCLUDED.source_site,
         type_bien = EXCLUDED.type_bien,
+        energy_class = EXCLUDED.energy_class,
         sale_date = EXCLUDED.sale_date,
         visit_date = EXCLUDED.visit_date;
     """
@@ -102,13 +104,13 @@ def insert_annonces(annonces):
                 annonce.get("agency"),
                 annonce.get("source_site"), 
                 annonce.get("type_bien"),    
+                annonce.get("energy_class"),
                 annonce.get("sale_date"),
                 annonce.get("visit_date"),
             ))
 
             if cursor.rowcount == 1:
                 inserted += 1
-                print(f"[INSERT] {url}")
             else:
                 updated += 1
                 print(f"[UPDATE] {url}")

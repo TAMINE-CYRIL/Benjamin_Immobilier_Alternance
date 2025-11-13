@@ -57,7 +57,7 @@ def format_address(address: str):
 
 def format_address_details(address: str):
     parts = address.split(',')
-    if parts and len(parts) >= 2:
+    if parts and len(parts) > 2:
         details = parts[0].strip()
         return details
     return None

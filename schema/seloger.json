@@ -45,6 +45,11 @@
       "name": "surface",
       "selector": "div[data-testid='cardmfe-keyfacts-testid'] div:nth-child(5)",
       "type": "text"
+    },
+    {
+      "name": "energy_class",
+      "selector": "span[data-testid='card-mfe-energy-performance-class'] text",
+      "type": "text"
     }
   ]
 }

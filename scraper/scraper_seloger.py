@@ -20,6 +20,20 @@ site = {
     "source_site": "SeLoger"
 }
 
+def filter_url(annonces: list):
+    """
+    On filtre l'URL afin de ne pas avoir des annonces provenant de BellesDemeures
+    """
+    filtrage = []
+    for annonce in annonces:  
+        url = annonce.get("url")
+
+        if "www.bellesdemeures.com" in url:
+            continue
+        filtrage.append(annonce)
+    return filtrage
+
+
 def extract_type_bien(url: str):
     """
     Extrait le type de bien (appartement, maison, etc.) à partir de l'URL de l'annonce.
@@ -35,7 +49,7 @@ def extract_type_bien(url: str):
             if cat in parts:
                 idx = parts.index(cat)
                 if idx + 1 < len(parts):
-                    return parts[idx + 1].lower()
+                    return parts[idx + 1].capitalize()
         return None
     except Exception:
         return None
@@ -145,7 +159,8 @@ async def scrape_seloger(max_pages=5):
 
             if not annonces:
                 break
-                                
+
+            annonces = filter_url(annonces)  
             for annonce in annonces:
                 annonce["source_site"] = site.get("source_site")
                 annonce["price"] = extract_number(annonce.get("price"))
