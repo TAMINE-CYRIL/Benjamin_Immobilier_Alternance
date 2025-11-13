@@ -24,7 +24,7 @@ async def main():
     os.mkdir("data") if not os.path.exists("data") else None
 
     print(datetime.datetime.now())
-    scrapers = [scrape_logicimmo()]
+    scrapers = [scrape_pap()]
 
     results = await asyncio.gather(*scrapers, return_exceptions=True)
 

@@ -16,7 +16,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_leboncoin = json.load(f)
 
 site = {
-    "url": "https://www.leboncoin.fr/recherche?category=9",
+    "url": "https://www.leboncoin.fr/recherche?category=9&sort=time&order=desc&page=1",
     "schema": schema_leboncoin,
     "wait_for": "css:article[data-test-id='ad']",
     "prefix": "https://www.leboncoin.fr",
@@ -99,21 +99,36 @@ def extract_property_details(title: str):
     return property_type, rooms, surface
 
 
+import re
+
 def extract_city_from_address(address: str):
-    """Extrait la ville de l'adresse (avant le code postal)."""
+    """Extrait la ville de l'adresse (avant ou après le code postal)."""
     if not address:
         return None
-    
-    # Nettoyer les retours à la ligne et espaces multiples
+
+    # Nettoyer les espaces multiples
     address = " ".join(address.split())
-    
-    # Format: "L'Aigle 61300"
-    parts = address.split()
-    if len(parts) >= 2:
-        # Prendre tout sauf le dernier élément (code postal)
-        city = " ".join(parts[:-1])
-        return city if city else None
-    return address
+
+    # Chercher un code postal français (5 chiffres)
+    match = re.search(r"\b(\d{5})\b", address)
+    if not match:
+        return None
+
+    code_postal = match.group(1)
+
+    before = address[:match.start()].strip()
+    after = address[match.end():].strip()
+
+    if before:
+        # Dernier mot ou groupe de mots avant le code postal
+        city = before.split()[-1]
+        return city
+
+    if after:
+        city = after.split()[0]
+        return city
+
+    return None
 
 
 async def scrape_leboncoin(max_pages=1):
@@ -126,7 +141,7 @@ async def scrape_leboncoin(max_pages=1):
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
-
+            url = site["url"].replace("page=1", f"page={page}")
             crawler_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],
@@ -142,7 +157,7 @@ async def scrape_leboncoin(max_pages=1):
 
             
             result = await crawler.arun(
-                    url=site["url"],
+                    url=url,
                     config=crawler_config
                 )
 

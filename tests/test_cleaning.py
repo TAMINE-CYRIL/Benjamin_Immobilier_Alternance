@@ -1,6 +1,10 @@
 from utils.cleaning import extract_number
+from utils.cleaning import normalisation_language
 
 def test_extract_number():
+    """
+    Fonction de test afin de vérifier que la conversion de texte en nombre fonctionne normalement.
+    """
     # On teste les nombres simples
     assert extract_number("250 000 €") == 250000.0
     assert extract_number("1 200 000") == 1200000.0
@@ -43,3 +47,14 @@ def test_extract_number():
     assert extract_number("") is None
 
 
+def test_normalisation_language():
+    """
+    Fonction de test afin de vérifier que la normalisation des formats de nombres fonctionne correctement.
+    """
+    assert normalisation_language("1,200.50") == "1200.50"
+    assert normalisation_language("2.500,75") == "2500.75"
+    assert normalisation_language("1.500.000") == "1500000"
+    assert normalisation_language("1,500,000") == "1500000"
+    assert normalisation_language("3.000.000,75") == "3000000.75"
+    assert normalisation_language("3,000,000.75") == "3000000.75"
+    assert normalisation_language("100.000,000") == "100000.000"
