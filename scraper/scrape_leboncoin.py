@@ -131,7 +131,7 @@ def extract_city_from_address(address: str):
     return None
 
 
-async def scrape_leboncoin(max_pages=1):
+async def scrape_leboncoin(max_pages=5):
     """
     Scrape les annonces immobilières de Leboncoin.
     """

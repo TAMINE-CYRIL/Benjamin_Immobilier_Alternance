@@ -1,0 +1,8 @@
+
+========== SUMMARY ==========
+Total annonces traitées : 832
+Insertions : 832
+Mises à jour : 0
+Skipped/Errors : 0
+================================
+

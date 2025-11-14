@@ -47,7 +47,7 @@ def get_browser_config():
     """Configuration améliorée anti-détection."""
     return BrowserConfig(
         browser_type="chromium",
-        headless=False, 
+        headless=True, 
         viewport_width=random.choice([1920, 1366, 1536, 1440]),
         viewport_height=random.choice([1080, 768, 864, 900]),
         user_agent=get_random_user_agent(),
@@ -57,7 +57,6 @@ def get_browser_config():
         extra_args=[
             "--disable-blink-features=AutomationControlled",
             "--disable-dev-shm-usage",
-            # Simuler un vrai navigateur
             "--disable-background-timer-throttling",
             "--disable-backgrounding-occluded-windows",
             "--disable-renderer-backgrounding",
@@ -70,10 +69,8 @@ def get_browser_config():
             "--enable-automation=false",
             "--password-store=basic",
             "--use-mock-keychain",
-            # Plugins/Extensions pour paraître légitime
             "--enable-features=NetworkService,NetworkServiceInProcess",
-            # WebGL
-            "--use-gl=swiftshader",  # Émulation GPU
+            "--use-gl=swiftshader",  
         ],
         headers={
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",

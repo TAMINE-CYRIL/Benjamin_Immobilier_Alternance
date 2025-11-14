@@ -26,18 +26,17 @@ async def main():
 
     # La liste des COROUTINES, mais exécution séquentielle
     scrapers = [
-        scrape_logicimmo(),
         scrape_avoventes(),
-        scrape_leboncoin(),
-        scrape_seloger(),
         scrape_bienici(),
         scrape_pap(),
-        scrape_atypiques()
+        scrape_logicimmo(),
+        scrape_leboncoin(),
+        scrape_seloger(),
+        
     ]
 
     all_annonces = []
 
-    # On exécute les scrapers UN PAR UN
     for scraper in scrapers:
         try:
             res = await scraper  # attendre le résultat du scraper
@@ -51,6 +50,7 @@ async def main():
             print(f"Erreur lors du scraping : {e}")
 
     print(f"{len(all_annonces)} annonces récupérées")
+    insert_annonces(all_annonces)
 
     # Sauvegarde des données dans un fichier JSON
     f = os.path.join("data", "annonces.json")
