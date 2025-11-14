@@ -3,7 +3,7 @@ from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import CrawlerRunConfig
 from utils.cleaning import extract_number
 from utils.config import get_browser_config
-import json, os, time, random, regex as re
+import json, os, asyncio, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/logic_immo.json")
@@ -142,7 +142,7 @@ async def scrape_logicimmo(max_pages=1):
 
             result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
 
-            time.sleep(random.uniform(1, 3))
+            await asyncio.sleep(random.uniform(1, 3))
             
             if not result or not result.extracted_content:
                 break  

@@ -3,7 +3,7 @@ from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import CrawlerRunConfig
 from utils.config import get_browser_config
 from utils.cleaning import extract_number
-import json, os, time, random, regex as re
+import json, os, random, asyncio, regex as re
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -154,7 +154,7 @@ async def scrape_seloger(max_pages=1):
 
 
 
-            time.sleep(random.uniform(2,4))
+            await asyncio.sleep(random.uniform(1, 3))
             print(result.status_code)
             
 

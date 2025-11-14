@@ -20,32 +20,46 @@ async def main():
     create_tables()
     print("Démarrage du scraping...")
 
-    # On crée le dossier (si il n'existe pas) qui va servir à stocker les données.
     os.mkdir("data") if not os.path.exists("data") else None
 
     print(datetime.datetime.now())
-    scrapers = [scrape_logicimmo(), scrape_avoventes(), scrape_leboncoin(), scrape_seloger(), scrape_bienici()]
 
-    results = await asyncio.gather(*scrapers, return_exceptions=True)
+    # La liste des COROUTINES, mais exécution séquentielle
+    scrapers = [
+        scrape_logicimmo(),
+        scrape_avoventes(),
+        scrape_leboncoin(),
+        scrape_seloger(),
+        scrape_bienici(),
+        scrape_pap(),
+        scrape_atypiques()
+    ]
 
     all_annonces = []
-    for res in results:
-        if isinstance(res, Exception) or res is None:
-            print(f"Erreur lors du scraping : {res}")
-            continue
-        res = filter_annonces(res)
-        all_annonces.extend(res)
-        time.sleep(random.uniform(3,5))  # Pause aléatoire entre les scrapers
+
+    # On exécute les scrapers UN PAR UN
+    for scraper in scrapers:
+        try:
+            res = await scraper  # attendre le résultat du scraper
+            await asyncio.sleep(random.uniform(6, 12))  # pause anti-bot
+
+            if res:
+                res = filter_annonces(res)
+                all_annonces.extend(res)
+
+        except Exception as e:
+            print(f"Erreur lors du scraping : {e}")
 
     print(f"{len(all_annonces)} annonces récupérées")
-    #insert_annonces(all_annonces)
 
-    # Sauvegarde des données dans un fichier JSON.
+    # Sauvegarde des données dans un fichier JSON
     f = os.path.join("data", "annonces.json")
     with open(f, "w", encoding="utf-8") as outfile:
         json.dump(all_annonces, outfile, ensure_ascii=False, indent=4)
+
     print(f"Données sauvegardées dans {f}") 
     print(datetime.datetime.now())
+
 
 
 if __name__ == "__main__":
