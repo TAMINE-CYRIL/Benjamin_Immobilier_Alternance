@@ -125,7 +125,7 @@ def extract_type_from_title(title: str):
 
 
 
-async def scrape_logicimmo(max_pages=5):
+async def scrape_logicimmo(max_pages=1):
     """Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination."""
     browser_config = get_browser_config()
     all_annonces = []

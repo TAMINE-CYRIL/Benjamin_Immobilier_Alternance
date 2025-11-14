@@ -22,16 +22,22 @@ site = {
 
 def filter_url(annonces: list):
     """
-    On filtre l'URL afin de ne pas avoir des annonces provenant de BellesDemeures
+    On filtre l'URL afin de ne pas avoir des annonces provenant de BellesDemeures.
+    Tolère les annonces sans URL.
     """
     filtrage = []
-    for annonce in annonces:  
+    for annonce in annonces:
         url = annonce.get("url")
+        if not url:  
+            filtrage.append(annonce)
+            continue
 
         if "www.bellesdemeures.com" in url:
             continue
         filtrage.append(annonce)
+
     return filtrage
+
 
 
 def extract_type_bien(url: str):
@@ -122,7 +128,7 @@ def extract_zip_code(address: str):
     match = re.search(r"\b(\d{5})\b", address)
     return match.group(1) if match else None
 
-async def scrape_seloger(max_pages=5):
+async def scrape_seloger(max_pages=1):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
     CSS et d'un schéma JSON.

@@ -118,7 +118,7 @@ def format_url(url: str):
         url = site["prefix"] + url
     return url
 
-async def scrape_bienici(max_pages=5):
+async def scrape_bienici(max_pages=10):
     """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
     all_annonces = []

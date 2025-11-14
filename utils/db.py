@@ -49,7 +49,7 @@ def create_tables():
 
 def insert_annonces(annonces):
     """
-    Insère ou met à jour les annonces avec logs détaillés.
+    Insère ou met à jour les annonces avec logs détaillés et stockage dans logs.txt.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
@@ -82,52 +82,58 @@ def insert_annonces(annonces):
     updated = 0
     skipped = 0
 
-    for annonce in annonces:
-        url = annonce.get("url")
-        
-        if not url or url.strip() == "":
-            skipped += 1
-            print(f"[SKIPPED] Annonce sans URL : {annonce.get('title')}")
-            continue
+    with open("logs.txt", "a", encoding="utf-8") as log:
 
-        try:
-            cursor.execute(insert_query, (
-                annonce.get("title"),
-                url,
-                annonce.get("address"),
-                annonce.get("surface"),
-                annonce.get("price"),
-                annonce.get("adjuged_price"),
-                annonce.get("zip_code"),
-                annonce.get("rooms"),
-                annonce.get("price_square_meter"),
-                annonce.get("agency"),
-                annonce.get("source_site"), 
-                annonce.get("type_bien"),    
-                annonce.get("energy_class"),
-                annonce.get("sale_date"),
-                annonce.get("visit_date"),
-            ))
+        def log_write(message):
+            print(message)         
+            log.write(message + "\n") 
 
-            if cursor.rowcount == 1:
-                inserted += 1
-            else:
-                updated += 1
-                print(f"[UPDATE] {url}")
+        for annonce in annonces:
+            url = annonce.get("url")
 
-        except Exception as e:
-            skipped += 1
-            print(f"[ERROR] {url} -> {e}")
-            connexion.rollback()
-            continue
+            if not url or url.strip() == "":
+                skipped += 1
+                log_write(f"[SKIPPED] Annonce sans URL : {annonce.get('title')}")
+                continue
 
-    connexion.commit()
-    cursor.close()
-    connexion.close()
+            try:
+                cursor.execute(insert_query, (
+                    annonce.get("title"),
+                    url,
+                    annonce.get("address"),
+                    annonce.get("surface"),
+                    annonce.get("price"),
+                    annonce.get("adjuged_price"),
+                    annonce.get("zip_code"),
+                    annonce.get("rooms"),
+                    annonce.get("price_square_meter"),
+                    annonce.get("agency"),
+                    annonce.get("source_site"), 
+                    annonce.get("type_bien"),    
+                    annonce.get("energy_class"),
+                    annonce.get("sale_date"),
+                    annonce.get("visit_date"),
+                ))
 
-    print("\n========== SUMMARY ==========")
-    print(f"Total annonces traitées : {len(annonces)}")
-    print(f"Insertions : {inserted}")
-    print(f"Mises à jour : {updated}")
-    print(f"Skipped/Errors : {skipped}")
-    print("================================\n")
+                if cursor.rowcount == 1:
+                    inserted += 1
+                else:
+                    updated += 1
+                    log_write(f"[UPDATE] {url}")
+
+            except Exception as e:
+                skipped += 1
+                log_write(f"[ERROR] {url} -> {e}")
+                connexion.rollback()
+                continue
+
+        connexion.commit()
+        cursor.close()
+        connexion.close()
+
+        log_write("\n========== SUMMARY ==========")
+        log_write(f"Total annonces traitées : {len(annonces)}")
+        log_write(f"Insertions : {inserted}")
+        log_write(f"Mises à jour : {updated}")
+        log_write(f"Skipped/Errors : {skipped}")
+        log_write("================================\n")
