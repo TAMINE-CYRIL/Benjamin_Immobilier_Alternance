@@ -25,7 +25,7 @@ async def main():
     print(datetime.datetime.now())
 
     scrapers = [
-        scrape_atypiques()
+        scrape_bienici()
 
     ]
 

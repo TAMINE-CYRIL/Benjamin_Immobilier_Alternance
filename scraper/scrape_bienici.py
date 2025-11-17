@@ -2,7 +2,7 @@ from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
 from utils.cleaning import extract_number
-import json, os, time, random, regex as re
+import json, os, asyncio, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 schema_path = os.path.join(BASE_DIR, "../schema/bienici.json")
@@ -121,6 +121,8 @@ def format_url(url: str):
 async def scrape_bienici(max_pages=10):
     """Scrape plusieurs pages de BienIci avec Crawl4AI et gère la pagination."""
     browser_config = BrowserConfig(browser_type="chromium", headless=True)
+    browser_config.block_resources = ["image", "font", "media", "stylesheet", "script"]
+
     all_annonces = []
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
@@ -133,16 +135,17 @@ async def scrape_bienici(max_pages=10):
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
             )
 
-            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
+            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=3)
 
-            time.sleep(random.uniform(1, 3))
+            await asyncio.sleep(random.uniform(0.2, 0.4))
+
             if not result or not result.extracted_content:
                 print("Aucun résultat extrait.")
-                return []  
+                break  
             annonces = json.loads(result.extracted_content)
             if not annonces:
                 print("Aucune annonce trouvée.")
-                return []  
+                break 
         
             for annonce in annonces:
                     url = annonce.get("url")
