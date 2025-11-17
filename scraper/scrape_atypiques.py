@@ -1,62 +1,56 @@
-from crawl4ai import AsyncWebCrawler, CacheMode
-from crawl4ai import JsonCssExtractionStrategy
-from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
+from crawl4ai import AsyncWebCrawler, CacheMode, JsonCssExtractionStrategy
+from crawl4ai.async_configs import CrawlerRunConfig
 from utils.cleaning import extract_number
-import json, os, time, random, regex as re
+from utils.config import get_browser_config
+import asyncio, json, os, random, regex as re
+
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/espace_atypique.json")
 
-with open(schema_path, "r", encoding="utf-8") as f:
+with open(os.path.join(BASE_DIR, "../schema/espace_atypique.json"), "r", encoding="utf-8") as f:
     schema_atypiques = json.load(f)
 
-detail_schema_path = os.path.join(BASE_DIR, "../schema/details/espace_atypique_details.json")
-
-with open(detail_schema_path, "r", encoding="utf-8") as f:
+with open(os.path.join(BASE_DIR, "../schema/details/espace_atypique_details.json"), "r", encoding="utf-8") as f:
     schema_detail = json.load(f)
 
 
 site = {
-    "url": "https://www.espaces-atypiques.com/ventes/page/1/?prj=ventes&pl&pmax&critere1&s&order&map&pt=vente",
     "schema": schema_atypiques,
     "wait_for": "css:.preview-annonce",
-    "prefix": "https://www.espaces-atypiques.com",
-    "source_site": "Espaces Atypiques"
+    "source_site": "Espaces Atypiques",
 }
+
 
 def calculate_price_square_meter(price, surface):
     """
-    Calcule le prix au m², en divisant le prix total par la surface.
-    """
+    Calcule le prix au mètre carré en divisant le prix par la surface.
+    Retourne None si le prix ou la surface est manquant."""
     if not price or not surface:
         return None
     price = extract_number(price)
     surface = extract_number(surface)
-    price_square_meter = round(price // surface, 2)
-    return price_square_meter
+    return round(price // surface, 2)
+
 
 def format_address(address: str):
+    """
+    Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux."""
     if not address:
         return address
 
-
     address = address.lower().strip()
-
     lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l'", "d'", "aux", "au"}
 
     def format_word(word):
         if "'" in word:
             parts = word.split("'")
             return parts[0].capitalize() + "'" + parts[1].capitalize()
-
         if "-" in word:
             return "-".join([w.capitalize() if w not in lower_words else w for w in word.split("-")])
-
         return word.capitalize() if word not in lower_words else word
 
-    formatted = " ".join(format_word(w) for w in re.split(r"\s+", address))
-
-    return formatted
+    return " ".join(format_word(w) for w in re.split(r"\s+", address))
 
 
 def extract_type_from_title(title: str):
@@ -64,74 +58,91 @@ def extract_type_from_title(title: str):
     Extrait le type de bien (appartement, maison, etc.) à partir du titre.
     Pour Espaces Atypiques, le type de bien est souvent dans le titre
     """
-    parts = title.split()
-    for part in parts:
-        if part.lower() in ["maison", "appartement", "loft", "atelier", "duplex", "villa", "chalet", "terrain"]:
+    types = ["maison", "appartement", "loft", "atelier", "duplex", "villa", "chalet", "terrain"]
+    for part in title.split():
+        if part.lower() in types:
             return part.capitalize()
     return None
 
-async def scrape_details(crawler, url, schema):
-    config = CrawlerRunConfig(
+
+
+async def scrape_details(crawler, annonce):
+    """Scrape une page de détail en parallèle."""
+
+    url = annonce.get("url")
+    if not url:
+        return annonce
+
+    run_cfg = CrawlerRunConfig(
         cache_mode=CacheMode.BYPASS,
         wait_for="css:#infos-cles",
-        extraction_strategy=JsonCssExtractionStrategy(schema=schema),
+        extraction_strategy=JsonCssExtractionStrategy(schema=schema_detail),
     )
 
-    result = await crawler.arun(url=url, config=config, wait_after_load=5)
+    result = await crawler.arun(url=url, config=run_cfg, wait_after_load=0.2)
 
-    if result and result.extracted_content:
-        return json.loads(result.extracted_content)
+    if not result or not result.extracted_content:
+        return annonce
 
-    return {}
+    details = json.loads(result.extracted_content)
+
+    for d in details:
+        if d['label'] == 'Chambres':
+            annonce['rooms'] = extract_number(d['value'])
+
+        if d['label'] == details[0]['label']:
+            zip_code = ''.join(filter(str.isdigit, d['value']))
+            if len(zip_code) == 5:
+                annonce['zip_code'] = zip_code
+
+    return annonce
 
 
 
 async def scrape_atypiques(max_pages=5):
-    """
-    Scrape plusieurs pages du site Espaces Atypiques à l’aide de Crawl4AI et du schéma JSON.
-    """
-    browser_config = BrowserConfig(browser_type="chromium", headless=True)
+    
+    """Scrape plusieurs pages du site Espaces Atypiques avec Crawl4AI et gère la pagination."""
+
+    browser_config = get_browser_config()
+    browser_config.block_resources = ["image", "font", "media", "stylesheet", "script"]
+
     all_annonces = []
+
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
-            site["url"] = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes&pl&pmax&critere1&s&order&map&pt=vente"
-            crawler_config = CrawlerRunConfig(
+
+            url = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes"
+
+            run_cfg = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
             )
 
-            result = await crawler.arun(url=site["url"], config=crawler_config, wait_after_load=10)
-            
-            time.sleep(random.uniform(1, 3))
-            
+            result = await crawler.arun(url=url, config=run_cfg, wait_after_load=0.2)
+
             if not result or not result.extracted_content:
                 print("Aucun résultat extrait.")
-                return []  
+                continue
 
             annonces = json.loads(result.extracted_content)
             if not annonces:
                 print("Aucune annonce trouvée.")
-                return []  
-            
+                continue
 
-            annonces = json.loads(result.extracted_content)
+            detail_tasks = [scrape_details(crawler, a) for a in annonces]
+            annonces = await asyncio.gather(*detail_tasks)
 
             for annonce in annonces:
-                url = annonce.get("url")
-                details = await scrape_details(crawler, url, schema_detail)                
-                for detail in details:
-                    if detail['label'] == 'Chambres':
-                        annonce['rooms'] = detail['value']
-                    elif detail['label'] == details[0]['label']: 
-                        zip_code = ''.join(filter(str.isdigit, detail['value']))
-                        if len(zip_code) == 5:
-                            annonce['zip_code'] = zip_code
-                annonce["source_site"] = site.get("source_site")
+                annonce["source_site"] = site["source_site"]
                 annonce["address"] = format_address(annonce.get("address", ""))
-                annonce["price_square_meter"] = calculate_price_square_meter(annonce.get("price"), annonce.get("surface"))  
-                annonce["type_bien"] = extract_type_from_title(annonce.get("title", ""))                   
-                time.sleep(random.uniform(1,3))
+                annonce["price_square_meter"] = calculate_price_square_meter(
+                    annonce.get("price"), annonce.get("surface")
+                )
+                annonce["type_bien"] = extract_type_from_title(annonce.get("title", ""))
+
             all_annonces.extend(annonces)
+
+            await asyncio.sleep(random.uniform(0.1, 0.3))
 
     return all_annonces

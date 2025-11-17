@@ -128,7 +128,7 @@ def extract_zip_code(address: str):
     match = re.search(r"\b(\d{5})\b", address)
     return match.group(1) if match else None
 
-async def scrape_seloger(max_pages=1):
+async def scrape_seloger(max_pages=2):
     """
     Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site SeLoger à l'aide d'une extraction
     CSS et d'un schéma JSON.

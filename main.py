@@ -24,23 +24,17 @@ async def main():
 
     print(datetime.datetime.now())
 
-    # La liste des COROUTINES, mais exécution séquentielle
     scrapers = [
-        scrape_avoventes(),
-        scrape_bienici(),
-        scrape_pap(),
-        scrape_logicimmo(),
-        scrape_leboncoin(),
-        scrape_seloger(),
-        
+        scrape_atypiques()
+
     ]
 
     all_annonces = []
 
     for scraper in scrapers:
         try:
-            res = await scraper  # attendre le résultat du scraper
-            await asyncio.sleep(random.uniform(6, 12))  # pause anti-bot
+            res = await scraper  
+            await asyncio.sleep(random.uniform(6, 12))  
 
             if res:
                 res = filter_annonces(res)
@@ -50,7 +44,7 @@ async def main():
             print(f"Erreur lors du scraping : {e}")
 
     print(f"{len(all_annonces)} annonces récupérées")
-    insert_annonces(all_annonces)
+    #insert_annonces(all_annonces)
 
     # Sauvegarde des données dans un fichier JSON
     f = os.path.join("data", "annonces.json")
