@@ -120,6 +120,32 @@ def calculate_price_square_meter(price: float, surface: float):
     except:
         return None
 
+def is_valid_pap_annonce(annonce):
+    """
+    Détecte si une annonce PAP est une vraie annonce immobilière.
+    Évite les pages éditoriales comme prix m2, actualités, etc.
+    """
+
+    url = annonce.get("url", "").lower()
+
+    if "/annonces/" not in url:
+        return False
+
+    blacklist_keywords = [
+        "/vendeur/", "prix-m2", "/actualite", "/immobilier",
+        "/g", "-g25", "/estimation", "conseils"
+    ]
+
+    if any(key in url for key in blacklist_keywords):
+        return False
+
+    if not annonce.get("price") and not annonce.get("surface"):
+        return False
+
+    return True
+
+
+
 site = {
         "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager-france-g25",
         "schema": schema_pap,
@@ -179,6 +205,8 @@ async def scrape_pap(max_pages=20):
             annonces = json.loads(result.extracted_content)
             if not annonces:
                 break
+
+            annonces = [a for a in annonces if is_valid_pap_annonce(a)]
 
             annonces = format_url(annonces)
             annonces = format_title(annonces)
