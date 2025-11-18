@@ -1,7 +1,7 @@
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
-import json, os, time, random, regex as re
+import json, os, asyncio, random, regex as re
 from utils.cleaning import extract_number
 
 
@@ -121,58 +121,82 @@ def calculate_price_square_meter(price: float, surface: float):
         return None
 
 site = {
-        "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager",
+        "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager-france-g25",
         "schema": schema_pap,
         "wait_for": "css:.search-list-item-alt",
         "prefix": "https://www.pap.fr",
         "source_site": "PAP"
     }
 
-async def scrape_pap(max_pages=5):
+async def scrape_pap(max_pages=20):
     """
-    Fonction asynchrone permettant de lancer le Web Crawler pour récupérer les données du site PAP à l'aide d'une extraction
-    CSS et d'un schéma JSON.
+    Scrape les annonces de PAP jusqu'à max_pages.
+    Retourne une liste d'annonces formatées.
     """
+
     browser_config = BrowserConfig(
         browser_type="chromium",
-        headless=True
+        headless=True,
+        text_mode=False,
+        java_script_enabled=True
     )
 
-    async with AsyncWebCrawler(config=browser_config) as crawler:
-        for page in range(1, max_pages + 1):
-            url = f"{site['url']}-{page}"
-                
-            crawler_config = CrawlerRunConfig(
-                cache_mode=CacheMode.BYPASS,
-                wait_for=site.get("wait_for"),
-                extraction_strategy=JsonCssExtractionStrategy(
-                schema=site.get("schema")),
-                scan_full_page=True,
-                scroll_delay=2
-                )
-            
-            result = await crawler.arun(url=url, config=crawler_config, wait_after_load=10)
+    all_annonces = []
 
-            time.sleep(random.uniform(1, 3))
+    async with AsyncWebCrawler(config=browser_config) as crawler:
+
+        for page in range(1, max_pages + 1):
+
+            if page == 1:
+                url = site["url"]
+            else:
+                url = f"{site['url']}-{page}"
+
+            run_cfg = CrawlerRunConfig(
+                cache_mode=CacheMode.BYPASS,
+                wait_until="domcontentloaded",
+                wait_for=site["wait_for"],
+                wait_for_timeout=8000,
+
+                extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
+
+                scan_full_page=False,     
+                scroll_delay=0.1,
+                max_scroll_steps=None,
+
+                delay_before_return_html=0.1
+            )
+
+            result = await crawler.arun(
+                url=url,
+                config=run_cfg,
+                wait_after_load=0.1
+            )
 
             if not result or not result.extracted_content:
-                return []
-                    
+                break
+
             annonces = json.loads(result.extracted_content)
+            if not annonces:
+                break
+
             annonces = format_url(annonces)
             annonces = format_title(annonces)
-            # Nettoyage des données
+
             for annonce in annonces:
                 adresse = annonce.get("address", "")
                 price = extract_number(annonce.get("price"))
                 surface = extract_number(annonce.get("surface"))
+
                 annonce["zip_code"] = extract_zip_code(adresse)
-                annonce["source_site"] = site.get("source_site")
+                annonce["source_site"] = site["source_site"]
                 annonce["address"] = clean_address(adresse)
-                annonce["type_bien"] = extract_type_from_url(annonce.get("url", ""))
+                annonce["type_bien"] = extract_type_from_url(annonce["url"])
                 annonce["price_square_meter"] = calculate_price_square_meter(price, surface)
-                    
-        return annonces
+
+            all_annonces.extend(annonces)
+    return all_annonces
+
 
 
 

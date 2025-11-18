@@ -93,6 +93,7 @@ async def scrape_avoventes():
             cache_mode=CacheMode.BYPASS,
             wait_for=site["wait_for"],
             extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
+            only_text=True
         )
 
         result = await crawler.arun(
@@ -119,9 +120,6 @@ async def scrape_avoventes():
         for annonce in annonces:
             annonce["price"] = format_price(annonce.get("price", ""))
             annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
-            annonce["surface"] = None
-            annonce["price_square_meter"] = None
-            annonce["rooms"] = None
             annonce["source_site"] = site.get("source_site")
             annonce["address_details"] = format_address_details(annonce.get("address", ""))
             annonce["address"] = format_address(annonce.get("address", ""))
