@@ -74,3 +74,4 @@ Thumbs.db
 *.key
 proxy.py
 logs.txt
+utils/config.py

@@ -146,13 +146,15 @@ async def scrape_leboncoin(max_pages=5):
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
-                page_timeout=90000,  
-                delay_before_return_html=4.0,  
+                page_timeout=15000,  
+                wait_for_timeout=8000,
+                delay_before_return_html=0.2,  
                 override_navigator=True,
                 simulate_user=True,
-                magic=True,  
                 mean_delay=2.0,  
-                max_range=1.5  
+                max_range=1.5,
+                exclude_all_images=True,
+                exclude_external_images=True
             )
 
             
