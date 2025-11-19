@@ -21,21 +21,40 @@ site = {
     "source_site": "Espaces Atypiques",
 }
 
+######################################################################
 
-def calculate_price_square_meter(price, surface):
+
+############# Fonctions de filtrage et de normalisation ##############
+
+def calculate_price_square_meter(price: str, surface: str) -> float | None:
     """
     Calcule le prix au mètre carré en divisant le prix par la surface.
-    Retourne None si le prix ou la surface est manquant."""
+    
+    Args:
+        price (str): Le prix total de l'annonce.
+        surface (str): La surface totale en m².
+
+    Returns:
+        float | None: Le prix au mètre carré arrondi à 2 décimales, ou None si le calcul n'est pas possible.
+    
+    """
     if not price or not surface:
         return None
-    price = extract_number(price)
-    surface = extract_number(surface)
+    price = extract_number(price) # On transforme notre prix en nombre
+    surface = extract_number(surface) # On transforme notre surface en nombre
     return round(price // surface, 2)
 
 
 def format_address(address: str):
     """
-    Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux."""
+    Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
+    
+    Args:
+        address (str): L'adresse brute à formater.
+
+    Returns:
+        str: L'adresse formatée.
+    """
     if not address:
         return address
 
@@ -53,10 +72,16 @@ def format_address(address: str):
     return " ".join(format_word(w) for w in re.split(r"\s+", address))
 
 
-def extract_type_from_title(title: str):
+def extract_type_from_title(title: str) -> str | None:
     """
     Extrait le type de bien (appartement, maison, etc.) à partir du titre.
     Pour Espaces Atypiques, le type de bien est souvent dans le titre
+
+    Args:
+        title (str): Le titre de l'annonce.
+        
+    Returns:
+        str: Le type de bien extrait ou None s'il n'est pas trouvé.
     """
     types = ["maison", "appartement", "loft", "atelier", "duplex", "villa", "chalet", "terrain"]
     for part in title.split():
@@ -66,8 +91,18 @@ def extract_type_from_title(title: str):
 
 
 
-async def scrape_details(crawler, annonce):
-    """Scrape une page de détail en parallèle."""
+async def scrape_details(crawler, annonce) -> dict | None:
+    """
+    Scrape une page de détail en parallèle.
+
+    Args:
+        crawler (AsyncWebCrawler): L'instance du crawler.
+        annonce (dict): L'annonce contenant l'URL à scraper.
+
+    Returns:
+        dict: L'annonce mise à jour avec les détails extraits.
+    
+    """
 
     url = annonce.get("url")
     if not url:
@@ -101,10 +136,17 @@ async def scrape_details(crawler, annonce):
 
 async def scrape_atypiques(max_pages=5):
     
-    """Scrape plusieurs pages du site Espaces Atypiques avec Crawl4AI et gère la pagination."""
+    """
+    Scrape plusieurs pages du site Espaces Atypiques avec Crawl4AI et gère la pagination.
+    
+    Args:
+        max_pages (int): Nombre maximum de pages à scraper.
 
-    browser_config = get_browser_config()
-    browser_config.block_resources = ["image", "font", "media", "stylesheet", "script"]
+    Returns:
+        list: Liste des annonces extraites et formatées.
+    """
+
+    browser_config = get_browser_config() # On récupère la config du navigateur
 
     all_annonces = []
 
@@ -125,6 +167,8 @@ async def scrape_atypiques(max_pages=5):
                 print("Aucun résultat extrait.")
                 continue
 
+            
+
             annonces = json.loads(result.extracted_content)
             if not annonces:
                 print("Aucune annonce trouvée.")
@@ -143,6 +187,6 @@ async def scrape_atypiques(max_pages=5):
 
             all_annonces.extend(annonces)
 
-            await asyncio.sleep(random.uniform(0.1, 0.3))
+            await asyncio.sleep(random.uniform(1, 3))
 
     return all_annonces
