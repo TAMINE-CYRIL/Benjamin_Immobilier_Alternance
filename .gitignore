@@ -55,9 +55,6 @@ exports/
 *.json
 *.xlsx
 
-# --- Ne PAS ignorer les schémas JSON ---
-!schema/
-!schema/*.json
 
 # --- Fichiers système et IDE ---
 .vscode/
