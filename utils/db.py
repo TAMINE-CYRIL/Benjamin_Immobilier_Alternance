@@ -26,7 +26,7 @@ def create_tables():
     CREATE TABLE IF NOT EXISTS annonces (
         id SERIAL PRIMARY KEY,
         title TEXT,
-        url TEXT UNIQUE,
+        url TEXT,
         address TEXT,
         surface NUMERIC,
         price NUMERIC,
@@ -39,7 +39,8 @@ def create_tables():
         type_bien TEXT,
         energy_class TEXT,
         sale_date TEXT,    
-        visit_date TEXT              
+        visit_date TEXT,
+        UNIQUE(url, address, zip_code)             
     );
     """)
 
@@ -61,7 +62,7 @@ def insert_annonces(annonces):
         sale_date, visit_date
     )
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (url) DO UPDATE
+    ON CONFLICT (url, address, zip_code) DO UPDATE
     SET title = EXCLUDED.title,
         address = EXCLUDED.address,
         surface = EXCLUDED.surface,

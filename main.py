@@ -26,13 +26,13 @@ async def main():
 
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        #("Leboncoin", scrape_leboncoin(max_pages=4, use_proxies=True)),
-        #("SeLoger", scrape_seloger(max_pages=2, use_proxies=True)),    
-        #("Bienici", scrape_bienici()),
+        ("Leboncoin", scrape_leboncoin(max_pages=4, use_proxies=True)),
+        ("SeLoger", scrape_seloger(max_pages=2, use_proxies=True)),    
+        ("Bienici", scrape_bienici()),
         ("Espaces Atypiques", scrape_atypiques()),
-        #("PAP", scrape_pap()),
-        #("LogicImmo", scrape_logicimmo(max_pages=2, use_proxies=True)),
-        #("Avoventes", scrape_avoventes()),
+        ("PAP", scrape_pap()),
+        ("LogicImmo", scrape_logicimmo(max_pages=2, use_proxies=True)),
+        ("Avoventes", scrape_avoventes()),
     ]
 
     all_annonces = []
@@ -55,7 +55,7 @@ async def main():
 
     print(f"\nTotal {len(all_annonces)} annonces récupérées (tous sites confondus)")
 
-    #insert_annonces(all_annonces) 
+    insert_annonces(all_annonces) 
 
     # Sauvegarde des données dans un fichier JSON
     output_path = os.path.join("data", "annonces.json")
