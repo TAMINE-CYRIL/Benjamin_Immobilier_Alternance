@@ -45,7 +45,7 @@ def calculate_price_square_meter(price: str, surface: str) -> float | None:
     return round(price // surface, 2)
 
 
-def format_address(address: str):
+def format_address(address: str) -> str:
     """
     Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
     
@@ -112,6 +112,7 @@ async def scrape_details(crawler, annonce) -> dict | None:
         cache_mode=CacheMode.BYPASS,
         wait_for="css:#infos-cles",
         extraction_strategy=JsonCssExtractionStrategy(schema=schema_detail),
+        only_text=True
     )
 
     result = await crawler.arun(url=url, config=run_cfg, wait_after_load=0.2)
@@ -120,6 +121,8 @@ async def scrape_details(crawler, annonce) -> dict | None:
         return annonce
 
     details = json.loads(result.extracted_content)
+
+    await asyncio.sleep(random.uniform(1, 3))
 
     for d in details:
         if d['label'] == 'Chambres':
@@ -134,7 +137,7 @@ async def scrape_details(crawler, annonce) -> dict | None:
 
 
 
-async def scrape_atypiques(max_pages=5):
+async def scrape_atypiques(max_pages=1) -> list:
     
     """
     Scrape plusieurs pages du site Espaces Atypiques avec Crawl4AI et gère la pagination.
