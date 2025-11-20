@@ -8,10 +8,10 @@ import asyncio, json, os, random, regex as re
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with open(os.path.join(BASE_DIR, "../schema/espace_atypique.json"), "r", encoding="utf-8") as f:
+with open(os.path.join(BASE_DIR, "../schema/immobilier/espace_atypique.json"), "r", encoding="utf-8") as f:
     schema_atypiques = json.load(f)
 
-with open(os.path.join(BASE_DIR, "../schema/details/espace_atypique_details.json"), "r", encoding="utf-8") as f:
+with open(os.path.join(BASE_DIR, "../schema/immobilier/details/espace_atypique_details.json"), "r", encoding="utf-8") as f:
     schema_detail = json.load(f)
 
 

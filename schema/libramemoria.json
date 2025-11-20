@@ -1,0 +1,26 @@
+{
+  "name": "Avis de deces Libramemoria",
+  "baseSelector": "div.tableau_liste > div.ligne:not(.entete)",
+  "fields": [
+    {
+      "name": "full_name",
+      "selector": ".nom-defunt a",
+      "type": "text"
+    },
+    {
+      "name": "age",
+      "selector": ".cellule.age",
+      "type": "text"
+    },
+    {
+      "name": "communes",
+      "selector": ".cellule.ville span a:first-child",
+      "type": "text"
+    },
+    {
+      "name": "departements",
+      "selector": ".cellule.ville span a:nth-of-type(2)",
+      "type": "text"
+    }
+  ]
+}

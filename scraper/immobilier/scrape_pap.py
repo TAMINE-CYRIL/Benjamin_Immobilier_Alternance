@@ -7,7 +7,7 @@ from utils.cleaning import extract_number
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/pap.json")
+schema_path = os.path.join(BASE_DIR, "../schema/immobilier/pap.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_pap = json.load(f)

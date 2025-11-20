@@ -1,11 +1,12 @@
 import asyncio, os, json, random, datetime
-from scraper.scrape_atypiques import scrape_atypiques
-from scraper.scrape_bienici import scrape_bienici
-from scraper.scrape_seloger import scrape_seloger
-from scraper.scrape_pap import scrape_pap
-from scraper.scrape_leboncoin import scrape_leboncoin
-from scraper.scrape_logicimmo import scrape_logicimmo
-from scraper.scrape_avoventes import scrape_avoventes
+from scraper.immobilier.scrape_atypiques import scrape_atypiques
+from scraper.immobilier.scrape_bienici import scrape_bienici
+from scraper.immobilier.scrape_seloger import scrape_seloger
+from scraper.immobilier.scrape_pap import scrape_pap
+from scraper.immobilier.scrape_leboncoin import scrape_leboncoin
+from scraper.immobilier.scrape_logicimmo import scrape_logicimmo
+from scraper.scrape_libramemoria import scrape_libramemoria
+from scraper.immobilier.scrape_avoventes import scrape_avoventes
 from utils.cleaning import filter_annonces
 from utils.db import create_tables, insert_annonces
 
@@ -33,6 +34,7 @@ async def main():
         ("PAP", scrape_pap()),
         ("LogicImmo", scrape_logicimmo(max_pages=2, use_proxies=True)),
         ("Avoventes", scrape_avoventes()),
+        #("LibraMemoria", scrape_libramemoria())
     ]
 
     all_annonces = []
@@ -55,7 +57,7 @@ async def main():
 
     print(f"\nTotal {len(all_annonces)} annonces récupérées (tous sites confondus)")
 
-    insert_annonces(all_annonces) 
+    #insert_annonces(all_annonces) 
 
     # Sauvegarde des données dans un fichier JSON
     output_path = os.path.join("data", "annonces.json")

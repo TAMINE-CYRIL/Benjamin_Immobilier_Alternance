@@ -6,3 +6,11 @@ Mises à jour : 0
 Skipped/Errors : 0
 ================================
 
+
+========== SUMMARY ==========
+Total annonces traitées : 989
+Insertions : 989
+Mises à jour : 0
+Skipped/Errors : 0
+================================
+
