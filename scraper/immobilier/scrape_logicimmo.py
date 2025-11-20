@@ -13,7 +13,7 @@ from utils.config import get_browser_config, get_proxy_strategy
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/immobilier/logic_immo.json")
+schema_path = os.path.join(BASE_DIR, "../../schema/immobilier/logic_immo.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_logicimmo = json.load(f)

@@ -11,7 +11,7 @@ from utils.config import get_browser_config, get_proxy_strategy
 from utils.cleaning import extract_number
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/immobilier/seloger.json")
+schema_path = os.path.join(BASE_DIR, "../../schema/immobilier/seloger.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_seloger = json.load(f)

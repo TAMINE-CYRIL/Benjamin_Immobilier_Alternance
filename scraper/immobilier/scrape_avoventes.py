@@ -14,7 +14,7 @@ from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
 ############# Ouverture des schémas et informations diverses ##############
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/immobilier/avoventes.json")
+schema_path = os.path.join(BASE_DIR, "../../schema/immobilier/avoventes.json")
 
 # On ouvre le schéma JSON pour AvoVentes
 with open(schema_path, "r", encoding="utf-8") as f:

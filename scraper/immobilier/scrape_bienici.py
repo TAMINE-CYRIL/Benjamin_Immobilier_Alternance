@@ -15,7 +15,7 @@ from utils.cleaning import extract_number
 ############# Ouverture du schéma et informations diverses ##############
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/immobilier/bienici.json")
+schema_path = os.path.join(BASE_DIR, "../../schema/immobilier/bienici.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_bienici = json.load(f)

@@ -16,7 +16,7 @@ from utils.config import get_browser_config, get_proxy_strategy
 ############# Ouverture des schémas et informations diverses ##############
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-schema_path = os.path.join(BASE_DIR, "../schema/immobilier/leboncoin.json")
+schema_path = os.path.join(BASE_DIR, "../../schema/immobilier/leboncoin.json")
 
 with open(schema_path, "r", encoding="utf-8") as f:
     schema_leboncoin = json.load(f)
