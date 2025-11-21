@@ -1,8 +1,5 @@
-# main_obits.py
-import asyncio, os, json, datetime
+import asyncio, os, csv, json
 from scraper.scrape_libramemoria import scrape_libramemoria
-# ou si tu n'as pas encore déplacé le fichier :
-# from scraper.scrape_libramemoria import scrape_libramemoria
 
 
 async def main():
@@ -10,8 +7,6 @@ async def main():
 
     os.makedirs("data", exist_ok=True)
 
-    start_time = datetime.datetime.now()
-    print("Début :", start_time)
 
     try:
         avis = await scrape_libramemoria()
@@ -21,18 +16,39 @@ async def main():
 
         print(f"{len(avis)} avis récupérés.")
 
-        output_path = os.path.join("data", "avis_deces.json")
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(avis, f, ensure_ascii=False, indent=4)
 
-        print(f"Données sauvegardées dans {output_path}")
+        output_path = os.path.join("data", "avis_deces.json")
+        with open(output_path, "w", encoding="utf-8") as outfile:
+            json.dump(avis, outfile, ensure_ascii=False, indent=4)
+
+        output_path = os.path.join("data", "avis_deces.csv")
+
+
+        fieldnames = [
+            "full_name",
+            "age",
+            "commune",
+            "departement",
+            "publication_date"
+            
+        ]    
+
+        with open(output_path, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=fieldnames,
+                quoting=csv.QUOTE_ALL,
+                delimiter=";", 
+            )
+            writer.writeheader()
+
+            for item in avis:
+                # Si certaines valeurs sont des listes (ex: plusieurs communes), on les joint
+                row = item.copy()
+                writer.writerow(row)
 
     except Exception as e:
         print(f"Erreur lors du scraping Libramemoria : {e}")
-
-    end_time = datetime.datetime.now()
-    print("Fin :", end_time)
-    print("Durée totale :", end_time - start_time)
 
 
 if __name__ == "__main__":

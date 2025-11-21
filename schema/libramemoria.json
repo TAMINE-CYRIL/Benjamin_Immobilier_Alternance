@@ -1,26 +1,38 @@
 {
-  "name": "Avis de deces Libramemoria",
-  "baseSelector": "div.tableau_liste > div.ligne:not(.entete)",
+  "name": "Libramemoria_avis_deces_par_jour",
+  "baseSelector": "div.tableau_liste",
   "fields": [
     {
-      "name": "full_name",
-      "selector": ".nom-defunt a",
+      "name": "publication_date",
+      "selector": "div.titre h2",
       "type": "text"
     },
     {
-      "name": "age",
-      "selector": ".cellule.age",
-      "type": "text"
-    },
-    {
-      "name": "communes",
-      "selector": ".cellule.ville span a:first-child",
-      "type": "text"
-    },
-    {
-      "name": "departements",
-      "selector": ".cellule.ville span a:nth-of-type(2)",
-      "type": "text"
+      "name": "avis",
+      "type": "nested_list",
+      "selector": "div.ligne:not(.entete)",
+      "fields": [
+        {
+          "name": "full_name",
+          "selector": ".nom-defunt a",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "selector": ".cellule.age",
+          "type": "text"
+        },
+        {
+          "name": "commune",
+          "selector": ".cellule.ville span a:first-child",
+          "type": "text"
+        },
+        {
+          "name": "departement",
+          "selector": ".cellule.ville span a:nth-of-type(2)",
+          "type": "text"
+        }
+      ]
     }
   ]
 }
