@@ -32,6 +32,7 @@ def create_tables():
         price NUMERIC,
         adjuged_price NUMERIC,
         zip_code TEXT,
+        department TEXT,
         rooms INTEGER,
         price_square_meter NUMERIC,
         agency TEXT,
@@ -58,11 +59,11 @@ def insert_annonces(annonces):
 
     insert_query = """
     INSERT INTO annonces (
-        title, url, address, surface, price, adjuged_price, zip_code, rooms, 
+        title, url, address, surface, price, adjuged_price, zip_code, department, rooms, 
         price_square_meter, agency, source_site, type_bien, energy_class,
         sale_date, visit_date
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (url, address, zip_code) DO UPDATE
     SET title = EXCLUDED.title,
         address = EXCLUDED.address,
@@ -70,6 +71,7 @@ def insert_annonces(annonces):
         price = EXCLUDED.price,
         adjuged_price = EXCLUDED.adjuged_price,
         zip_code = EXCLUDED.zip_code,
+        department = EXCLUDED.department,
         rooms = EXCLUDED.rooms,
         price_square_meter = EXCLUDED.price_square_meter,
         agency = EXCLUDED.agency,
@@ -109,6 +111,7 @@ def insert_annonces(annonces):
                     annonce.get("price"),
                     annonce.get("adjuged_price"),
                     annonce.get("zip_code"),
+                    annonce.get("department"),
                     annonce.get("rooms"),
                     annonce.get("price_square_meter"),
                     annonce.get("agency"),

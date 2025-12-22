@@ -1,5 +1,20 @@
 import regex as re
 
+
+def extract_department(zip_code: str) -> str | None:
+    """
+    Extrait le département depuis un code postal français.
+    Args:
+        zip_code (str): Le code postal (5 chiffres).
+
+    Returns:
+        str | None: Le département (2 chiffres) ou None si non valide.
+    """
+    if zip_code and re.match(r'^\d{5}$', zip_code):
+        part = zip_code[:2]
+        return part
+    return None
+
 def normalisation_language(text):
     """
     Normalise le nombre selon l'insertion des virgules/points dans le paramètre.
@@ -72,6 +87,7 @@ def normalization(annonces):
         annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
         annonce["adjuged_price"] = extract_number(annonce.get("adjuged_price"))
         annonce["rooms"] = extract_number(annonce.get("rooms"), as_int=True)
+        annonce["department"] = extract_department(annonce.get("zip_code"))
         clean_annonces.append(annonce)
     return clean_annonces
 

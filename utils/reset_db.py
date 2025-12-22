@@ -6,6 +6,10 @@ from datetime import datetime
 load_dotenv()
 
 def cleanup():
+    """
+    Fonction pour supprimer les annonces n'ayant pas été vues depuis plus de 30 jours.
+
+    """
     conn = psycopg2.connect(
         dbname=os.getenv("PG_DB"),
         user=os.getenv("PG_USER"),
