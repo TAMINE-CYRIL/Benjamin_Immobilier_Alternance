@@ -40,6 +40,7 @@ def create_tables():
         energy_class TEXT,
         sale_date TEXT,    
         visit_date TEXT,
+        last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(url, address, zip_code)             
     );
     """)
@@ -76,14 +77,16 @@ def insert_annonces(annonces):
         type_bien = EXCLUDED.type_bien,
         energy_class = EXCLUDED.energy_class,
         sale_date = EXCLUDED.sale_date,
-        visit_date = EXCLUDED.visit_date;
+        visit_date = EXCLUDED.visit_date,
+        last_seen = CURRENT_TIMESTAMP;
+
     """
 
     inserted = 0
     updated = 0
     skipped = 0
 
-    with open("logs.txt", "a", encoding="utf-8") as log:
+    with open("logs/logs.txt", "a", encoding="utf-8") as log:
 
         def log_write(message):
             print(message)         
