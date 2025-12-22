@@ -40,9 +40,12 @@ def calculate_price_square_meter(price: str, surface: str) -> float | None:
     """
     if not price or not surface:
         return None
-    price = extract_number(price) # On transforme notre prix en nombre
-    surface = extract_number(surface) # On transforme notre surface en nombre
-    return round(price // surface, 2)
+    price_number = extract_number(price) # On transforme notre prix en nombre
+    surface_number = extract_number(surface) # On transforme notre surface en nombre
+    if price_number is None or surface_number is None or surface_number == 0:
+        return None
+    return round(price_number / surface_number, 2)
+
 
 
 def format_address(address: str) -> str:
