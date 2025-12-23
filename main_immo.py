@@ -37,9 +37,6 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        ("Bienici", scrape_bienici()),
-        ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
-        ("PAP", scrape_pap()),
         ("Avoventes", scrape_avoventes()),
     ]
 

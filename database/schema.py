@@ -42,25 +42,24 @@ def create_dvf_tables():
     # Table brute temporaire pour les données DVF
     cur.execute("""
     CREATE TABLE IF NOT EXISTS dvf_raw (
-        date_mutation DATE,
-        valeur_fonciere NUMERIC,
-        code_commune TEXT,
+        valeur_fonciere TEXT,
+        code_postal TEXT,
         code_departement TEXT,
         type_local TEXT,
-        surface_reelle_bati NUMERIC
+        surface_reelle_bati TEXT
     );
     """)
 
     # Table agrégée pour les statistiques DVF
     cur.execute("""
     CREATE TABLE IF NOT EXISTS dvf_stats (
-        code_commune TEXT,
+        code_postal TEXT,
         code_departement TEXT,
         annee INTEGER,
         type_local TEXT,
         prix_m2_moyen NUMERIC,
         nb_transactions INTEGER,
-        PRIMARY KEY (code_commune, annee, type_local)
+        PRIMARY KEY (code_postal, annee, type_local)
     );
     """)
 

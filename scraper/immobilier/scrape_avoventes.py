@@ -89,34 +89,49 @@ def format_address(address: str) -> str | None:
         str: L'adresse formatée.
     
     """
-    parts = address.split(',')
-    if parts:
-        if len(parts) == 2:
-            address = parts[0].strip()
-            address = re.sub(r'^\s*\d{5}\s*', '', address).strip()
-            return address
-        else:
-            address = parts[1].strip()
-            address = re.sub(r'^\s*\d{5}\s*', '', address).strip()
-            return address
+    if not address:
+        return None
 
-def format_address_details(address: str) -> str | None:
+    address = address.strip()
+    parts = [p.strip() for p in address.split(",")]
+
+    # Cas standard : "Rue ..., 75000 Ville"
+    if len(parts) >= 2:
+        street = parts[0]
+        return street
+
+    # Fallback : adresse sans virgule → on garde tout
+    return address
+
+def format_address_details(annonces) -> list | None:
     """
     Récupère l'élément de l'adresse avant la première virgule comme détails de l'adresse.
     Par exemple : "123 Rue de la Paix, 75002 Paris" -> "123 Rue de la Paix"
 
     Args:
-        address (str): L'adresse complète.
+        annonces (list): Liste des annonces.
 
     Returns:
-        str | None: Les détails de l'adresse ou None si non disponible.
+        list | None: Liste des détails d'adresse ou None si non disponible.
     
     """
-    parts = address.split(',')
-    if parts and len(parts) > 2:
-        details = parts[0].strip()
-        return details
-    return None
+    clean_annonces = []
+
+    if not annonces:
+        return clean_annonces
+
+    for annonce in annonces:
+        address = annonce.get("address")
+
+        if not address:
+            continue
+
+        if "," not in address:
+            continue
+
+        clean_annonces.append(annonce)
+
+    return clean_annonces
 
 def format_sale(annonces) -> list:
     """
@@ -203,12 +218,11 @@ async def scrape_avoventes() -> list:
         
 
         annonces = format_sale(annonces)
-        # On lance nos fonctions de formatage/filtrages pour chaque annonce
+        annonce = format_address_details(annonces)
+        # Formatage champ par champ (SAFE)
         for annonce in annonces:
             annonce["price"] = format_price(annonce.get("price", ""))
             annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
-            annonce["source_site"] = "AvoVentes"
-            annonce["address_details"] = format_address_details(annonce.get("address", ""))
             annonce["address"] = format_address(annonce.get("address", ""))
             
 
