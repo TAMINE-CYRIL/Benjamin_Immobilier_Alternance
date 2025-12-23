@@ -8,7 +8,8 @@ from scraper.immobilier.scrape_logicimmo import scrape_logicimmo
 from scraper.scrape_libramemoria import scrape_libramemoria
 from scraper.immobilier.scrape_avoventes import scrape_avoventes
 from utils.cleaning import filter_annonces
-from utils.db import create_tables, insert_annonces
+from database.schema import create_all_tables
+
 
 
 async def main():
@@ -17,7 +18,7 @@ async def main():
     et sauvegarder les résultats dans un fichier JSON.
     """
 
-    create_tables()
+    create_all_tables()
     print("Démarrage du scraping...")
 
     os.makedirs("data", exist_ok=True)
@@ -62,7 +63,6 @@ async def main():
 
     print(f"\nTotal {len(all_annonces)} annonces récupérées (tous sites confondus)")
 
-    insert_annonces(all_annonces) 
 
     # Sauvegarde des données dans un fichier JSON
     output_path = os.path.join("data", "annonces.json")

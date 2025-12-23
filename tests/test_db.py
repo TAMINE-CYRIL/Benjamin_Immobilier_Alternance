@@ -1,6 +1,6 @@
 import os
 from unittest.mock import mock_open, patch, MagicMock
-from utils.db import create_tables, get_connection, insert_annonces
+from database.db import create_tables, get_connection, insert_annonces
 
 
 def test_get_connection():
