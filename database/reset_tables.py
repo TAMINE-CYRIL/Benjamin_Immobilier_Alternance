@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def cleanup():
+def drop_tables():
     """
-    Fonction pour supprimer les annonces n'ayant pas été vues depuis plus de 30 jours.
+    Supprime toutes les tables si elles existent.
     """
     conn = psycopg2.connect(
         dbname=os.getenv("PG_DB"),
@@ -19,13 +19,16 @@ def cleanup():
     with conn:
         with conn.cursor() as cur:
             cur.execute("""
-                DELETE FROM annonces
-                WHERE last_seen < NOW() - INTERVAL '30 days'
+                DROP TABLE IF EXISTS
+                    annonces,
+                    dvf_raw,
+                    dvf_stats,
+                    dvf_stats_multi_annees
+                CASCADE;
             """)
-            deleted = cur.rowcount
 
     conn.close()
-    print(f"{deleted} annonces supprimées")
+    print("Tables supprimées avec succès")
 
 if __name__ == "__main__":
-    cleanup()
+    drop_tables()

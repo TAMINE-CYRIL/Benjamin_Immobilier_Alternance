@@ -6,6 +6,8 @@ load_dotenv()
 def get_connection():
     """
     Établit une connexion à la base de données PostgreSQL en utilisant les variables d'environnement.
+    Returns:
+        Une connexion psycopg2 à la base de données PostgreSQL.
     """
     return psycopg2.connect(
         dbname=os.getenv("PG_DB"),

@@ -8,8 +8,7 @@ from scraper.immobilier.scrape_logicimmo import scrape_logicimmo
 from scraper.scrape_libramemoria import scrape_libramemoria
 from scraper.immobilier.scrape_avoventes import scrape_avoventes
 from utils.cleaning import filter_annonces
-from database.schema import create_all_tables
-
+from database.db import insert_annonces
 
 
 async def main():
@@ -18,14 +17,11 @@ async def main():
     et sauvegarder les résultats dans un fichier JSON.
     """
 
-    create_all_tables()
     print("Démarrage du scraping...")
 
     os.makedirs("data", exist_ok=True)
 
     start_time = datetime.datetime.now()
-    print("Début :", start_time)
-
 
     """
         ("Leboncoin", scrape_leboncoin(max_pages=4, use_proxies=True)),
@@ -37,6 +33,11 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
+        ("Leboncoin", scrape_leboncoin(max_pages=4, use_proxies=True)),
+        ("SeLoger", scrape_seloger(max_pages=4, use_proxies=True)),    
+        ("LogicImmo", scrape_logicimmo(max_pages=4, use_proxies=True)),
+        ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
+        ("PAP", scrape_pap()),
         ("Avoventes", scrape_avoventes()),
     ]
 
@@ -50,7 +51,6 @@ async def main():
 
             if res:
                 res = filter_annonces(res)
-                print(f"{len(res)} annonces gardées après filtrage pour {name}")
                 all_annonces.extend(res)
             else:
                 print(f"Aucune annonce retournée par {name}")
@@ -59,19 +59,21 @@ async def main():
             print(f"Erreur lors du scraping {name} : {e}")
 
     print(f"\nTotal {len(all_annonces)} annonces récupérées (tous sites confondus)")
+    insert_annonces(all_annonces) # On insère les annonces dans la base de données
 
 
     # Sauvegarde des données dans un fichier JSON
+    # Cette partie est commentée car on ne l'utilise plus depuis l'insertion en BDD.
+    """
     output_path = os.path.join("data", "annonces.json")
     with open(output_path, "w", encoding="utf-8") as outfile:
         json.dump(all_annonces, outfile, ensure_ascii=False, indent=4)
 
     print(f"Données sauvegardées dans {output_path}")
+    """
 
     end_time = datetime.datetime.now()
-    print("Fin :", end_time)
     print("Durée totale :", end_time - start_time)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -3,6 +3,9 @@ from database.connection import get_connection
 def insert_annonces(annonces):
     """
     Insère ou met à jour les annonces avec logs détaillés et stockage dans logs.txt.
+    Args:
+        annonces: Liste des dictionnaires représentant les annonces à insérer ou mettre à jour.
+
     """
     connexion = get_connection()
     cursor = connexion.cursor()
@@ -88,9 +91,7 @@ def insert_annonces(annonces):
         cursor.close()
         connexion.close()
 
-        log_write("\n========== SUMMARY ==========")
         log_write(f"Total annonces traitées : {len(annonces)}")
         log_write(f"Insertions : {inserted}")
         log_write(f"Mises à jour : {updated}")
         log_write(f"Skipped/Errors : {skipped}")
-        log_write("================================\n")
