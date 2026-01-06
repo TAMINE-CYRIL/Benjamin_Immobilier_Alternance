@@ -9,6 +9,7 @@ from scraper.scrape_libramemoria import scrape_libramemoria
 from scraper.immobilier.scrape_avoventes import scrape_avoventes
 from utils.cleaning import filter_annonces
 from database.db import insert_annonces
+from database.score_annonce import score_annonces
 
 
 async def main():
@@ -33,9 +34,6 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        ("Leboncoin", scrape_leboncoin(max_pages=4, use_proxies=True)),
-        ("SeLoger", scrape_seloger(max_pages=4, use_proxies=True)),    
-        ("LogicImmo", scrape_logicimmo(max_pages=4, use_proxies=True)),
         ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
         ("PAP", scrape_pap()),
         ("Avoventes", scrape_avoventes()),
@@ -60,6 +58,8 @@ async def main():
 
     print(f"\nTotal {len(all_annonces)} annonces récupérées (tous sites confondus)")
     insert_annonces(all_annonces) # On insère les annonces dans la base de données
+    print("Lancement du système de scoring...")
+    score_annonces()
 
 
     # Sauvegarde des données dans un fichier JSON

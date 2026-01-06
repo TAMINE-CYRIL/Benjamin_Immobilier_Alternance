@@ -4,7 +4,15 @@ from connection import get_connection
 def aggregate_dvf(year: int):
     """
     Agrège les données DVF d'une année spécifique depuis dvf_raw vers dvf_stats.
-    Calcule le prix moyen au m² et le nombre de transactions par zone géographique et type de local.
+    Calcule le prix médian au m² (plus robuste que la moyenne) et le nombre de transactions 
+    par zone géographique et type de local.
+    
+    Filtres appliqués pour éviter les valeurs aberrantes :
+    - Prix au m² entre 500€ et 20000€
+    - Surface entre 10m² et 500m²
+    - Prix de vente entre 10000€ et 5000000€
+    - Uniquement Maisons et Appartements
+    - Exclusion des ventes de lots multiples (qui faussent les prix)
     
     Args:
         year: Année à agréger
@@ -28,14 +36,19 @@ def aggregate_dvf(year: int):
             code_departement,
             %s AS annee,
             type_local,
+            
+            -- Utilisation de la MÉDIANE au lieu de la MOYENNE pour plus de robustesse
             ROUND(
-                AVG(
-                    REPLACE(valeur_fonciere, ',', '.')::NUMERIC
-                    /
-                    REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
-                ),
+                PERCENTILE_CONT(0.5) WITHIN GROUP (
+                    ORDER BY (
+                        REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                        /
+                        REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                    )
+                )::NUMERIC,
                 2
             ) AS prix_m2_moyen,
+            
             COUNT(*) AS nb_transactions
         FROM dvf_raw
         WHERE
@@ -44,15 +57,26 @@ def aggregate_dvf(year: int):
             AND code_postal <> ''
             AND code_departement IS NOT NULL
             AND code_departement <> ''
-            AND type_local IS NOT NULL
+            AND type_local IN ('Maison', 'Appartement')  -- IMPORTANT: Filtrer les types
             AND valeur_fonciere ~ '^[0-9]+([.,][0-9]+)?$'
             AND surface_reelle_bati ~ '^[0-9]+([.,][0-9]+)?$'
             AND REPLACE(valeur_fonciere, ',', '.')::NUMERIC > 0
             AND REPLACE(surface_reelle_bati, ',', '.')::NUMERIC > 0
+            
+            -- Filtres pour éliminer les valeurs aberrantes
+            AND REPLACE(valeur_fonciere, ',', '.')::NUMERIC BETWEEN 10000 AND 5000000  -- Prix entre 10k€ et 5M€
+            AND REPLACE(surface_reelle_bati, ',', '.')::NUMERIC BETWEEN 10 AND 500    -- Surface entre 10m² et 500m²
+            AND (
+                REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                /
+                REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+            ) BETWEEN 500 AND 20000  -- Prix au m² entre 500€ et 20000€
+            
         GROUP BY
             code_postal,
             code_departement,
             type_local
+        HAVING COUNT(*) >= 3  -- Minimum 3 transactions pour calculer une statistique fiable
         ON CONFLICT (code_postal, code_departement, annee, type_local)
         DO UPDATE SET
             prix_m2_moyen = EXCLUDED.prix_m2_moyen,
@@ -69,9 +93,9 @@ def aggregate_dvf(year: int):
 
 def aggregate_dvf_multi_years(years: list[int]):
     """
-    Calcule une moyenne du prix au m² sur plusieurs années.
-    Cette fonction calcule une vraie moyenne à partir des transactions individuelles,
-    pas une moyenne de moyennes.
+    Calcule la médiane du prix au m² sur plusieurs années, par type de logement.
+    Cette fonction calcule la médiane à partir des prix MÉDIANS annuels de chaque zone,
+    en séparant les Maisons des Appartements.
     
     Args:
         years: Liste des années à inclure dans le calcul (ex: [2023, 2024, 2025])
@@ -83,7 +107,7 @@ def aggregate_dvf_multi_years(years: list[int]):
     cur = conn.cursor()
 
     years_str = ", ".join(map(str, years))
-    print(f"Calcul de la moyenne multi-années : {years_str}")
+    print(f"Calcul de la médiane multi-années : {years_str}")
 
     # Créer la table si elle n'existe pas
     cur.execute("""
@@ -92,7 +116,7 @@ def aggregate_dvf_multi_years(years: list[int]):
             code_departement VARCHAR(2),
             annees TEXT,
             type_local TEXT,
-            prix_m2_moyen NUMERIC(10, 2),
+            prix_m2_med NUMERIC(10, 2),
             nb_transactions INTEGER,
             PRIMARY KEY (code_postal, code_departement, annees, type_local)
         );
@@ -106,7 +130,7 @@ def aggregate_dvf_multi_years(years: list[int]):
     """, (annees_key,))
     conn.commit()
 
-    # Calculer la vraie moyenne à partir des transactions individuelles
+    # Calculer la médiane à partir des prix médians annuels
     placeholders = ", ".join(["%s"] * len(years))
     query = f"""
         INSERT INTO dvf_stats_multi_annees (
@@ -114,39 +138,36 @@ def aggregate_dvf_multi_years(years: list[int]):
             code_departement,
             annees,
             type_local,
-            prix_m2_moyen,
+            prix_m2_med,
             nb_transactions
         )
         SELECT
             code_postal,
-            code_departement,
+            MIN(code_departement) AS code_departement,
             %s AS annees,
             type_local,
+
+            -- MÉDIANE multi-années (calculée sur les prix MÉDIANS de chaque année)
             ROUND(
-                AVG(
-                    REPLACE(valeur_fonciere, ',', '.')::NUMERIC
-                    /
-                    REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
-                ),
+                PERCENTILE_CONT(0.5)
+                WITHIN GROUP (ORDER BY prix_m2_moyen)
+                ::NUMERIC,
                 2
-            ) AS prix_m2_moyen,
-            COUNT(*) AS nb_transactions
-        FROM dvf_raw
+            ) AS prix_m2_med,
+
+            SUM(nb_transactions) AS nb_transactions
+        FROM dvf_stats
         WHERE
-            annee IN ({placeholders})
-            AND code_postal IS NOT NULL
-            AND code_postal <> ''
-            AND code_departement IS NOT NULL
-            AND code_departement <> ''
-            AND type_local IS NOT NULL
-            AND valeur_fonciere ~ '^[0-9]+([.,][0-9]+)?$'
-            AND surface_reelle_bati ~ '^[0-9]+([.,][0-9]+)?$'
-            AND REPLACE(valeur_fonciere, ',', '.')::NUMERIC > 0
-            AND REPLACE(surface_reelle_bati, ',', '.')::NUMERIC > 0
+            type_local IN ('Maison', 'Appartement')
+            AND annee IN ({placeholders})
         GROUP BY
             code_postal,
-            code_departement,
-            type_local;
+            type_local
+        HAVING SUM(nb_transactions) >= 5  -- Minimum 5 transactions au total
+        ON CONFLICT (code_postal, code_departement, annees, type_local)
+        DO UPDATE SET
+            prix_m2_med = EXCLUDED.prix_m2_med,
+            nb_transactions = EXCLUDED.nb_transactions;
     """
     
     cur.execute(query, (annees_key, *years))
@@ -155,5 +176,87 @@ def aggregate_dvf_multi_years(years: list[int]):
     cur.close()
     conn.close()
 
-    print(f"Moyenne multi-années calculée : {rows_affected:,} lignes insérées\n")
+    print(f"Médiane multi-années calculée : {rows_affected:,} lignes insérées\n")
     return rows_affected
+
+
+def analyze_outliers(year: int, code_postal: str = None):
+    """
+    Fonction utilitaire pour analyser les valeurs aberrantes dans les données DVF.
+    Permet de diagnostiquer pourquoi certaines communes ont des prix aberrants.
+    
+    Args:
+        year: Année à analyser
+        code_postal: Code postal spécifique à analyser (optionnel)
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    where_clause = "annee = %s"
+    params = [year]
+    
+    if code_postal:
+        where_clause += " AND code_postal = %s"
+        params.append(code_postal)
+    
+    query = f"""
+        SELECT
+            code_postal,
+            type_local,
+            COUNT(*) as nb_total,
+            COUNT(*) FILTER (
+                WHERE type_local NOT IN ('Maison', 'Appartement')
+            ) as nb_autres_types,
+            COUNT(*) FILTER (
+                WHERE (
+                    REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                    /
+                    REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                ) > 20000
+            ) as nb_prix_trop_haut,
+            COUNT(*) FILTER (
+                WHERE (
+                    REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                    /
+                    REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                ) < 500
+            ) as nb_prix_trop_bas,
+            ROUND(AVG(
+                REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                /
+                REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+            ), 2) as prix_m2_moyen_brut,
+            ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (
+                ORDER BY (
+                    REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                    /
+                    REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                )
+            ), 2) as prix_m2_median_brut
+        FROM dvf_raw
+        WHERE
+            {where_clause}
+            AND valeur_fonciere ~ '^[0-9]+([.,][0-9]+)?$'
+            AND surface_reelle_bati ~ '^[0-9]+([.,][0-9]+)?$'
+            AND REPLACE(valeur_fonciere, ',', '.')::NUMERIC > 0
+            AND REPLACE(surface_reelle_bati, ',', '.')::NUMERIC > 0
+        GROUP BY code_postal, type_local
+        ORDER BY nb_total DESC
+        LIMIT 20;
+    """
+    
+    cur.execute(query, params)
+    results = cur.fetchall()
+    
+    print(f"\nAnalyse des valeurs pour l'année {year}")
+    if code_postal:
+        print(f"Code postal: {code_postal}")
+    print("-" * 100)
+    print(f"{'CP':<6} {'Type':<12} {'Total':<8} {'Autres':<8} {'>20k€':<8} {'<500€':<8} {'Moy':<10} {'Méd':<10}")
+    print("-" * 100)
+    
+    for row in results:
+        print(f"{row[0]:<6} {row[1]:<12} {row[2]:<8} {row[3]:<8} {row[4]:<8} {row[5]:<8} {row[6]:<10} {row[7]:<10}")
+    
+    cur.close()
+    conn.close()
