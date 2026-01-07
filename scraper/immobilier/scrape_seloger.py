@@ -195,13 +195,15 @@ async def scrape_seloger(max_pages: int = 2, use_proxies: bool = False):
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
             url = (
-                "https://www.seloger.com/classified-search"
-                "?distributionTypes=Buy,Buy_Auction,Compulsory_Auction"
-                "&estateTypes=House,Apartment"
-                "&locations=AD02FR1"
+                f"https://www.seloger.com/classified-search?"
+                f"distributionTypes=Buy,Buy_Auction,Compulsory_Auction"
+                f"&estateTypes=House,Apartment"
+                f"&locations=AD04FR33"
                 f"&page={page}"
-                "&order=DateDesc"
+                f"&order=DateDesc"
             )
+
+            
             print(f"\n===== SeLoger – page {page}/{max_pages} : {url} =====")
 
             crawler_config = CrawlerRunConfig(

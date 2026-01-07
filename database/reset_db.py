@@ -20,7 +20,7 @@ def cleanup():
         with conn.cursor() as cur:
             cur.execute("""
                 DELETE FROM annonces
-                WHERE last_seen < NOW() - INTERVAL '30 days'
+                WHERE last_seen < NOW() - INTERVAL '14 days'
             """)
             deleted = cur.rowcount
 

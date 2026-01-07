@@ -28,7 +28,7 @@ def aggregate_dvf(year: int):
             code_departement,
             annee,
             type_local,
-            prix_m2_moyen,
+            prix_m2_med,
             nb_transactions
         )
         SELECT
@@ -47,7 +47,7 @@ def aggregate_dvf(year: int):
                     )
                 )::NUMERIC,
                 2
-            ) AS prix_m2_moyen,
+            ) AS prix_m2_med,
             
             COUNT(*) AS nb_transactions
         FROM dvf_raw
@@ -79,7 +79,7 @@ def aggregate_dvf(year: int):
         HAVING COUNT(*) >= 3  -- Minimum 3 transactions pour calculer une statistique fiable
         ON CONFLICT (code_postal, code_departement, annee, type_local)
         DO UPDATE SET
-            prix_m2_moyen = EXCLUDED.prix_m2_moyen,
+            prix_m2_med = EXCLUDED.prix_m2_med,
             nb_transactions = EXCLUDED.nb_transactions;
     """, (year, year))
 
@@ -150,7 +150,7 @@ def aggregate_dvf_multi_years(years: list[int]):
             -- MÉDIANE multi-années (calculée sur les prix MÉDIANS de chaque année)
             ROUND(
                 PERCENTILE_CONT(0.5)
-                WITHIN GROUP (ORDER BY prix_m2_moyen)
+                WITHIN GROUP (ORDER BY prix_m2_med)
                 ::NUMERIC,
                 2
             ) AS prix_m2_med,
@@ -225,7 +225,7 @@ def analyze_outliers(year: int, code_postal: str = None):
                 REPLACE(valeur_fonciere, ',', '.')::NUMERIC
                 /
                 REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
-            ), 2) as prix_m2_moyen_brut,
+            ), 2) as prix_m2_med_brut,
             ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (
                 ORDER BY (
                     REPLACE(valeur_fonciere, ',', '.')::NUMERIC

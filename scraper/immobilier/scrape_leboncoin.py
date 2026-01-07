@@ -22,7 +22,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_leboncoin = json.load(f)
 
 site = {
-    "url": "https://www.leboncoin.fr/recherche?category=9&sort=time&order=desc&page=1",
+    "url": "https://www.leboncoin.fr/recherche?category=9&locations=d_6%2Cd_83%2Cd_13&sort=time&order=desc&page=1",
     "schema": schema_leboncoin,
     "wait_for": "css:article[data-test-id='ad']",
     "prefix": "https://www.leboncoin.fr",

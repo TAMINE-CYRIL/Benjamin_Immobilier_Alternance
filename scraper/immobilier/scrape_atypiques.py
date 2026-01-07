@@ -159,8 +159,7 @@ async def scrape_atypiques(max_pages=1) -> list:
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
 
-            url = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes"
-
+            url = f"https://www.espaces-atypiques.com/ventes/page/{page}/?prj=ventes&pl=447%2C519%2C440&pmax&critere1&s&order&map&pt=vente"
             run_cfg = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 wait_for=site["wait_for"],

@@ -186,7 +186,7 @@ async def scrape_avoventes() -> list:
         )
 
         result = await crawler.arun(
-            url="https://avoventes.fr/recherche/toutes?sort=date&order=asc&display=liste",
+            url="https://avoventes.fr/recherche?_token=prctdQ5z1J9xsUeAjh0k0MC7IitZy22pADLo1GAI&type_vente=all&villes%5B%5D=30409&rayon=100&prix_min=0&prix_max=0",
             config=crawler_config
         )
 

@@ -19,10 +19,8 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_logicimmo = json.load(f)
 
 site = {
-    "url": "https://www.logic-immo.com/classified-search?distributionTypes=Buy,Buy_Auction,Compulsory_Auction&estateTypes=House,Apartment&locations=AD02FR1&page=1&order=DateDesc",
     "schema": schema_logicimmo,
     "wait_for": "div[data-testid='serp-core-classified-card-testid']",
-    "prefix": "https://www.logic-immo.com",
     "source_site": "Logic Immo",
 }
 
@@ -194,12 +192,13 @@ async def scrape_logicimmo(max_pages: int = 1, use_proxies: bool = True):
     async with AsyncWebCrawler(config=browser_config) as crawler:
         for page in range(1, max_pages + 1):
             url = (
-                "https://www.logic-immo.com/classified-search"
-                "?distributionTypes=Buy,Buy_Auction,Compulsory_Auction"
-                "&estateTypes=House,Apartment"
-                "&locations=AD02FR1"
+                f"https://www.logic-immo.com/classified-search?"
+                f"distributionTypes=Buy"
+                f"&estateTypes=House,Apartment"
+                f"&locations=AD06FR13,AD06FR84,AD06FR6"
+                f"&projectTypes=Resale"
                 f"&page={page}"
-                "&order=DateDesc"
+                f"&order=DateDesc"
             )
             print(f"\n===== LogicImmo – page {page}/{max_pages} : {url} =====")
 

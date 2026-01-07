@@ -21,7 +21,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
     schema_bienici = json.load(f)
 
 site = {
-    "url": "https://www.bienici.com/recherche/achat/france/maisonvilla,appartement,parking,terrain,loft,commerce,batiment,chateau,local,bureau,hotel,autres",
+    "url": "https://www.bienici.com/recherche/achat/bouches-du-rhone-13,alpes-maritimes-06,var-83/maisonvilla,appartement,parking,terrain,loft,commerce,batiment,chateau,local,bureau,hotel,autres",
     "wait_for": "css:article.ad-overview",
     "prefix": "https://www.bienici.com",
 }

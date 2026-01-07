@@ -23,7 +23,7 @@ def score_annonces():
         annonce_id, prix_m2, zip_code, department, type_bien = annonce
 
         cur.execute("""
-            SELECT prix_m2_moyen, nb_transactions
+            SELECT prix_m2_med, nb_transactions
             FROM dvf_stats
             WHERE code_postal = %s
               AND type_local = %s

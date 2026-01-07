@@ -80,7 +80,7 @@ def create_dvf_tables():
         code_departement VARCHAR(2) NOT NULL,
         annee INTEGER NOT NULL,
         type_local TEXT NOT NULL,
-        prix_m2_moyen NUMERIC(10, 2),
+        prix_m2_med NUMERIC(10, 2),
         nb_transactions INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
