@@ -35,7 +35,9 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        ("Leboncoin", scrape_leboncoin(max_pages=1, use_proxies=True)),
+        ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
+        ("PAP", scrape_pap()),
+        ("BienIci", scrape_bienici(max_pages=10)),
     ]
 
     all_annonces = []

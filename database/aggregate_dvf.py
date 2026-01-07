@@ -29,6 +29,10 @@ def aggregate_dvf(year: int):
             annee,
             type_local,
             prix_m2_med,
+            prix_m2_q1,
+            prix_m2_q3,
+            prix_m2_min,
+            prix_m2_max,
             nb_transactions
         )
         SELECT
@@ -48,7 +52,51 @@ def aggregate_dvf(year: int):
                 )::NUMERIC,
                 2
             ) AS prix_m2_med,
-            
+
+            ROUND(
+                PERCENTILE_CONT(0.25) WITHIN GROUP (
+                    ORDER BY (
+                        REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                        /
+                        REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                    )
+                )::NUMERIC,
+                2
+            ) AS prix_m2_q1,
+
+            ROUND(
+                PERCENTILE_CONT(0.75) WITHIN GROUP (
+                    ORDER BY (
+                        REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                        /
+                        REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                    )
+                )::NUMERIC,
+                2
+            ) AS prix_m2_q3,
+
+            ROUND(
+                PERCENTILE_CONT(0.0) WITHIN GROUP (
+                    ORDER BY (
+                        REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                        /
+                        REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                    )
+                )::NUMERIC,
+                2
+            ) AS prix_m2_min,
+
+            ROUND(
+                PERCENTILE_CONT(1.0) WITHIN GROUP (
+                    ORDER BY (
+                        REPLACE(valeur_fonciere, ',', '.')::NUMERIC
+                        /
+                        REPLACE(surface_reelle_bati, ',', '.')::NUMERIC
+                    )
+                )::NUMERIC,
+                2
+            ) AS prix_m2_max,
+
             COUNT(*) AS nb_transactions
         FROM dvf_raw
         WHERE
@@ -117,6 +165,10 @@ def aggregate_dvf_multi_years(years: list[int]):
             annees TEXT,
             type_local TEXT,
             prix_m2_med NUMERIC(10, 2),
+            prix_m2_q1 NUMERIC(10, 2),
+            prix_m2_q3 NUMERIC(10, 2), 
+            prix_m2_min NUMERIC(10, 2),
+            prix_m2_max NUMERIC(10, 2),
             nb_transactions INTEGER,
             PRIMARY KEY (code_postal, code_departement, annees, type_local)
         );
@@ -139,6 +191,10 @@ def aggregate_dvf_multi_years(years: list[int]):
             annees,
             type_local,
             prix_m2_med,
+            prix_m2_q1,
+            prix_m2_q3,
+            prix_m2_min,
+            prix_m2_max,
             nb_transactions
         )
         SELECT
@@ -147,13 +203,29 @@ def aggregate_dvf_multi_years(years: list[int]):
             %s AS annees,
             type_local,
 
-            -- MÉDIANE multi-années (calculée sur les prix MÉDIANS de chaque année)
             ROUND(
                 PERCENTILE_CONT(0.5)
                 WITHIN GROUP (ORDER BY prix_m2_med)
                 ::NUMERIC,
                 2
             ) AS prix_m2_med,
+
+            ROUND(
+                PERCENTILE_CONT(0.25)
+                WITHIN GROUP (ORDER BY prix_m2_med)
+                ::NUMERIC,
+                2
+            ) AS prix_m2_q1,
+
+            ROUND(
+                PERCENTILE_CONT(0.75)
+                WITHIN GROUP (ORDER BY prix_m2_med)
+                ::NUMERIC,
+                2
+            ) AS prix_m2_q3,
+
+            MIN(prix_m2_med) AS prix_m2_min,
+            MAX(prix_m2_med) AS prix_m2_max,
 
             SUM(nb_transactions) AS nb_transactions
         FROM dvf_stats
@@ -163,11 +235,16 @@ def aggregate_dvf_multi_years(years: list[int]):
         GROUP BY
             code_postal,
             type_local
-        HAVING SUM(nb_transactions) >= 5  -- Minimum 5 transactions au total
+        HAVING SUM(nb_transactions) >= 5
         ON CONFLICT (code_postal, code_departement, annees, type_local)
         DO UPDATE SET
             prix_m2_med = EXCLUDED.prix_m2_med,
+            prix_m2_q1  = EXCLUDED.prix_m2_q1,
+            prix_m2_q3  = EXCLUDED.prix_m2_q3,
+            prix_m2_min = EXCLUDED.prix_m2_min,
+            prix_m2_max = EXCLUDED.prix_m2_max,
             nb_transactions = EXCLUDED.nb_transactions;
+
     """
     
     cur.execute(query, (annees_key, *years))

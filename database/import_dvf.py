@@ -106,8 +106,9 @@ def import_dvf_with_staging(dvf_path: Path, year: int):
             AND surface_reelle_bati IS NOT NULL
             AND type_local IS NOT NULL
             AND code_postal ~ '^[0-9]+$'
-            AND code_departement ~ '^[0-9A-B]+$';
-    """, (year,))
+            AND code_departement ~ '^[0-9A-B]+$'
+            AND code_departement IN ('13','06','83');
+    """, (year,)) # On limite notre recherche à ces 3 départements
     
     rows_inserted = cur.rowcount
     conn.commit()

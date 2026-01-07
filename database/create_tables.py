@@ -81,6 +81,10 @@ def create_dvf_tables():
         annee INTEGER NOT NULL,
         type_local TEXT NOT NULL,
         prix_m2_med NUMERIC(10, 2),
+        prix_m2_q1 NUMERIC(10, 2),
+        prix_m2_q3 NUMERIC(10, 2),
+        prix_m2_min NUMERIC(10, 2),
+        prix_m2_max NUMERIC(10, 2),
         nb_transactions INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -106,6 +110,10 @@ def create_dvf_tables():
         annees TEXT NOT NULL,
         type_local TEXT NOT NULL,
         prix_m2_med NUMERIC(10, 2),
+        prix_m2_q1 NUMERIC(10, 2),
+        prix_m2_q3 NUMERIC(10, 2),
+        prix_m2_min NUMERIC(10, 2),
+        prix_m2_max NUMERIC(10, 2),
         nb_transactions INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -125,12 +133,31 @@ def create_dvf_tables():
     cur.close()
     conn.close()
 
+
+def create_table_stats():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS dvf_nb_transactions_stats (
+    scope TEXT PRIMARY KEY,
+    q1 INTEGER,
+    median INTEGER,
+    q3 INTEGER,
+    updated_at TIMESTAMP DEFAULT NOW()
+    );
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 def create_all_tables():
     """
     Crée toutes les tables nécessaires dans la base de données.
     """
     create_tables()
     create_dvf_tables()
+    create_table_stats()
 
 if __name__ == "__main__":
     create_all_tables()

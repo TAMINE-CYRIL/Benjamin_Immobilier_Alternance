@@ -3,8 +3,8 @@ import re
 
 from import_dvf import import_dvf_with_staging
 from aggregate_dvf import aggregate_dvf, aggregate_dvf_multi_years
-from connection import get_connection
-
+#from connection import get_connection
+from stats_nb_transactions import compute_nb_transactions_quartiles
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,8 +68,11 @@ def import_all_dvf():
         print(f"Calcul de la moyenne sur {len(years_imported)} année(s)")
         print(f"Années concernées : {', '.join(map(str, sorted(years_imported)))}")
         aggregate_dvf_multi_years(years=years_imported)
+    
+
 
     # Étape 3 : Nettoyage
+    """
     print("Import et agrégation DVF multi-années terminés")
     print("Nettoyage de la table dvf_raw")
     conn = get_connection()
@@ -80,7 +83,8 @@ def import_all_dvf():
     conn.close()
     
     print("Processus terminé avec succès")
-
+    """
+    compute_nb_transactions_quartiles()
 
 if __name__ == "__main__":
     import_all_dvf()
