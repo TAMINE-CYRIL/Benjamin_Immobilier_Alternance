@@ -14,7 +14,7 @@
       "attribute": "href"
     },
     {
-      "name": "address",
+      "name": "city",
       "selector": "span.ville",
       "type": "text"
     },

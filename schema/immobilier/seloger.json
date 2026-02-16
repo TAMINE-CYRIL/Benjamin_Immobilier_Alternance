@@ -15,7 +15,7 @@
       "attribute": "href"
     },
     {
-      "name": "address",
+      "name": "city",
       "selector": "div[data-testid='cardmfe-description-box-address']",
       "type": "text"
     },

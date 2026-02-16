@@ -48,20 +48,20 @@ def calculate_price_square_meter(price: str, surface: str) -> float | None:
 
 
 
-def format_address(address: str) -> str:
+def format_city(city: str) -> str:
     """
     Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
     
     Args:
-        address (str): L'adresse brute à formater.
+        city (str): L'adresse brute à formater.
 
     Returns:
         str: L'adresse formatée.
     """
-    if not address:
-        return address
+    if not city:
+        return city
 
-    address = address.lower().strip()
+    city = city.lower().strip()
     lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l'", "d'", "aux", "au"}
 
     def format_word(word):
@@ -72,24 +72,49 @@ def format_address(address: str) -> str:
             return "-".join([w.capitalize() if w not in lower_words else w for w in word.split("-")])
         return word.capitalize() if word not in lower_words else word
 
-    return " ".join(format_word(w) for w in re.split(r"\s+", address))
+    return " ".join(format_word(w) for w in re.split(r"\s+", city))
 
 
 def extract_type_from_title(title: str) -> str | None:
     """
-    Extrait le type de bien (appartement, maison, etc.) à partir du titre.
-    Pour Espaces Atypiques, le type de bien est souvent dans le titre
+    Extrait le type de bien à partir du titre et le normalise
+    en 'Maison' ou 'Appartement'.
 
     Args:
         title (str): Le titre de l'annonce.
-        
+
     Returns:
-        str: Le type de bien extrait ou None s'il n'est pas trouvé.
+        str | None: 'Maison', 'Appartement' ou None si non trouvé.
     """
-    types = ["maison", "appartement", "loft", "atelier", "duplex", "villa", "chalet", "terrain"]
-    for part in title.split():
-        if part.lower() in types:
-            return part.capitalize()
+
+    TYPE_TO_CATEGORIE = {
+    # Maison
+    "maison": "Maison",
+    "maisons": "Maison",
+    "villa": "Maison",
+    "chalet": "Maison",
+    "mas": "Maison",
+    "manoir": "Maison",
+    "demeure": "Maison",
+    "château": "Maison",
+    "chateau": "Maison",   
+    "bastide": "Maison",
+    "terrain": "Maison",
+    "atelier": "Maison",
+
+    # Appartement
+    "appartement": "Appartement",
+    "loft": "Appartement",
+    "duplex": "Appartement",
+}
+
+
+    title_lower = title.lower()
+
+    for type_bien, categorie in TYPE_TO_CATEGORIE.items():
+        if re.search(rf"\b{type_bien}\b", title_lower):
+            return categorie
+
     return None
 
 
@@ -184,7 +209,7 @@ async def scrape_atypiques(max_pages=1) -> list:
 
             for annonce in annonces:
                 annonce["source_site"] = site["source_site"]
-                annonce["address"] = format_address(annonce.get("address", ""))
+                annonce["city"] = format_city(annonce.get("city", ""))
                 annonce["price_square_meter"] = calculate_price_square_meter(
                     annonce.get("price"), annonce.get("surface")
                 )

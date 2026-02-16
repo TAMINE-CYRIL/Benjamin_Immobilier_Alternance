@@ -12,7 +12,7 @@ def create_tables():
         id SERIAL PRIMARY KEY,
         title TEXT,
         url TEXT,
-        address TEXT,
+        city TEXT,
         surface NUMERIC,
         price NUMERIC,
         adjuged_price NUMERIC,
@@ -28,7 +28,7 @@ def create_tables():
         sale_date TEXT,    
         visit_date TEXT,
         last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(url, address, zip_code)             
+        UNIQUE(url, city, zip_code)             
     );
     """)
 

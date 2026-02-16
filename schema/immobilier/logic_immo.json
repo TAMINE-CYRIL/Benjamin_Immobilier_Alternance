@@ -15,7 +15,7 @@
       "attribute": "data-base"
     },
     {
-      "name": "address",
+      "name": "city",
       "selector": "div[data-testid='cardmfe-description-box-address']",
       "type": "text"
     },
@@ -32,7 +32,7 @@
     },
     {
       "name": "price_square_meter",
-      "selector": "div[data-testid='cardmfe-price-testid'] span.css-94cpja",
+      "selector": "div[data-testid='cardmfe-price-testid'] span",
       "type": "text"
     },
     {

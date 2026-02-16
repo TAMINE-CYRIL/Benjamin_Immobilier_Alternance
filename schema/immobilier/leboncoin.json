@@ -18,7 +18,7 @@
             "type": "text"
         },
         {
-            "name": "address",
+            "name": "city",
             "selector": "p.text-caption",
             "type": "text"
         },

@@ -12,6 +12,37 @@ from utils.cleaning import extract_number
 ###########################################################################
 
 
+############# Villes importantes, dans le cas où on a pas de code postal ##############
+
+CITY_TO_ZIP = {
+    # Bouches-du-Rhône (13)
+    "marseille": "13000",
+    "aix-en-provence": "13100",
+    "aix": "13100",
+    "arles": "13200",
+    "martigues": "13500",
+    "salon-de-provence": "13300",
+
+    # Alpes-Maritimes (06)
+    "nice": "06000",
+    "cannes": "06400",
+    "antibes": "06600",
+    "grasse": "06130",
+    "menton": "06500",
+
+    # Var (83)
+    "toulon": "83000",
+    "hyeres": "83400",
+    "fréjus": "83600",
+    "frejus": "83600",
+    "draguignan": "83300",
+    "saint-raphael": "83700",
+}
+
+
+#################################################################################
+
+
 ############# Ouverture du schéma et informations diverses ##############
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,19 +62,19 @@ site = {
 
 ############# Fonctions de filtrage et de normalisation ##############
 
-def extract_zip_code(address: str) -> str | None:
+def extract_zip_code(city: str, ) -> str | None:
     """
     Extrait le code postal (5 chiffres) de l'adresse à l'aide de regex.
 
     Args:
-        address (str): L'adresse complète.
+        city (str): L'adresse complète.
 
     Returns:
         str or None: Le code postal extrait ou None s'il n'est pas trouvé.
     """
-    if not address:
+    if not city:
         return None
-    match = re.search(r"\b\d{5}\b", address)
+    match = re.search(r"\b\d{5}\b", city)
     return match.group(0) if match else None
 
 
@@ -81,31 +112,31 @@ def extract_type_from_url(url: str) -> str | None:
 
     return None
 
-def format_address(address: str):
+def format_city(city: str):
     """
     Formate l'adresse en capitalisant correctement les mots, en supprimant le code postal et les caractères spéciaux.
     Par exemple : "75002 paris" -> "Paris"
     
     Args:
-        address (str): L'adresse brute à formater.
+        city (str): L'adresse brute à formater.
 
     Returns:
         str: L'adresse formatée.
     """
-    if not address:
-        return address
+    if not city:
+        return city
 
-    address = address.replace("\u00A0", " ").replace("\u202F", " ")
+    city = city.replace("\u00A0", " ").replace("\u202F", " ")
 
-    address = address.replace("’", "'")
+    city = city.replace("’", "'")
 
-    address = re.sub(r"\(?\b\d{5}\b\)?", " ", address)
+    city = re.sub(r"\(?\b\d{5}\b\)?", " ", city)
 
-    address = re.sub(r"[(),/]", " ", address)
+    city = re.sub(r"[(),/]", " ", city)
 
-    address = address.lower().strip()
+    city = city.lower().strip()
 
-    address = re.sub(r"\s+", " ", address)
+    city = re.sub(r"\s+", " ", city)
 
     lower_words = {"sur", "sous", "les", "des", "du", "de", "la", "le", "l", "d", "aux", "au", "et"}
 
@@ -129,7 +160,7 @@ def format_address(address: str):
 
         return token if token in lower_words else token.capitalize()
 
-    tokens = [cap_token(t) for t in address.split(" ") if t]
+    tokens = [cap_token(t) for t in city.split(" ") if t]
     formatted = " ".join(tokens)
 
     formatted = re.sub(r"\bl'", "L'", formatted)
@@ -225,16 +256,28 @@ async def scrape_bienici(max_pages=10):
         
             # Nettoyage et formatage des annonces
             for annonce in annonces:
-                    url = annonce.get("url")
-                    adresse = annonce.get("address", "")
-                    annonce["zip_code"] = extract_zip_code(adresse)
-                    annonce["source_site"] = "BienIci"
-                    annonce["address"] = format_address(adresse)
-                    annonce["type_bien"] = extract_type_from_url(url)
-                    annonce["url"] = format_url(url)
-                    annonce["price"] = extract_number(annonce.get("price"))
-                    annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
-                    annonce["surface"] = format_surface(annonce.get("price"), annonce.get("price_square_meter"))
-            all_annonces.extend(annonces)
+                url = annonce.get("url")
+                adresse = annonce.get("city", "")
+
+                type_bien = extract_type_from_url(url)
+
+                # On exclut les programmes immobiliers de nos annonces
+                if type_bien == "Programme neuf":
+                    continue
+
+                annonce["type_bien"] = type_bien
+                annonce["zip_code"] = extract_zip_code(adresse)
+                annonce["source_site"] = "BienIci"
+                annonce["city"] = format_city(adresse)
+                annonce["url"] = format_url(url)
+                annonce["price"] = extract_number(annonce.get("price"))
+                annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
+                annonce["surface"] = format_surface(
+                    annonce.get("price"),
+                    annonce.get("price_square_meter")
+                )
+
+                all_annonces.append(annonce)
+
 
     return all_annonces

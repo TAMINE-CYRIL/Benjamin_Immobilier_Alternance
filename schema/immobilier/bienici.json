@@ -14,7 +14,7 @@
       "attribute": "href"
     },
     {
-      "name": "address",
+      "name": "city",
       "selector": ".ad-overview-details__address-title",
       "type": "text"
     },

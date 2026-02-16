@@ -51,7 +51,7 @@ def test_insert_annonces():
         annonces = [{
             "title": "Test",
             "url": "http://example.com",
-            "address": "Rue 123",
+            "city": "Rue 123",
             "surface": 50,
             "price": 300000,
             "adjuged_price": 280000,
@@ -103,7 +103,7 @@ def test_insert_annonces_insert():
     annonces = [{
         "title": "Test",
         "url": "http://example.com",
-        "address": "",
+        "city": "",
         "surface": None,
         "price": None,
         "adjuged_price": None,

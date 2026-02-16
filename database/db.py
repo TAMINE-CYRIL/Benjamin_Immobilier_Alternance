@@ -12,14 +12,14 @@ def insert_annonces(annonces):
 
     insert_query = """
     INSERT INTO annonces (
-        title, url, address, surface, price, adjuged_price, zip_code, department, rooms, 
+        title, url, city, surface, price, adjuged_price, zip_code, department, rooms, 
         price_square_meter, agency, source_site, type_bien, energy_class,
         sale_date, visit_date
     )
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (url, address, zip_code) DO UPDATE
+    ON CONFLICT (url, city, zip_code) DO UPDATE
     SET title = EXCLUDED.title,
-        address = EXCLUDED.address,
+        city = EXCLUDED.city,
         surface = EXCLUDED.surface,
         price = EXCLUDED.price,
         adjuged_price = EXCLUDED.adjuged_price,
@@ -59,7 +59,7 @@ def insert_annonces(annonces):
                 cursor.execute(insert_query, (
                     annonce.get("title"),
                     url,
-                    annonce.get("address"),
+                    annonce.get("city"),
                     annonce.get("surface"),
                     annonce.get("price"),
                     annonce.get("adjuged_price"),

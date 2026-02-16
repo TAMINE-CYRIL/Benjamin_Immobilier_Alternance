@@ -219,11 +219,12 @@ async def scrape_avoventes() -> list:
 
         annonces = format_sale(annonces)
         annonce = format_address_details(annonces)
-        # Formatage champ par champ (SAFE)
+        # Formatage champ par champ
         for annonce in annonces:
             annonce["price"] = format_price(annonce.get("price", ""))
             annonce["zip_code"] = extract_zip_code(annonce.get("address", ""))
             annonce["address"] = format_address(annonce.get("address", ""))
+            annonce["source_site"] = "AvoVentes"
             
 
         all_annonces.extend(annonces)

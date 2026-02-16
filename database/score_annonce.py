@@ -1,5 +1,5 @@
 from database.connection import get_connection
-from service.deals import evaluate_annonce  
+from services.deals import evaluate_annonce  
 
 def score_annonces():
     conn = get_connection()

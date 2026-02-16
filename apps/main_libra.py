@@ -1,5 +1,5 @@
 import asyncio, os, csv, json
-from scraper.scrape_libramemoria import scrape_libramemoria
+from scrapers.scrape_libramemoria import scrape_libramemoria
 
 
 async def main():

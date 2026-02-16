@@ -21,7 +21,6 @@ with open(schema_path, "r", encoding="utf-8") as f:
 site = {
     "schema": schema_logicimmo,
     "wait_for": "div[data-testid='serp-core-classified-card-testid']",
-    "source_site": "Logic Immo",
 }
 
 
@@ -247,7 +246,7 @@ async def scrape_logicimmo(max_pages: int = 1, use_proxies: bool = True):
                 break
 
             for annonce in annonces:
-                annonce["source_site"] = site.get("source_site")
+                annonce["source_site"] = "Logic Immo"
 
                 annonce["price"] = extract_number(annonce.get("price"))
                 annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))
@@ -261,7 +260,6 @@ async def scrape_logicimmo(max_pages: int = 1, use_proxies: bool = True):
                 annonce["rooms"] = extract_number(annonce.get("rooms"))
                 annonce["type_bien"] = extract_type_from_title(annonce.get("title", ""))
 
-                # Si tu veux aussi calculer la surface à partir du prix et prix/m² :
                 if not annonce.get("surface") and annonce.get("price") and annonce.get("price_square_meter"):
                     annonce["surface"] = calculate_surface(
                         annonce["price"],

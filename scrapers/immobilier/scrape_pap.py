@@ -147,7 +147,7 @@ def is_valid_pap_annonce(annonce):
 
 
 site = {
-        "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-viager-alpes-maritimes-06-g369g376g447",
+        "url": "https://www.pap.fr/annonce/vente-appartement-bureaux-divers-fonds-de-commerce-garage-parking-immeuble-local-commercial-local-d-activite-maison-mobil-home-multipropriete-peniche-residence-avec-service-surface-a-amenager-terrain-alpes-maritimes-06-g369g376g447-studio",
         "schema": schema_pap,
         "wait_for": "css:.search-list-item-alt",
         "prefix": "https://www.pap.fr",
@@ -214,7 +214,6 @@ async def scrape_pap(max_pages=20):
             for annonce in annonces:
                 adresse = annonce.get("address", "")
                 price = extract_number(annonce.get("price"))
-                surface = extract_number(annonce.get("surface"))
 
                 annonce["zip_code"] = extract_zip_code(adresse)
                 annonce["source_site"] = site["source_site"]

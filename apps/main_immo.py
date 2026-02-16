@@ -1,12 +1,14 @@
-import asyncio, os, json, random, datetime
-from scraper.immobilier.scrape_atypiques import scrape_atypiques
-from scraper.immobilier.scrape_bienici import scrape_bienici
-from scraper.immobilier.scrape_seloger import scrape_seloger
-from scraper.immobilier.scrape_pap import scrape_pap
-from scraper.immobilier.scrape_leboncoin import scrape_leboncoin
-from scraper.immobilier.scrape_logicimmo import scrape_logicimmo
-from scraper.scrape_libramemoria import scrape_libramemoria
-from scraper.immobilier.scrape_avoventes import scrape_avoventes
+
+import asyncio, random, datetime, os, json
+
+# Imports projet
+#from scrapers.immobilier.scrape_atypiques import scrape_atypiques
+from scrapers.immobilier.scrape_bienici import scrape_bienici
+from scrapers.immobilier.scrape_seloger import scrape_seloger
+from scrapers.immobilier.scrape_pap import scrape_pap
+from scrapers.immobilier.scrape_leboncoin import scrape_leboncoin
+from scrapers.immobilier.scrape_logicimmo import scrape_logicimmo
+from scrapers.immobilier.scrape_avoventes import scrape_avoventes
 from utils.cleaning import filter_annonces
 from database.db import insert_annonces
 from database.score_annonce import score_annonces
@@ -18,6 +20,7 @@ async def main():
     et sauvegarder les résultats dans un fichier JSON.
     """
 
+
     print("Démarrage du scraping...")
 
     os.makedirs("data", exist_ok=True)
@@ -25,9 +28,9 @@ async def main():
     start_time = datetime.datetime.now()
 
     """
-        ("Leboncoin", scrape_leboncoin(max_pages=4, use_proxies=True)),
-        ("SeLoger", scrape_seloger(max_pages=4, use_proxies=True)),    
-        ("LogicImmo", scrape_logicimmo(max_pages=4, use_proxies=True)),
+        ("Leboncoin", scrape_leboncoin(max_pages=1, use_proxies=True)),
+        ("SeLoger", scrape_seloger(max_pages=1, use_proxies=True)),    
+        ("LogicImmo", scrape_logicimmo(max_pages=1, use_proxies=True)),
         ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
         ("PAP", scrape_pap()),
         ("BienIci", scrape_bienici(max_pages=10)),
@@ -35,9 +38,8 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
-        ("PAP", scrape_pap()),
         ("BienIci", scrape_bienici(max_pages=10)),
+        ("Avoventes", scrape_avoventes()),
     ]
 
     all_annonces = []
@@ -65,13 +67,13 @@ async def main():
 
     # Sauvegarde des données dans un fichier JSON
     # Cette partie est commentée car on ne l'utilise plus depuis l'insertion en BDD.
-    """
+
     output_path = os.path.join("data", "annonces.json")
     with open(output_path, "w", encoding="utf-8") as outfile:
         json.dump(all_annonces, outfile, ensure_ascii=False, indent=4)
 
     print(f"Données sauvegardées dans {output_path}")
-    """
+
 
     end_time = datetime.datetime.now()
     print("Durée totale :", end_time - start_time)
