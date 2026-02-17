@@ -4,7 +4,7 @@
   "fields": [
     {
       "name": "title",
-      "selector": "a.item-title span.h1",
+      "selector": ".h1",
       "type": "text"
     },
     {
@@ -15,18 +15,21 @@
     },
     {
       "name": "city",
-      "selector": ".item-title span.h1",
+      "selector": ".h1",
       "type": "text"
-    },
-    {
-      "name": "tags",
-      "selector": "ul.item-tags li",
-      "type": "list"
     },
     {
       "name": "price",
       "selector": ".item-price",
       "type": "text"
+    },
+    {
+      "name": "tags_raw",
+      "selector": ".item-tags",
+      "type": "text"
     }
+
+
+
   ]
 }

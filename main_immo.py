@@ -2,7 +2,7 @@
 import asyncio, random, datetime, os, json
 
 # Imports projet
-#from scrapers.immobilier.scrape_atypiques import scrape_atypiques
+from scrapers.immobilier.scrape_atypiques import scrape_atypiques
 from scrapers.immobilier.scrape_bienici import scrape_bienici
 from scrapers.immobilier.scrape_seloger import scrape_seloger
 from scrapers.immobilier.scrape_pap import scrape_pap
@@ -38,8 +38,7 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        ("BienIci", scrape_bienici(max_pages=10)),
-        ("Avoventes", scrape_avoventes()),
+        ("PAP", scrape_pap()),
     ]
 
     all_annonces = []
@@ -51,13 +50,22 @@ async def main():
             await asyncio.sleep(random.uniform(6, 12))
 
             if res:
+                all_annonces.extend(res)
+            else:
+                print(f"Aucune annonce retournée par {name}")
+
+
+            if res:
                 res = filter_annonces(res)
                 all_annonces.extend(res)
             else:
                 print(f"Aucune annonce retournée par {name}")
 
+
         except Exception as e:
             print(f"Erreur lors du scraping {name} : {e}")
+
+
 
     print(f"\nTotal {len(all_annonces)} annonces récupérées (tous sites confondus)")
     insert_annonces(all_annonces) # On insère les annonces dans la base de données

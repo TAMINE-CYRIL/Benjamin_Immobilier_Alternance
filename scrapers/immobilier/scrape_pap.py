@@ -144,6 +144,41 @@ def is_valid_pap_annonce(annonce):
 
     return True
 
+def parse_pap_tags(tags_raw):
+    """
+    Gère :
+    - liste de tags
+    - string compacte type '3 chambres30 m²'
+    """
+
+    rooms = None
+    surface = None
+
+    if not tags_raw:
+        return rooms, surface
+
+    # Si c'est une liste → on la transforme en string
+    if isinstance(tags_raw, list):
+        text = " ".join(tags_raw)
+    else:
+        text = tags_raw
+
+    # Nettoyage espaces insécables
+    text = text.replace("\xa0", " ").strip().lower()
+
+    # Surface
+    match_surface = re.search(r"(\d+)\s*m²", text)
+    if match_surface:
+        surface = int(match_surface.group(1))
+
+    # Pièces
+    match_rooms = re.search(r"(\d+)\s*pièce", text)
+    if match_rooms:
+        rooms = int(match_rooms.group(1))
+
+    return rooms, surface
+
+
 
 
 site = {
@@ -154,7 +189,7 @@ site = {
         "source_site": "PAP"
     }
 
-async def scrape_pap(max_pages=20):
+async def scrape_pap(max_pages=1):
     """
     Scrape les annonces de PAP jusqu'à max_pages.
     Retourne une liste d'annonces formatées.
@@ -173,30 +208,22 @@ async def scrape_pap(max_pages=20):
 
         for page in range(1, max_pages + 1):
 
-            if page == 1:
-                url = site["url"]
-            else:
-                url = f"{site['url']}-{page}"
+            url = site["url"] if page == 1 else f"{site['url']}-{page}"
 
             run_cfg = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
-                wait_until="domcontentloaded",
+                wait_until="networkidle",
                 wait_for=site["wait_for"],
                 wait_for_timeout=8000,
-
                 extraction_strategy=JsonCssExtractionStrategy(schema=site["schema"]),
-
-                scan_full_page=False,     
-                scroll_delay=0.1,
-                max_scroll_steps=None,
-
-                delay_before_return_html=0.1
+                scan_full_page=True,
+                delay_before_return_html=0.2
             )
 
             result = await crawler.arun(
                 url=url,
                 config=run_cfg,
-                wait_after_load=0.1
+                wait_after_load=0.2
             )
 
             if not result or not result.extracted_content:
@@ -211,18 +238,31 @@ async def scrape_pap(max_pages=20):
             annonces = format_url(annonces)
             annonces = format_title(annonces)
 
+            # Nettoyage des annonces
             for annonce in annonces:
-                adresse = annonce.get("address", "")
-                price = extract_number(annonce.get("price"))
 
-                annonce["zip_code"] = extract_zip_code(adresse)
-                annonce["source_site"] = site["source_site"]
-                annonce["address"] = clean_address(adresse)
-                annonce["type_bien"] = extract_type_from_url(annonce["url"])
+                raw_city = annonce.get("city", "")
+                raw_price = annonce.get("price")
+                raw_tags = annonce.get("tags_raw")
+
+                price = extract_number(raw_price)
+                rooms, surface = parse_pap_tags(raw_tags)
+
+                annonce["price"] = price
+                annonce["rooms"] = rooms
+                annonce["surface"] = surface
+                annonce["zip_code"] = extract_zip_code(raw_city)
+                annonce["city"] = clean_address(raw_city)
+                annonce["type_bien"] = extract_type_from_url(annonce.get("url"))
                 annonce["price_square_meter"] = calculate_price_square_meter(price, surface)
+                annonce["source_site"] = site["source_site"]
+                annonce.pop("tags_raw", None)
 
             all_annonces.extend(annonces)
+
     return all_annonces
+
+
 
 
 
