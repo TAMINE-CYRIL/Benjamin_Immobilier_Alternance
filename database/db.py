@@ -1,4 +1,7 @@
+import os
+
 from database.connection import get_connection
+from database.create_tables import create_tables
 
 def insert_annonces(annonces):
     """
@@ -41,6 +44,7 @@ def insert_annonces(annonces):
     updated = 0
     skipped = 0
 
+    os.makedirs("logs", exist_ok=True)
     with open("logs/logs.txt", "a", encoding="utf-8") as log:
 
         def log_write(message):

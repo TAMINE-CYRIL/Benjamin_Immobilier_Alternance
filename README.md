@@ -91,6 +91,10 @@ PG_PORT=5432
 
 # Optionnel : proxies Webshare pour les sites anti-bot
 PROXIES=http://user:pass@host:port,...
+
+# Dashboard prive
+JWT_SECRET=une-cle-longue-et-aleatoire
+AUTH_COOKIE_SECURE=false
 ```
 
 ## Utilisation
@@ -133,7 +137,23 @@ Génère `data/avis_deces.json` et `data/avis_deces.csv`.
 uvicorn apps.api.main:app --reload
 ```
 
-L'endpoint `GET /api/annonces` retourne toutes les annonces triées par score décroissant.
+Créer un utilisateur pour le dashboard privé :
+
+```bash
+python database/create_user.py admin@example.com motdepasse
+```
+
+L'endpoint `GET /api/annonces` est protégé par authentification et retourne les annonces filtrées sous forme paginée.
+
+### 6. Démarrer le dashboard web
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+L'interface React est disponible sur `http://127.0.0.1:5173` et proxifie les appels `/api` vers FastAPI.
 
 ## Système de scoring
 

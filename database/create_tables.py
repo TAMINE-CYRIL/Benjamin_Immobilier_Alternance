@@ -1,4 +1,7 @@
-from connection import get_connection
+try:
+    from database.connection import get_connection
+except ImportError:
+    from connection import get_connection
 
 def create_tables():
     """
@@ -30,6 +33,45 @@ def create_tables():
         last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(url, city, zip_code)             
     );
+    """)
+
+    index_statements = [
+        "CREATE INDEX IF NOT EXISTS idx_annonces_score ON annonces(score);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_city ON annonces(city);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_zip_code ON annonces(zip_code);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_department ON annonces(department);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_type_bien ON annonces(type_bien);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_price ON annonces(price);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_surface ON annonces(surface);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_last_seen ON annonces(last_seen);",
+    ]
+    for statement in index_statements:
+        cursor.execute(statement)
+
+    connexion.commit()
+    cursor.close()
+    connexion.close()
+
+
+def create_users_table():
+    """
+    Cree la table des utilisateurs qui peuvent acceder au dashboard prive.
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     """)
 
     connexion.commit()
@@ -156,6 +198,7 @@ def create_all_tables():
     Crée toutes les tables nécessaires dans la base de données.
     """
     create_tables()
+    create_users_table()
     create_dvf_tables()
     create_table_stats()
 

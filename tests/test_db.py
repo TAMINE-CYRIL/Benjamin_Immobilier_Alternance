@@ -36,7 +36,7 @@ def test_create_tables():
     with patch("psycopg2.connect", return_value=mock_conn):
         create_tables()
 
-        mock_cursor.execute.assert_called_once() 
+        assert mock_cursor.execute.call_count >= 1
         mock_conn.commit.assert_called_once()
         mock_cursor.close.assert_called_once()
         mock_conn.close.assert_called_once()

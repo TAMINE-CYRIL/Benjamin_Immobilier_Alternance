@@ -2,3 +2,6 @@ crawl4ai
 psycopg2
 python-dotenv
 pytest
+fastapi
+uvicorn
+bcrypt

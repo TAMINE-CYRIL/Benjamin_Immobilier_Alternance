@@ -17,6 +17,9 @@ env.bak/
 venv.bak/
 pip-wheel-metadata/
 pip-log.txt
+.pytest_cache/
+.coverage
+htmlcov/
 
 # --- Configuration et caches ---
 *.log
@@ -54,6 +57,20 @@ exports/
 *.csv
 *.xlsx
 
+# --- Frontend / Node ---
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+.vite/
+**/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
 
 # --- Fichiers système et IDE ---
 .vscode/
@@ -61,11 +78,13 @@ exports/
 *.iml
 .DS_Store
 Thumbs.db
+.history/
 
 # --- Clés/API ---
 .env
 .env.local
 .env.*
+!.env.example
 *.pem
 *.key
 proxy.py
