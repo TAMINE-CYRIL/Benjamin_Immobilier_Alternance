@@ -38,13 +38,7 @@ async def main():
     """
     # Liste des scrapers à lancer (tu peux en commenter certains pendant les tests)
     scrapers = [
-        ("Leboncoin", scrape_leboncoin(max_pages=1, use_proxies=True)),
-        ("SeLoger", scrape_seloger(max_pages=1, use_proxies=True)),    
         ("LogicImmo", scrape_logicimmo(max_pages=1, use_proxies=True)),
-        ("Espaces Atypiques", scrape_atypiques(max_pages=4)),
-        ("PAP", scrape_pap()),
-        ("BienIci", scrape_bienici(max_pages=10)),
-        ("Avoventes", scrape_avoventes()),
     ]
 
     all_annonces = []

@@ -4,7 +4,7 @@
   "fields": [
     {
       "name": "title",
-      "selector": ".ad-overview-details__ad-title",
+      "selector": ".real-estate-main-info__title",
       "type": "text"
     },
     {
@@ -15,12 +15,12 @@
     },
     {
       "name": "city",
-      "selector": ".ad-overview-details__address-title",
+      "selector": ".real-estate-main-info__address",
       "type": "text"
     },
     {
       "name": "surface",
-      "selector": ".ad-price__price-per-square-meter",
+      "selector": ".real-estate-main-info__title",
       "type": "text"
     },
     {
