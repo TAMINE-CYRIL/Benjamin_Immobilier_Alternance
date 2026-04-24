@@ -1,36 +1,49 @@
 from database.connection import get_connection
 
-def load_nb_transaction_stats():
+
+NB_TRANSACTION_STATS = None
+
+
+def load_nb_transaction_stats(force_reload=False):
+    global NB_TRANSACTION_STATS
+
+    if NB_TRANSACTION_STATS is not None and not force_reload:
+        return NB_TRANSACTION_STATS
+
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT q1, median, q3
-        FROM dvf_nb_transactions_stats
-        WHERE scope = 'global'
-    """)
-
-    row = cur.fetchone()
-    cur.close()
-    conn.close()
+    try:
+        cur.execute(
+            """
+            SELECT q1, median, q3
+            FROM dvf_nb_transactions_stats
+            WHERE scope = 'global'
+            """
+        )
+        row = cur.fetchone()
+    finally:
+        cur.close()
+        conn.close()
 
     if not row:
-        raise RuntimeError("Quartiles nb_transactions non initialisés")
+        raise RuntimeError("Quartiles nb_transactions non initialises")
 
-    return {
+    NB_TRANSACTION_STATS = {
         "q1": row[0],
         "median": row[1],
         "q3": row[2],
     }
+    return NB_TRANSACTION_STATS
 
-NB_TRANSACTION_STATS = load_nb_transaction_stats()
 
 def evaluate_annonce(
     prix_annonce_m2,
     prix_m2_med,
     prix_m2_q1,
     prix_m2_q3,
-    nb_transactions
+    nb_transactions,
+    nb_transaction_stats=None,
 ):
     if not all([prix_annonce_m2, prix_m2_med, prix_m2_q1, prix_m2_q3]):
         return None
@@ -67,9 +80,10 @@ def evaluate_annonce(
         else:
             bonus_quartile = -20
 
-    q1 = NB_TRANSACTION_STATS["q1"]
-    median = NB_TRANSACTION_STATS["median"]
-    q3 = NB_TRANSACTION_STATS["q3"]
+    stats = nb_transaction_stats or load_nb_transaction_stats()
+    q1 = stats["q1"]
+    median = stats["median"]
+    q3 = stats["q3"]
 
     if nb_transactions <= q1:
         confidence = 0.6

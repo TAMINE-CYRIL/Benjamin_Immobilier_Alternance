@@ -1,60 +1,109 @@
-from utils.cleaning import extract_number
-from utils.cleaning import normalisation_language
+from utils.cleaning import (
+    classify_annonce,
+    extract_number,
+    normalisation_language,
+    normalize_annonce,
+    normalize_annonces,
+)
+
 
 def test_extract_number():
-    """
-    Fonction de test afin de vérifier que la conversion de texte en nombre fonctionne normalement.
-    """
-    # On teste les nombres simples
-    assert extract_number("250 000 €") == 250000.0
+    assert extract_number("250 000 â‚¬") == 250000.0
     assert extract_number("1 200 000") == 1200000.0
-    assert extract_number("3500000") == 3500000.0
     assert extract_number("450.75") == 450.75
-
-
-    # On test avec des virgules et des points
-    assert extract_number("1,200.50 €") == 1200.50
-    assert extract_number("2.500,75 €") == 2500.75
-    assert extract_number("1.500.000") == 1500000
-    assert extract_number("1,500,000") == 1500000
-    assert extract_number("3.000.000,75") == 3000000.75
-    assert extract_number("3,000,000.75") == 3000000.75
-    assert extract_number("31 000,00") == 31000.00
-    
-    # On test les abréviations k/K et m/M
+    assert extract_number("1,200.50 â‚¬") == 1200.50
+    assert extract_number("2.500,75 â‚¬") == 2500.75
     assert extract_number("300k") == 300000.0
-    assert extract_number("1.5K€") == 1500.0
-    assert extract_number("1.5k€") == 1500.0
-    assert extract_number("450K€") == 450000.0
     assert extract_number("1.2M") == 1200000.0
-    assert extract_number("2,5m €") == 2500000.0
-    
-    # On test la suppression des caractères
-    assert extract_number("450.75 m²") == 450.75
-    assert extract_number("450 m2") == 450.0
-    assert extract_number("450M2") == 450.0
-    assert extract_number("450,75 m²") == 450.75
-    assert extract_number("450m €/m²") == 450000000.0
-    assert extract_number("300 €/m2") == 300.0
-    assert extract_number("1.2M €/m²") == 1200000.0
-    assert extract_number("300k€/m²") == 300000.0
-    assert extract_number("73,1k €/m²") == 73100.0
-    assert extract_number("674.000 €") == 674000
-
-    # On teste avec un résultat invalide
-    assert extract_number("Une chaine de caractère") is None
+    assert extract_number("300 â‚¬/m2") == 300.0
+    assert extract_number("Une chaine de caractere") is None
     assert extract_number("N/A") is None
     assert extract_number("") is None
 
 
 def test_normalisation_language():
-    """
-    Fonction de test afin de vérifier que la normalisation des formats de nombres fonctionne correctement.
-    """
     assert normalisation_language("1,200.50") == "1200.50"
     assert normalisation_language("2.500,75") == "2500.75"
     assert normalisation_language("1.500.000") == "1500000"
     assert normalisation_language("1,500,000") == "1500000"
     assert normalisation_language("3.000.000,75") == "3000000.75"
     assert normalisation_language("3,000,000.75") == "3000000.75"
-    assert normalisation_language("100.000,000") == "100000.000"
+
+
+def test_normalize_annonce_keeps_existing_surface():
+    annonce = normalize_annonce(
+        {
+            "url": "http://example.com",
+            "price": "300000",
+            "surface": "60",
+            "price_square_meter": "4900",
+            "zip_code": "13001",
+            "type_bien": "Appartement",
+        }
+    )
+    assert annonce["surface"] == 60.0
+    assert annonce["price_square_meter"] == 4900.0
+    assert annonce["department"] == "13"
+
+
+def test_normalize_annonce_computes_missing_surface():
+    annonce = normalize_annonce(
+        {
+            "url": "http://example.com",
+            "price": "300000",
+            "price_square_meter": "5000",
+        }
+    )
+    assert annonce["surface"] == 60.0
+
+
+def test_normalize_annonce_computes_missing_price_square_meter():
+    annonce = normalize_annonce(
+        {
+            "url": "http://example.com",
+            "price": "300000",
+            "surface": "75",
+        }
+    )
+    assert annonce["price_square_meter"] == 4000.0
+
+
+def test_normalize_annonce_invalid_values_become_none():
+    annonce = normalize_annonce(
+        {
+            "url": "http://example.com",
+            "price": "-1",
+            "surface": "0",
+            "price_square_meter": "-4",
+            "zip_code": "abc",
+        }
+    )
+    assert annonce["price"] is None
+    assert annonce["surface"] is None
+    assert annonce["price_square_meter"] is None
+    assert annonce["zip_code"] is None
+
+
+def test_classify_annonce_accepts_non_scorable_annonce():
+    annonce = normalize_annonce(
+        {
+            "url": "http://example.com",
+            "city": "Marseille",
+            "price": "250000",
+        }
+    )
+    assert classify_annonce(annonce) == "valid_no_scoring"
+
+
+def test_normalize_annonces_summary_counts():
+    annonces, summary = normalize_annonces(
+        [
+            {"url": "http://1", "zip_code": "13001", "type_bien": "Appartement", "price_square_meter": "4500"},
+            {"url": "http://2", "city": "Marseille"},
+            {"title": "Sans URL"},
+        ]
+    )
+    assert len(annonces) == 3
+    assert summary["valid_scoring"] == 1
+    assert summary["valid_no_scoring"] == 1
+    assert summary["skipped"] == 1

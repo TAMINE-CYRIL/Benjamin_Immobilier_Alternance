@@ -11,9 +11,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(BASE_DIR, "../../schema/immobilier/espace_atypique.json"), "r", encoding="utf-8") as f:
     schema_atypiques = json.load(f)
 
-with open(os.path.join(BASE_DIR, "../../schema/immobilier/details/espace_atypique_details.json"), "r", encoding="utf-8") as f:
-    schema_detail = json.load(f)
-
 
 site = {
     "schema": schema_atypiques,
@@ -117,54 +114,6 @@ def extract_type_from_title(title: str) -> str | None:
 
     return None
 
-
-
-async def scrape_details(crawler, annonce) -> dict | None:
-    """
-    Scrape une page de détail en parallèle.
-
-    Args:
-        crawler (AsyncWebCrawler): L'instance du crawler.
-        annonce (dict): L'annonce contenant l'URL à scraper.
-
-    Returns:
-        dict: L'annonce mise à jour avec les détails extraits.
-    
-    """
-
-    url = annonce.get("url")
-    if not url:
-        return annonce
-
-    run_cfg = CrawlerRunConfig(
-        cache_mode=CacheMode.BYPASS,
-        wait_for="css:#infos-cles",
-        extraction_strategy=JsonCssExtractionStrategy(schema=schema_detail),
-        only_text=True
-    )
-
-    result = await crawler.arun(url=url, config=run_cfg, wait_after_load=0.2)
-
-    if not result or not result.extracted_content:
-        return annonce
-
-    details = json.loads(result.extracted_content)
-
-    await asyncio.sleep(random.uniform(1, 3))
-
-    for d in details:
-        if d['label'] == 'Chambres':
-            annonce['rooms'] = extract_number(d['value'])
-
-        if d['label'] == details[0]['label']:
-            zip_code = ''.join(filter(str.isdigit, d['value']))
-            if len(zip_code) == 5:
-                annonce['zip_code'] = zip_code
-
-    return annonce
-
-
-
 async def scrape_atypiques(max_pages=1) -> list:
     
     """
@@ -203,9 +152,6 @@ async def scrape_atypiques(max_pages=1) -> list:
             if not annonces:
                 print("Aucune annonce trouvée.")
                 continue
-
-            detail_tasks = [scrape_details(crawler, a) for a in annonces]
-            annonces = await asyncio.gather(*detail_tasks)
 
             for annonce in annonces:
                 annonce["source_site"] = site["source_site"]

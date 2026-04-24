@@ -19,6 +19,11 @@
       "type": "text"
     },
     {
+      "name": "zip_code",
+      "selector": "span.info.upc.orange.localisation.font2 > span:not(.ville)",
+      "type": "text"
+    },
+    {
       "name": "surface",
       "selector": "span.info.font2:-soup-contains('M2'), span.info.font2:-soup-contains('m²'), span.info.font2:-soup-contains('M²')",
       "type": "text"
