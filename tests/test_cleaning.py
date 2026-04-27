@@ -84,6 +84,20 @@ def test_normalize_annonce_invalid_values_become_none():
     assert annonce["zip_code"] is None
 
 
+def test_normalize_annonce_extracts_missing_zip_code_from_city():
+    annonce = normalize_annonce(
+        {
+            "url": "http://example.com",
+            "city": "Toulon (83200)",
+            "type_bien": "Maison",
+            "price_square_meter": "4280",
+        }
+    )
+    assert annonce["zip_code"] == "83200"
+    assert annonce["department"] == "83"
+    assert classify_annonce(annonce) == "valid_scoring"
+
+
 def test_classify_annonce_accepts_non_scorable_annonce():
     annonce = normalize_annonce(
         {

@@ -253,9 +253,11 @@ async def scrape_logicimmo(max_pages: int = 1, use_proxies: bool = True):
 
                 annonce["url"] = format_url(annonce.get("url", ""))
 
-                raw_address = annonce.get("address", "")
-                annonce["zip_code"] = extract_zip_code(raw_address)
-                annonce["address"] = format_address(raw_address)
+                raw_city = annonce.get("city", "") or annonce.get("address", "")
+                formatted_city = format_address(raw_city)
+                annonce["zip_code"] = extract_zip_code(raw_city)
+                annonce["city"] = formatted_city
+                annonce["address"] = formatted_city
 
                 annonce["rooms"] = extract_number(annonce.get("rooms"))
                 annonce["type_bien"] = extract_type_from_title(annonce.get("title", ""))

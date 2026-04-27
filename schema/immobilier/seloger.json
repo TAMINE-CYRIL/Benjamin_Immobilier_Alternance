@@ -1,6 +1,6 @@
 {
   "name": "SeLoger",
-  "baseSelector": "div[data-testid^='classified-card-mfe-']",
+  "baseSelector": "div[data-testid='serp-core-classified-card-testid']",
   "fields": [
     {
       "name": "title",

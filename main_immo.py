@@ -35,12 +35,12 @@ def build_source_registry():
         {
             "name": "LogicImmo",
             "enabled": False,
-            "builder": lambda max_pages: scrape_logicimmo(max_pages=max_pages, use_proxies=True),
+            "builder": lambda max_pages: scrape_logicimmo(max_pages=max_pages, use_proxies=False),
         },
         {
             "name": "SeLoger",
-            "enabled": False,
-            "builder": lambda max_pages: scrape_seloger(max_pages=max_pages, use_proxies=True),
+            "enabled": True,
+            "builder": lambda max_pages: scrape_seloger(max_pages=max_pages, use_proxies=False),
         },
         {
             "name": "PAP",
@@ -55,11 +55,11 @@ def build_source_registry():
         {
             "name": "Leboncoin",
             "enabled": False,
-            "builder": lambda max_pages: scrape_leboncoin(max_pages=max_pages, use_proxies=True),
+            "builder": lambda max_pages: scrape_leboncoin(max_pages=max_pages, use_proxies=False),
         },
         {
             "name": "Espaces Atypiques",
-            "enabled": True,
+            "enabled": False,
             "builder": lambda max_pages: scrape_atypiques(max_pages=max_pages),
         },
         {

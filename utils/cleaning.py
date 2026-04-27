@@ -123,6 +123,19 @@ def _is_valid_zip_code(zip_code):
     return bool(zip_code and re.match(r"^\d{5}$", str(zip_code)))
 
 
+def _extract_zip_code_from_text(*values):
+    for value in values:
+        value = blank_to_none(value)
+        if value is None:
+            continue
+
+        match = re.search(r"\b(\d{5})\b", str(value))
+        if match:
+            return match.group(1)
+
+    return None
+
+
 def _sanitize_positive_number(value):
     if value is None:
         return None
@@ -171,6 +184,13 @@ def normalize_annonce(raw_annonce):
     annonce["price_square_meter"] = _sanitize_positive_number(extract_number(annonce.get("price_square_meter")))
     annonce["adjuged_price"] = _sanitize_positive_number(extract_number(annonce.get("adjuged_price")))
     annonce["rooms"] = _sanitize_positive_number(extract_number(annonce.get("rooms"), as_int=True))
+
+    if not _is_valid_zip_code(annonce.get("zip_code")):
+        annonce["zip_code"] = _extract_zip_code_from_text(
+            annonce.get("zip_code"),
+            annonce.get("city"),
+            annonce.get("address"),
+        )
 
     if not _is_valid_zip_code(annonce.get("zip_code")):
         annonce["zip_code"] = None
