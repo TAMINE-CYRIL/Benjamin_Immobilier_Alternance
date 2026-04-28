@@ -34,7 +34,7 @@ def build_source_registry():
     return [
         {
             "name": "LogicImmo",
-            "enabled": False,
+            "enabled": True,
             "builder": lambda max_pages: scrape_logicimmo(max_pages=max_pages, use_proxies=False),
         },
         {
@@ -44,12 +44,12 @@ def build_source_registry():
         },
         {
             "name": "PAP",
-            "enabled": False,
+            "enabled": True,
             "builder": lambda max_pages: scrape_pap(max_pages=max_pages),
         },
         {
             "name": "BienIci",
-            "enabled": False,
+            "enabled": True,
             "builder": lambda max_pages: scrape_bienici(max_pages=max_pages),
         },
         {
@@ -59,12 +59,12 @@ def build_source_registry():
         },
         {
             "name": "Espaces Atypiques",
-            "enabled": False,
+            "enabled": True,
             "builder": lambda max_pages: scrape_atypiques(max_pages=max_pages),
         },
         {
             "name": "AvoVentes",
-            "enabled": False,
+            "enabled": True,
             "builder": lambda max_pages: scrape_avoventes(),
         },
     ]

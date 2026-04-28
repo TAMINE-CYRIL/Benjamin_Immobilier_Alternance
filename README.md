@@ -17,6 +17,7 @@ On utilise [Crawl4AI](https://github.com/unclecode/crawl4ai) pour parcourir les 
 - Rotation de proxies et randomisation des User-Agents dans `utils/config.py`
 - Import et agrégation des données DVF (prix médian au m² par code postal, type de bien, année)
 - Système de scoring des annonces basé sur l'écart au prix marché DVF (`services/deals.py`)
+- Enrichissement cadastre et urbanisme (API Adresse, API Carto Cadastre, GPU) dans `services/enrichment/`
 - API REST FastAPI exposant les annonces scorées (`apps/api/`)
 - Tests unitaires avec pytest dans `tests/`
 
@@ -131,7 +132,28 @@ python main_libra.py
 
 Génère `data/avis_deces.json` et `data/avis_deces.csv`.
 
-### 5. Démarrer l'API
+### 5. Enrichir les annonces avec cadastre et urbanisme
+
+```bash
+python -m services.enrichment.run --limit 100
+```
+
+Cette commande traite les annonces non enrichies ou anciennes, géocode la localisation via le service de géocodage Géoplateforme, rattache l'annonce à une parcelle cadastrale via l'API Carto Cadastre, puis interroge le Géoportail de l'Urbanisme pour récupérer le zonage, les prescriptions et les servitudes. Pappers n'est pas utilisé dans cette V1.
+
+Chaque enrichissement stocke aussi un diagnostic par étape (`geocode_status`, `cadastre_status`, `gpu_status`, score de géocodage, type de résultat, message métier) pour expliquer les résultats partiels.
+
+Variables optionnelles si les endpoints publics changent :
+
+```env
+ADDRESS_API_URL=https://data.geopf.fr/geocodage/search
+CADASTRE_API_URL=https://apicarto.ign.fr/api/cadastre/parcelle
+GPU_API_BASE_URL=https://apicarto.ign.fr/api/gpu
+MIN_GEOCODE_SCORE=0.45
+```
+
+Les résultats sont stockés dans les tables `parcelles` et `annonce_enrichments`.
+
+### 6. Démarrer l'API
 
 ```bash
 uvicorn apps.api.main:app --reload
@@ -145,7 +167,7 @@ python database/create_user.py admin@example.com motdepasse
 
 L'endpoint `GET /api/annonces` est protégé par authentification et retourne les annonces filtrées sous forme paginée.
 
-### 6. Démarrer le dashboard web
+### 7. Démarrer le dashboard web
 
 ```bash
 cd apps/web

@@ -5,3 +5,5 @@ pytest
 fastapi
 uvicorn
 bcrypt
+regex
+certifi

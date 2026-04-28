@@ -365,6 +365,43 @@ dd {
   text-decoration: none;
 }
 
+.detail-section {
+  margin-top: 28px;
+}
+
+.status-pill {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #16304f;
+  background: #edf4fb;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-success {
+  color: #14532d;
+  background: #dcfce7;
+}
+
+.status-partial {
+  color: #854d0e;
+  background: #fef3c7;
+}
+
+.status-failed {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.status-not_found {
+  color: #3f3f46;
+  background: #e4e4e7;
+}
+
 @media (max-width: 900px) {
   .login-shell {
     grid-template-columns: 1fr;

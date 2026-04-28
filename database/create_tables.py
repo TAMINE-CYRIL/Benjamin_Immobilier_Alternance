@@ -193,6 +193,90 @@ def create_table_stats():
     conn.close()
 
 
+def create_enrichment_tables():
+    """
+    Cree les tables d'enrichissement cadastre et urbanisme.
+    Les geometries sont stockees en JSONB pour rester utilisables sans extension PostGIS.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS parcelles (
+        id SERIAL PRIMARY KEY,
+        parcel_key TEXT NOT NULL UNIQUE,
+        commune_code TEXT,
+        section TEXT,
+        numero TEXT,
+        contenance NUMERIC,
+        centroid_lat NUMERIC,
+        centroid_lon NUMERIC,
+        geometry_json JSONB,
+        raw_data JSONB,
+        created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS annonce_enrichments (
+        id SERIAL PRIMARY KEY,
+        annonce_id INTEGER NOT NULL UNIQUE REFERENCES annonces(id) ON DELETE CASCADE,
+        status TEXT NOT NULL DEFAULT 'pending',
+        latitude NUMERIC,
+        longitude NUMERIC,
+        parcel_id INTEGER REFERENCES parcelles(id),
+        parcel_key TEXT,
+        zip_code TEXT,
+        zonage TEXT,
+        prescriptions JSONB DEFAULT '[]'::jsonb,
+        servitudes JSONB DEFAULT '[]'::jsonb,
+        documents JSONB DEFAULT '[]'::jsonb,
+        raw_geocode JSONB,
+        raw_cadastre JSONB,
+        raw_gpu JSONB,
+        geocode_status TEXT,
+        cadastre_status TEXT,
+        gpu_status TEXT,
+        geocode_score NUMERIC,
+        geocode_type TEXT,
+        geocode_query TEXT,
+        diagnostic_message TEXT,
+        error_message TEXT,
+        enriched_at TIMESTAMP(0),
+        created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    alter_statements = [
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS geocode_status TEXT;",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS cadastre_status TEXT;",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS gpu_status TEXT;",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS geocode_score NUMERIC;",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS geocode_type TEXT;",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS geocode_query TEXT;",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS diagnostic_message TEXT;",
+    ]
+    for statement in alter_statements:
+        cur.execute(statement)
+
+    index_statements = [
+        "CREATE INDEX IF NOT EXISTS idx_parcelles_commune_code ON parcelles(commune_code);",
+        "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_annonce_id ON annonce_enrichments(annonce_id);",
+        "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_zip_code ON annonce_enrichments(zip_code);",
+        "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_parcel_id ON annonce_enrichments(parcel_id);",
+        "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_status ON annonce_enrichments(status);",
+        "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_zonage ON annonce_enrichments(zonage);",
+    ]
+    for statement in index_statements:
+        cur.execute(statement)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 def create_all_tables():
     """
     Crée toutes les tables nécessaires dans la base de données.
@@ -201,6 +285,7 @@ def create_all_tables():
     create_users_table()
     create_dvf_tables()
     create_table_stats()
+    create_enrichment_tables()
 
 if __name__ == "__main__":
     create_all_tables()

@@ -14,6 +14,7 @@ export function AnnoncesTable({ annonces, onSelect }) {
             <th>Surface</th>
             <th>Prix/m2</th>
             <th>Source</th>
+            <th>Enrichissement</th>
           </tr>
         </thead>
         <tbody>
@@ -26,6 +27,11 @@ export function AnnoncesTable({ annonces, onSelect }) {
               <td>{annonce.surface ? `${annonce.surface} m2` : "-"}</td>
               <td>{annonce.price_m2 ? `${Math.round(annonce.price_m2)} EUR` : "-"}</td>
               <td>{annonce.source_site || "-"}</td>
+              <td>
+                <span className={`status-pill status-${annonce.enrichment?.status || "pending"}`}>
+                  {annonce.enrichment?.status || "pending"}
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>

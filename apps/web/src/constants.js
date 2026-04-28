@@ -9,6 +9,8 @@ export const emptyFilters = {
   type_bien: "",
   score_min: "",
   source_site: "",
+  enrichment_status: "",
+  zonage: "",
   sort: "score",
   direction: "desc",
 };

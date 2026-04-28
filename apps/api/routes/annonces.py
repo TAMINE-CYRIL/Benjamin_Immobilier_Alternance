@@ -21,6 +21,8 @@ def get_annonces(
     type_bien: Optional[str] = None,
     score_min: Optional[float] = None,
     source_site: Optional[str] = None,
+    enrichment_status: Optional[str] = None,
+    zonage: Optional[str] = None,
     sort: str = "score",
     direction: str = "desc",
 ):
@@ -37,6 +39,8 @@ def get_annonces(
         "type_bien": type_bien,
         "score_min": score_min,
         "source_site": source_site,
+        "enrichment_status": enrichment_status,
+        "zonage": zonage,
         "sort": sort,
         "direction": direction,
     })
