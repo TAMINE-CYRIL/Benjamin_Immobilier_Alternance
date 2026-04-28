@@ -92,7 +92,7 @@ def extract_number(text, as_int=False):
     text_cleaned = re.sub(r"M2|m2|m\u00b2|M\u00b2|\u20ac|EUR|/|\s+", "", text)
     text_cleaned = normalisation_language(text_cleaned)
 
-    match = re.search(r"\d+(\.\d+)?", text_cleaned)
+    match = re.search(r"[+-]?\d+(\.\d+)?", text_cleaned)
     if not match:
         return None
 

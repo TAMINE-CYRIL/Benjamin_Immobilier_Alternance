@@ -277,6 +277,41 @@ def create_enrichment_tables():
     conn.close()
 
 
+def create_automation_tables():
+    """
+    Cree la table de suivi des executions automatisees.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS automation_runs (
+        id SERIAL PRIMARY KEY,
+        run_type TEXT NOT NULL DEFAULT 'full',
+        status TEXT NOT NULL DEFAULT 'running',
+        started_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
+        completed_at TIMESTAMP(0),
+        duration_seconds NUMERIC,
+        log_path TEXT,
+        summary JSONB DEFAULT '{}'::jsonb,
+        error_message TEXT
+    );
+    """)
+
+    cur.execute("""
+    CREATE INDEX IF NOT EXISTS idx_automation_runs_started_at
+    ON automation_runs(started_at DESC);
+    """)
+    cur.execute("""
+    CREATE INDEX IF NOT EXISTS idx_automation_runs_status
+    ON automation_runs(status);
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 def create_all_tables():
     """
     Crée toutes les tables nécessaires dans la base de données.
@@ -286,6 +321,7 @@ def create_all_tables():
     create_dvf_tables()
     create_table_stats()
     create_enrichment_tables()
+    create_automation_tables()
 
 if __name__ == "__main__":
     create_all_tables()

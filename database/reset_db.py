@@ -1,12 +1,14 @@
-import psycopg2
 import os
+
+import psycopg2
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def cleanup():
+
+def cleanup(days=14, logger=None):
     """
-    Fonction pour supprimer les annonces n'ayant pas été vues depuis plus de 30 jours.
+    Supprime les annonces qui n'ont pas ete vues depuis plus de N jours.
     """
     conn = psycopg2.connect(
         dbname=os.getenv("PG_DB"),
@@ -18,14 +20,23 @@ def cleanup():
 
     with conn:
         with conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 DELETE FROM annonces
-                WHERE last_seen < NOW() - INTERVAL '14 days'
-            """)
+                WHERE last_seen < NOW() - (%s * INTERVAL '1 day')
+                """,
+                (days,),
+            )
             deleted = cur.rowcount
 
     conn.close()
-    print(f"{deleted} annonces supprimées")
+    message = f"{deleted} annonces supprimees"
+    if logger:
+        logger(message)
+    else:
+        print(message)
+    return deleted
+
 
 if __name__ == "__main__":
     cleanup()

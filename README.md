@@ -153,7 +153,50 @@ MIN_GEOCODE_SCORE=0.45
 
 Les résultats sont stockés dans les tables `parcelles` et `annonce_enrichments`.
 
-### 6. Démarrer l'API
+### 6. Automatisation V2 sous Windows
+
+L'orchestrateur V2 lance en une seule commande :
+
+- creation/mise a jour des tables techniques
+- scraping des sources activees
+- insertion ou mise a jour des annonces
+- scoring DVF
+- enrichissement cadastre et urbanisme
+- nettoyage des annonces non revues depuis 14 jours
+- ecriture d'un log dans `logs/`
+- stockage du statut du run dans la table `automation_runs`
+
+Test manuel :
+
+```powershell
+.\scripts\run_automation.ps1 -MaxPages 1 -EnrichmentLimit 100
+```
+
+Commande Python equivalente :
+
+```bash
+python -m services.jobs.run_automation --max-pages 1 --enrichment-limit 100
+```
+
+Installer la tache planifiee Windows toutes les 6 heures :
+
+```powershell
+.\scripts\install_windows_task.ps1 -FrequencyHours 6 -StartTime "06:00"
+```
+
+Desinstaller la tache :
+
+```powershell
+.\scripts\uninstall_windows_task.ps1
+```
+
+Le dernier resume JSON est ecrit dans `data/automation/latest_run.json`. Les derniers runs sont aussi disponibles via l'API protegee :
+
+```http
+GET /api/jobs/runs?limit=20
+```
+
+### 7. Demarrer l'API
 
 ```bash
 uvicorn apps.api.main:app --reload
@@ -167,7 +210,7 @@ python database/create_user.py admin@example.com motdepasse
 
 L'endpoint `GET /api/annonces` est protégé par authentification et retourne les annonces filtrées sous forme paginée.
 
-### 7. Démarrer le dashboard web
+### 8. Demarrer le dashboard web
 
 ```bash
 cd apps/web

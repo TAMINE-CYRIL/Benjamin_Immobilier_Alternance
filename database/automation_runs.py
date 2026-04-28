@@ -1,0 +1,84 @@
+import datetime as dt
+
+from psycopg2.extras import Json
+
+from database.connection import get_connection
+
+
+def create_run(run_type="full", log_path=None):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            INSERT INTO automation_runs (run_type, status, log_path)
+            VALUES (%s, 'running', %s)
+            RETURNING id, started_at
+            """,
+            (run_type, log_path),
+        )
+        run_id, started_at = cur.fetchone()
+        conn.commit()
+        return {"id": run_id, "started_at": started_at}
+    finally:
+        cur.close()
+        conn.close()
+
+
+def finish_run(run_id, status, summary=None, error_message=None):
+    completed_at = dt.datetime.now()
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            UPDATE automation_runs
+            SET status = %s,
+                completed_at = %s,
+                duration_seconds = EXTRACT(EPOCH FROM (%s - started_at)),
+                summary = %s,
+                error_message = %s
+            WHERE id = %s
+            """,
+            (status, completed_at, completed_at, Json(summary or {}), error_message, run_id),
+        )
+        conn.commit()
+    finally:
+        cur.close()
+        conn.close()
+
+
+def list_runs(limit=20):
+    safe_limit = min(max(int(limit or 20), 1), 100)
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT id, run_type, status, started_at, completed_at, duration_seconds,
+                   log_path, summary, error_message
+            FROM automation_runs
+            ORDER BY started_at DESC
+            LIMIT %s
+            """,
+            (safe_limit,),
+        )
+        rows = cur.fetchall()
+    finally:
+        cur.close()
+        conn.close()
+
+    return [
+        {
+            "id": row[0],
+            "run_type": row[1],
+            "status": row[2],
+            "started_at": row[3],
+            "completed_at": row[4],
+            "duration_seconds": row[5],
+            "log_path": row[6],
+            "summary": row[7] or {},
+            "error_message": row[8],
+        }
+        for row in rows
+    ]
