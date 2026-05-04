@@ -18,8 +18,6 @@ Automatiser la collecte d'annonces sur des plateformes immobilieres comme Lebonc
 - Extraction des donnees structurees :
   - prix ;
   - surface ;
-  - description ;
-  - photos ;
   - geolocalisation.
 - Mecanismes d'anti-blocage :
   - rotation IP ;

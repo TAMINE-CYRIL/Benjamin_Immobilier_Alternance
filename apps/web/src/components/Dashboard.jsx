@@ -4,6 +4,7 @@ import { emptyFilters } from "../constants";
 import { AnnoncesTable } from "./AnnoncesTable";
 import { DetailPanel } from "./DetailPanel";
 import { Filters } from "./Filters";
+import AnnoncesMap from "./AnnoncesMap";
 
 export function Dashboard({ user, onLogout }) {
   const [filters, setFilters] = useState(emptyFilters);
@@ -16,6 +17,7 @@ export function Dashboard({ user, onLogout }) {
 
   const totalPages = useMemo(() => Math.max(Math.ceil(data.total / data.page_size), 1), [data]);
 
+  console.log("Dashboard render", { filters, page, data, loading, error, selected });
   async function load(nextPage = page, nextFilters = filters) {
     setLoading(true);
     setError("");
@@ -27,6 +29,7 @@ export function Dashboard({ user, onLogout }) {
     } finally {
       setLoading(false);
     }
+    
   }
 
   useEffect(() => {
@@ -94,6 +97,9 @@ export function Dashboard({ user, onLogout }) {
       ) : (
         <div className="empty">Aucune annonce ne correspond aux filtres.</div>
       )}
+
+      <AnnoncesMap annonces={data.items} />
+      
 
       <nav className="pagination">
         <button className="secondary" disabled={page <= 1} onClick={() => goToPage(page - 1)}>Precedent</button>

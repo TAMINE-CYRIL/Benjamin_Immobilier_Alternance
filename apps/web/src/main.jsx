@@ -4,6 +4,9 @@ import { getMe } from "./api";
 import { Dashboard } from "./components/Dashboard";
 import { LoginPage } from "./components/LoginPage";
 import "./styles.css";
+import "leaflet/dist/leaflet.css";
+
+
 
 function App() {
   const [user, setUser] = useState(null);
