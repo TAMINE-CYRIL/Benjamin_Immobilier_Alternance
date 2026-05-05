@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 from database.automation_runs import create_run, finish_run
 from database.create_tables import create_all_tables
+from database.migrations import apply_pending_migrations
 from database.reset_db import cleanup
 from main_immo import create_run_logger, run_pipeline
 from services.enrichment.orchestrator import EnrichmentService
@@ -21,7 +22,7 @@ def parse_args():
     parser.add_argument("--skip-scraping", action="store_true", help="Ne pas lancer le scraping")
     parser.add_argument("--skip-enrichment", action="store_true", help="Ne pas lancer l'enrichissement")
     parser.add_argument("--skip-cleanup", action="store_true", help="Ne pas nettoyer les annonces anciennes")
-    parser.add_argument("--cleanup-days", type=int, default=14, help="Age des annonces a supprimer")
+    parser.add_argument("--cleanup-days", type=int, default=30, help="Age des annonces a archiver puis supprimer")
     parser.add_argument("--output-json", default=os.path.join("data", "automation", "latest_run.json"))
     return parser.parse_args()
 
@@ -43,6 +44,7 @@ def _write_summary(path, payload):
 async def run(args=None):
     args = args or parse_args()
     create_all_tables()
+    apply_pending_migrations()
     logger, log_path, log_file = create_run_logger()
     run_record = create_run(run_type="full", log_path=log_path)
 

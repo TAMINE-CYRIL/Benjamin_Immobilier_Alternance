@@ -158,11 +158,12 @@ Les résultats sont stockés dans les tables `parcelles` et `annonce_enrichments
 L'orchestrateur V2 lance en une seule commande :
 
 - creation/mise a jour des tables techniques
+- application des migrations SQL en attente
 - scraping des sources activees
 - insertion ou mise a jour des annonces
 - scoring DVF
 - enrichissement cadastre et urbanisme
-- nettoyage des annonces non revues depuis 14 jours
+- archivage puis nettoyage des annonces non revues depuis 30 jours
 - ecriture d'un log dans `logs/`
 - stockage du statut du run dans la table `automation_runs`
 
@@ -195,6 +196,30 @@ Le dernier resume JSON est ecrit dans `data/automation/latest_run.json`. Les der
 ```http
 GET /api/jobs/runs?limit=20
 ```
+
+### 6 bis. Migrations et sauvegardes
+
+Les migrations SQL versionnees sont placees dans `database/migrations/` et suivies dans la table `schema_migrations`.
+
+Application manuelle :
+
+```bash
+python -m database.migrations
+```
+
+Sauvegarde PostgreSQL au format custom :
+
+```powershell
+.\scripts\backup_database.ps1
+```
+
+Restauration depuis une sauvegarde :
+
+```powershell
+.\scripts\restore_database.ps1 -BackupPath .\data\backups\nom_du_dump.dump
+```
+
+Par defaut, les annonces non revues depuis 30 jours sont copiees dans `annonces_archive` avec un snapshot JSONB de leur enrichissement, puis supprimees de `annonces`.
 
 ### 7. Demarrer l'API
 

@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from database.db import create_tables, get_connection, insert_annonces
+from database.reset_db import cleanup
 from database.score_annonce import score_annonces
 from main_immo import run_pipeline
 
@@ -101,6 +102,28 @@ def test_insert_annonces_handles_sql_error():
     mock_conn.commit.assert_called_once()
     assert summary["errors"] == 1
     assert summary["skip_reasons"]["sql_error"] == 1
+
+
+def test_cleanup_archives_before_deleting_old_annonces():
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+    mock_conn.__enter__.return_value = mock_conn
+    mock_cursor.rowcount = 3
+
+    with patch("database.reset_db.create_annonces_archive_table") as mock_create_archive:
+        with patch("database.reset_db.get_connection", return_value=mock_conn):
+            deleted = cleanup(days=30, logger=MagicMock())
+
+    assert deleted == 3
+    assert mock_create_archive.called
+    assert mock_cursor.execute.call_count == 2
+    archive_sql = mock_cursor.execute.call_args_list[0].args[0]
+    delete_sql = mock_cursor.execute.call_args_list[1].args[0]
+    assert "INSERT INTO annonces_archive" in archive_sql
+    assert "DELETE FROM annonces" in delete_sql
+    assert mock_cursor.execute.call_args_list[0].args[1] == ("last_seen older than 30 days", 30)
+    assert mock_cursor.execute.call_args_list[1].args[1] == (30,)
 
 
 def test_score_annonces_ignores_missing_fields_without_error():
