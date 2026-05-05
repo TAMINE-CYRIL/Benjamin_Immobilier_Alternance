@@ -1,30 +1,35 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from typing import Optional
+from typing import Literal, Optional
 
 from apps.api.auth import get_current_user
 from apps.database.annonces_repo import fetch_annonce_by_id, search_annonces
 
 router = APIRouter()
 
+TEXT_FILTER = Query(None, min_length=1, max_length=100)
+ZIP_FILTER = Query(None, min_length=2, max_length=10, pattern=r"^[0-9A-Za-z -]+$")
+DEPARTMENT_FILTER = Query(None, min_length=1, max_length=3, pattern=r"^[0-9A-Za-z]+$")
+
+
 @router.get("/annonces")
 def get_annonces(
     user=Depends(get_current_user),
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
-    city: Optional[str] = None,
-    zip_code: Optional[str] = None,
-    department: Optional[str] = None,
+    city: Optional[str] = TEXT_FILTER,
+    zip_code: Optional[str] = ZIP_FILTER,
+    department: Optional[str] = DEPARTMENT_FILTER,
     price_min: Optional[float] = None,
     price_max: Optional[float] = None,
     surface_min: Optional[float] = None,
     surface_max: Optional[float] = None,
-    type_bien: Optional[str] = None,
+    type_bien: Optional[str] = TEXT_FILTER,
     score_min: Optional[float] = None,
-    source_site: Optional[str] = None,
-    enrichment_status: Optional[str] = None,
-    zonage: Optional[str] = None,
-    sort: str = "score",
-    direction: str = "desc",
+    source_site: Optional[str] = TEXT_FILTER,
+    enrichment_status: Optional[Literal["pending", "success", "partial_success", "failed"]] = None,
+    zonage: Optional[str] = TEXT_FILTER,
+    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage"] = "score",
+    direction: Literal["asc", "desc"] = "desc",
 ):
     return search_annonces({
         "page": page,

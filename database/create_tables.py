@@ -66,8 +66,13 @@ def create_users_table():
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        locked_until TIMESTAMP(0),
         created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
     );
+    """)
+
+    cursor.execute("""
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP(0);
     """)
 
     cursor.execute("""
@@ -77,6 +82,37 @@ def create_users_table():
     connexion.commit()
     cursor.close()
     connexion.close()
+
+
+def create_login_attempts_table():
+    """
+    Cree l'historique des tentatives de connexion pour detecter le brute force.
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS login_attempts (
+        id SERIAL PRIMARY KEY,
+        email TEXT NOT NULL,
+        ip_address TEXT,
+        success BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    index_statements = [
+        "CREATE INDEX IF NOT EXISTS idx_login_attempts_email_created_at ON login_attempts(lower(email), created_at DESC);",
+        "CREATE INDEX IF NOT EXISTS idx_login_attempts_ip_created_at ON login_attempts(ip_address, created_at DESC);",
+        "CREATE INDEX IF NOT EXISTS idx_login_attempts_success ON login_attempts(success);",
+    ]
+    for statement in index_statements:
+        cursor.execute(statement)
+
+    connexion.commit()
+    cursor.close()
+    connexion.close()
+
 
 def create_dvf_tables():
     """
@@ -370,6 +406,7 @@ def create_all_tables():
     """
     create_tables()
     create_users_table()
+    create_login_attempts_table()
     create_dvf_tables()
     create_table_stats()
     create_enrichment_tables()

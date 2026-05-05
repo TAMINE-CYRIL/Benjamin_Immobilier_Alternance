@@ -49,6 +49,20 @@ SORT_COLUMNS = {
     "zonage": "e.zonage",
 }
 
+SORT_DIRECTIONS = {
+    "asc": "ASC",
+    "desc": "DESC",
+}
+
+
+def _escape_like(value):
+    return (
+        str(value)
+        .replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+    )
+
 
 def _row_to_annonce(row):
     return {
@@ -109,8 +123,8 @@ def _build_filters(filters):
     for key, column in text_filters.items():
         value = filters.get(key)
         if value:
-            clauses.append(f"{column} ILIKE %s")
-            params.append(f"%{value}%")
+            clauses.append(f"{column} ILIKE %s ESCAPE '\\'")
+            params.append(f"%{_escape_like(value)}%")
 
     enrichment_status = filters.get("enrichment_status")
     if enrichment_status:
@@ -141,8 +155,8 @@ def search_annonces(filters):
     clauses, params = _build_filters(filters)
     where_sql = f"WHERE {' AND '.join(clauses)}" if clauses else ""
 
-    sort = SORT_COLUMNS.get(filters.get("sort") or "score", "a.score")
-    direction = "ASC" if filters.get("direction") == "asc" else "DESC"
+    sort = SORT_COLUMNS.get(filters.get("sort") or "score", SORT_COLUMNS["score"])
+    direction = SORT_DIRECTIONS.get(filters.get("direction") or "desc", SORT_DIRECTIONS["desc"])
 
     joins = """
         LEFT JOIN annonce_enrichments e ON e.annonce_id = a.id

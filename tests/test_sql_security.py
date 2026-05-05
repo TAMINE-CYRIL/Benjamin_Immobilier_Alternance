@@ -1,0 +1,72 @@
+from unittest.mock import MagicMock, patch
+
+from fastapi.testclient import TestClient
+
+from apps.api.auth import get_current_user
+from apps.api.main import app
+from apps.database.annonces_repo import search_annonces
+
+
+def _mock_connection():
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.__enter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+    mock_cursor.fetchone.return_value = (0,)
+    mock_cursor.fetchall.return_value = []
+    return mock_conn, mock_cursor
+
+
+def test_search_annonces_keeps_text_filter_in_sql_parameters():
+    mock_conn, mock_cursor = _mock_connection()
+    payload = "%' OR 1=1; DROP TABLE users; --"
+
+    with patch("apps.database.annonces_repo.get_connection", return_value=mock_conn):
+        search_annonces({"city": payload})
+
+    count_sql = mock_cursor.execute.call_args_list[0].args[0]
+    count_params = mock_cursor.execute.call_args_list[0].args[1]
+
+    assert payload not in count_sql
+    assert "ILIKE %s" in count_sql
+    assert "ESCAPE '\\'" in count_sql
+    assert count_params == [r"%\%' OR 1=1; DROP TABLE users; --%"]
+
+
+def test_search_annonces_ignores_malicious_sort_and_direction_values():
+    mock_conn, mock_cursor = _mock_connection()
+
+    with patch("apps.database.annonces_repo.get_connection", return_value=mock_conn):
+        search_annonces({
+            "sort": "price; DROP TABLE users; --",
+            "direction": "asc; DROP TABLE users; --",
+        })
+
+    data_sql = mock_cursor.execute.call_args_list[1].args[0]
+
+    assert "DROP TABLE" not in data_sql
+    assert "ORDER BY a.score DESC" in data_sql
+
+
+def test_annonces_route_rejects_invalid_sort_parameter():
+    app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
+    client = TestClient(app)
+
+    try:
+        response = client.get("/api/annonces?sort=price;DROP TABLE users")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+
+
+def test_annonces_route_rejects_invalid_zip_code_parameter():
+    app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
+    client = TestClient(app)
+
+    try:
+        response = client.get("/api/annonces?zip_code=75000';DROP TABLE users")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
