@@ -31,8 +31,14 @@ def create_tables():
         sale_date TEXT,    
         visit_date TEXT,
         last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
+        search_vector tsvector,
         UNIQUE(url, city, zip_code)             
     );
+    """)
+
+    # Ajouter colonne search_vector si elle n'existe pas (pour tables existantes)
+    cursor.execute("""
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS search_vector tsvector;
     """)
 
     index_statements = [
@@ -44,6 +50,7 @@ def create_tables():
         "CREATE INDEX IF NOT EXISTS idx_annonces_price ON annonces(price);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_surface ON annonces(surface);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_last_seen ON annonces(last_seen);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_search_vector ON annonces USING GIN(search_vector);",
     ]
     for statement in index_statements:
         cursor.execute(statement)
@@ -53,7 +60,46 @@ def create_tables():
     connexion.close()
 
 
-def create_users_table():
+def create_fulltext_search_trigger():
+    """
+    Crée la fonction de trigger et le trigger pour maintenir le vecteur search_vector
+    dans la table annonces lors des INSERT/UPDATE.
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+
+    # Créer la fonction trigger
+    cursor.execute("""
+    CREATE OR REPLACE FUNCTION update_annonce_search_vector() RETURNS trigger AS $$
+    BEGIN
+        NEW.search_vector := 
+            setweight(to_tsvector('french', COALESCE(NEW.title, '')), 'A') ||
+            setweight(to_tsvector('french', COALESCE(NEW.city, '')), 'B') ||
+            setweight(to_tsvector('french', COALESCE(NEW.type_bien, '')), 'B') ||
+            setweight(to_tsvector('french', COALESCE(NEW.source_site, '')), 'C') ||
+            setweight(to_tsvector('french', COALESCE(NEW.agency, '')), 'C') ||
+            setweight(to_tsvector('french', COALESCE(NEW.department, '')), 'C') ||
+            setweight(to_tsvector('french', COALESCE(NEW.zip_code, '')), 'C');
+        RETURN NEW;
+    END
+    $$ LANGUAGE plpgsql;
+    """)
+
+    # Créer le trigger
+    cursor.execute("""
+    DROP TRIGGER IF EXISTS trg_update_annonce_search_vector ON annonces;
+    """)
+
+    cursor.execute("""
+    CREATE TRIGGER trg_update_annonce_search_vector
+    BEFORE INSERT OR UPDATE ON annonces
+    FOR EACH ROW
+    EXECUTE FUNCTION update_annonce_search_vector();
+    """)
+
+    connexion.commit()
+    cursor.close()
+    connexion.close()
     """
     Cree la table des utilisateurs qui peuvent acceder au dashboard prive.
     """
@@ -114,7 +160,35 @@ def create_login_attempts_table():
     connexion.close()
 
 
-def create_dvf_tables():
+def populate_fulltext_search_vector():
+    """
+    Remplit la colonne search_vector pour toutes les annonces existantes.
+    À appeler une seule fois après create_fulltext_search_trigger().
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+
+    cursor.execute("""
+    UPDATE annonces
+    SET search_vector = 
+        setweight(to_tsvector('french', COALESCE(title, '')), 'A') ||
+        setweight(to_tsvector('french', COALESCE(city, '')), 'B') ||
+        setweight(to_tsvector('french', COALESCE(type_bien, '')), 'B') ||
+        setweight(to_tsvector('french', COALESCE(source_site, '')), 'C') ||
+        setweight(to_tsvector('french', COALESCE(agency, '')), 'C') ||
+        setweight(to_tsvector('french', COALESCE(department, '')), 'C') ||
+        setweight(to_tsvector('french', COALESCE(zip_code, '')), 'C')
+    WHERE search_vector IS NULL;
+    """)
+
+    cursor.execute("SELECT ROW_COUNT() as count;")
+    row_count = cursor.fetchone()
+    
+    connexion.commit()
+    cursor.close()
+    connexion.close()
+    
+    return row_count[0] if row_count else 0
     """
     Crée les tables nécessaires pour les données DVF dans la base de données si elles n'existent pas déjà.
     """
@@ -405,6 +479,7 @@ def create_all_tables():
     Crée toutes les tables nécessaires dans la base de données.
     """
     create_tables()
+    create_fulltext_search_trigger()
     create_users_table()
     create_login_attempts_table()
     create_dvf_tables()

@@ -189,7 +189,7 @@ site = {
         "source_site": "PAP"
     }
 
-async def scrape_pap(max_pages=1):
+async def scrape_pap(max_pages=10):
     """
     Scrape les annonces de PAP jusqu'à max_pages.
     Retourne une liste d'annonces formatées.

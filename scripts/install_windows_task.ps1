@@ -1,6 +1,6 @@
 param(
     [string]$TaskName = "Benjamin Immobilier Automation",
-    [string]$ProjectPath = "C:\Users\arris\Downloads\Benjamin_Immobilier_Alternance",
+    [string]$ProjectPath = "C:\Users\xanot\Documents\INFO\Benjamin_Immobilier_Alternance",
     [int]$FrequencyHours = 6,
     [string]$StartTime = "06:00",
     [int]$MaxPages = 1,

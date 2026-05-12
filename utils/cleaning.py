@@ -1,4 +1,5 @@
 import math
+import unicodedata
 
 import regex as re
 
@@ -28,6 +29,13 @@ ANNONCE_FIELDS = [
 ]
 
 SCORING_REQUIRED_FIELDS = ("zip_code", "type_bien", "price_square_meter")
+
+_VALIDATION_STATUS_PRIORITY = {
+    "valid_scoring": 3,
+    "valid_no_scoring": 2,
+    "partial": 1,
+    "skipped": 0,
+}
 
 
 def blank_to_none(value):
@@ -258,3 +266,147 @@ def normalization(annonces):
 def filter_annonces(annonces):
     normalized, _ = normalize_annonces(annonces)
     return normalized
+
+
+def _canonical_text(value):
+    value = blank_to_none(value)
+    if value is None:
+        return None
+
+    text = unicodedata.normalize("NFKD", str(value))
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text or None
+
+
+def _canonical_type_bien(value):
+    text = _canonical_text(value)
+    if not text:
+        return None
+    if "appartement" in text:
+        return "appartement"
+    if "maison" in text:
+        return "maison"
+    if "villa" in text:
+        return "maison"
+    return text
+
+
+def build_duplicate_key(annonce):
+    """
+    Build a conservative listing identity key for cross-source duplicates.
+
+    URLs are intentionally ignored because SeLoger and Logic Immo can expose the
+    same listing with different URLs.
+    """
+    if not isinstance(annonce, dict):
+        return None
+
+    price = annonce.get("price")
+    zip_code = annonce.get("zip_code")
+    city = _canonical_text(annonce.get("city") or annonce.get("address"))
+    type_bien = _canonical_type_bien(annonce.get("type_bien"))
+    surface = annonce.get("surface")
+    price_square_meter = annonce.get("price_square_meter")
+
+    if not price or not zip_code or not city or not type_bien:
+        return None
+
+    try:
+        price_key = int(round(float(price)))
+    except (TypeError, ValueError):
+        return None
+
+    area_marker = None
+    try:
+        if surface:
+            area_marker = ("surface", round(float(surface), 1))
+        elif price_square_meter:
+            area_marker = ("price_m2", int(round(float(price_square_meter))))
+    except (TypeError, ValueError):
+        return None
+
+    if area_marker is None:
+        return None
+
+    rooms = annonce.get("rooms")
+    rooms_key = None
+    try:
+        if rooms:
+            rooms_key = int(round(float(rooms)))
+    except (TypeError, ValueError):
+        rooms_key = None
+
+    return (
+        price_key,
+        str(zip_code).strip(),
+        city,
+        type_bien,
+        area_marker,
+        rooms_key,
+    )
+
+
+def _annonce_quality_score(annonce):
+    validation_score = _VALIDATION_STATUS_PRIORITY.get(annonce.get("_validation_status"), 0)
+    populated_fields = sum(
+        1
+        for field in ANNONCE_FIELDS
+        if annonce.get(field) not in (None, "", [])
+    )
+    has_url = 1 if annonce.get("url") else 0
+    return validation_score, populated_fields, has_url
+
+
+def deduplicate_annonces(annonces):
+    """
+    Remove duplicate listings before database insertion.
+
+    When two listings share the same property key, the most complete payload is
+    kept. Ties preserve the first source encountered by the pipeline.
+    """
+    summary = {
+        "input_total": len(annonces or []),
+        "output_total": 0,
+        "removed": 0,
+        "groups": [],
+    }
+    if not annonces:
+        return [], summary
+
+    deduplicated = []
+    seen_indexes = {}
+
+    for annonce in annonces:
+        key = build_duplicate_key(annonce)
+        if key is None:
+            deduplicated.append(annonce)
+            continue
+
+        existing_index = seen_indexes.get(key)
+        if existing_index is None:
+            seen_indexes[key] = len(deduplicated)
+            deduplicated.append(annonce)
+            continue
+
+        kept = deduplicated[existing_index]
+        duplicate = annonce
+        if _annonce_quality_score(annonce) > _annonce_quality_score(kept):
+            deduplicated[existing_index] = annonce
+            kept, duplicate = annonce, kept
+
+        summary["removed"] += 1
+        summary["groups"].append(
+            {
+                "key": "|".join(str(part) for part in key),
+                "kept_url": kept.get("url"),
+                "kept_source": kept.get("source_site"),
+                "duplicate_url": duplicate.get("url"),
+                "duplicate_source": duplicate.get("source_site"),
+            }
+        )
+
+    summary["output_total"] = len(deduplicated)
+    return deduplicated, summary

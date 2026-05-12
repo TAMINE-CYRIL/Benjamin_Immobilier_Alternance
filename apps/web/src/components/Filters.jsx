@@ -1,4 +1,5 @@
 import React from "react";
+import { propertyTypeOptions } from "../constants";
 
 export function Filters({ filters, onChange, onSubmit, onReset }) {
   function update(name, value) {
@@ -7,10 +8,15 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
 
   return (
     <form className="filters" onSubmit={onSubmit}>
+      <input placeholder="Rechercher" value={filters.query} onChange={(event) => update("query", event.target.value)} />
       <input placeholder="Ville" value={filters.city} onChange={(event) => update("city", event.target.value)} />
       <input placeholder="Code postal" value={filters.zip_code} onChange={(event) => update("zip_code", event.target.value)} />
       <input placeholder="Departement" value={filters.department} onChange={(event) => update("department", event.target.value)} />
-      <input placeholder="Type de bien" value={filters.type_bien} onChange={(event) => update("type_bien", event.target.value)} />
+      <select value={filters.type_bien} onChange={(event) => update("type_bien", event.target.value)}>
+        {propertyTypeOptions.map((option) => (
+          <option key={option.value || "all"} value={option.value}>{option.label}</option>
+        ))}
+      </select>
       <input placeholder="Source" value={filters.source_site} onChange={(event) => update("source_site", event.target.value)} />
       <input placeholder="Zonage" value={filters.zonage} onChange={(event) => update("zonage", event.target.value)} />
       <input type="number" placeholder="Prix min" value={filters.price_min} onChange={(event) => update("price_min", event.target.value)} />

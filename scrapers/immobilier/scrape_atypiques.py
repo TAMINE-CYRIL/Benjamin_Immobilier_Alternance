@@ -114,7 +114,7 @@ def extract_type_from_title(title: str) -> str | None:
 
     return None
 
-async def scrape_atypiques(max_pages=1) -> list:
+async def scrape_atypiques(max_pages=10) -> list:
     
     """
     Scrape plusieurs pages du site Espaces Atypiques avec Crawl4AI et gère la pagination.

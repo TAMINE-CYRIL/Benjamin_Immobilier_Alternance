@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from database.db import create_tables, get_connection, insert_annonces
 from database.reset_db import cleanup
 from database.score_annonce import score_annonces
-from main_immo import run_pipeline
+from main_immo import _scrape_with_optional_max_pages, run_pipeline
 
 
 def test_get_connection():
@@ -189,3 +189,79 @@ def test_run_pipeline_respects_flags_and_avoids_duplicates():
     assert summary["normalized_total"] == 2
     assert summary["failed_sources"] == ["Fail"]
     assert summary["status"] == "partial_success"
+
+
+def test_run_pipeline_deduplicates_before_db_insert():
+    args = SimpleNamespace(
+        source=None,
+        max_pages=1,
+        no_db=False,
+        no_score=True,
+        output_json=None,
+    )
+
+    async def logic_builder(_max_pages):
+        return [
+            {
+                "url": "https://www.logic-immo.com/detail",
+                "city": "Marseille",
+                "zip_code": "13001",
+                "price": "250000",
+                "surface": "50",
+                "rooms": "3",
+                "type_bien": "Appartement",
+            }
+        ]
+
+    async def seloger_builder(_max_pages):
+        return [
+            {
+                "url": "https://www.seloger.com/detail",
+                "city": "Marseille",
+                "zip_code": "13001",
+                "price": "250 000 EUR",
+                "surface": "50 m2",
+                "rooms": "3",
+                "type_bien": "Appartement",
+            }
+        ]
+
+    with patch(
+        "main_immo.build_source_registry",
+        return_value=[
+            {"name": "LogicImmo", "enabled": True, "builder": logic_builder},
+            {"name": "SeLoger", "enabled": True, "builder": seloger_builder},
+        ],
+    ), patch("main_immo.insert_annonces") as mock_insert:
+        mock_insert.return_value = {
+            "total": 1,
+            "inserted": 1,
+            "updated": 0,
+            "skipped": 0,
+            "errors": 0,
+            "skip_reasons": {},
+            "processed_ids": [42],
+        }
+        annonces, summary = __import__("asyncio").run(run_pipeline(args))
+
+    assert len(annonces) == 1
+    assert summary["normalized_before_dedup"] == 2
+    assert summary["normalized_total"] == 1
+    assert summary["deduplicated"] == 1
+    mock_insert.assert_called_once()
+    assert len(mock_insert.call_args.args[0]) == 1
+
+
+def test_optional_max_pages_preserves_scraper_default_when_not_overridden():
+    async def fake_scraper(max_pages=7, use_proxies=False):
+        return max_pages, use_proxies
+
+    default_result = __import__("asyncio").run(
+        _scrape_with_optional_max_pages(fake_scraper, max_pages=None, use_proxies=True)
+    )
+    overridden_result = __import__("asyncio").run(
+        _scrape_with_optional_max_pages(fake_scraper, max_pages=3, use_proxies=True)
+    )
+
+    assert default_result == (7, True)
+    assert overridden_result == (3, True)

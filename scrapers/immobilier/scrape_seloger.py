@@ -250,7 +250,7 @@ async def fetch_with_retries(
     return last_result, attempt
 
 
-async def scrape_seloger(max_pages: int = 2, use_proxies: bool = False):
+async def scrape_seloger(max_pages: int = 10, use_proxies: bool = False):
     """
     Scrape plusieurs pages de SeLoger avec Crawl4AI et gere la pagination.
 

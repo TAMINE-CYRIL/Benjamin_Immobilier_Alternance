@@ -1,5 +1,6 @@
 from utils.cleaning import (
     classify_annonce,
+    deduplicate_annonces,
     extract_number,
     normalisation_language,
     normalize_annonce,
@@ -121,3 +122,49 @@ def test_normalize_annonces_summary_counts():
     assert summary["valid_scoring"] == 1
     assert summary["valid_no_scoring"] == 1
     assert summary["skipped"] == 1
+
+
+def test_deduplicate_annonces_removes_cross_site_duplicate():
+    annonces, _ = normalize_annonces(
+        [
+            {
+                "url": "https://www.logic-immo.com/detail",
+                "source_site": "Logic Immo",
+                "city": "Marseille",
+                "zip_code": "13001",
+                "price": "250000",
+                "surface": "50",
+                "rooms": "3",
+                "type_bien": "Appartement",
+            },
+            {
+                "url": "https://www.seloger.com/detail",
+                "source_site": "SeLoger",
+                "city": "marseille",
+                "zip_code": "13001",
+                "price": "250 000 EUR",
+                "surface": "50 m2",
+                "rooms": "3",
+                "type_bien": "appartement",
+            },
+            {
+                "url": "https://www.seloger.com/autre",
+                "source_site": "SeLoger",
+                "city": "Marseille",
+                "zip_code": "13001",
+                "price": "260000",
+                "surface": "50",
+                "rooms": "3",
+                "type_bien": "Appartement",
+            },
+        ]
+    )
+
+    deduplicated, summary = deduplicate_annonces(annonces)
+
+    assert len(deduplicated) == 2
+    assert summary["removed"] == 1
+    assert summary["input_total"] == 3
+    assert summary["output_total"] == 2
+    assert deduplicated[0]["url"] == "https://www.logic-immo.com/detail"
+    assert summary["groups"][0]["duplicate_source"] == "SeLoger"

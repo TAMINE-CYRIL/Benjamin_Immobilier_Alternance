@@ -13,13 +13,18 @@ from scrapers.immobilier.scrape_leboncoin import scrape_leboncoin
 from scrapers.immobilier.scrape_logicimmo import scrape_logicimmo
 from scrapers.immobilier.scrape_pap import scrape_pap
 from scrapers.immobilier.scrape_seloger import scrape_seloger
-from utils.cleaning import normalize_annonces
+from utils.cleaning import deduplicate_annonces, normalize_annonces
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benjamin Immobilier scraping pipeline")
     parser.add_argument("--source", help="Run only one source by name")
-    parser.add_argument("--max-pages", type=int, default=1, help="Override max pages for paginated scrapers")
+    parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=None,
+        help="Override max pages for paginated scrapers. Defaults to each scraper's own setting.",
+    )
     parser.add_argument("--no-db", action="store_true", help="Skip database insert/update")
     parser.add_argument("--no-score", action="store_true", help="Skip scoring step")
     parser.add_argument(
@@ -30,37 +35,55 @@ def parse_args():
     return parser.parse_args()
 
 
+def _scrape_with_optional_max_pages(scraper, max_pages=None, **kwargs):
+    if max_pages is None:
+        return scraper(**kwargs)
+    return scraper(max_pages=max_pages, **kwargs)
+
+
 def build_source_registry():
     return [
         {
             "name": "LogicImmo",
             "enabled": True,
-            "builder": lambda max_pages: scrape_logicimmo(max_pages=max_pages, use_proxies=False),
+            "builder": lambda max_pages: _scrape_with_optional_max_pages(
+                scrape_logicimmo,
+                max_pages=max_pages,
+                use_proxies=False,
+            ),
         },
         {
             "name": "SeLoger",
             "enabled": True,
-            "builder": lambda max_pages: scrape_seloger(max_pages=max_pages, use_proxies=False),
+            "builder": lambda max_pages: _scrape_with_optional_max_pages(
+                scrape_seloger,
+                max_pages=max_pages,
+                use_proxies=False,
+            ),
         },
         {
             "name": "PAP",
             "enabled": True,
-            "builder": lambda max_pages: scrape_pap(max_pages=max_pages),
+            "builder": lambda max_pages: _scrape_with_optional_max_pages(scrape_pap, max_pages=max_pages),
         },
         {
             "name": "BienIci",
             "enabled": True,
-            "builder": lambda max_pages: scrape_bienici(max_pages=max_pages),
+            "builder": lambda max_pages: _scrape_with_optional_max_pages(scrape_bienici, max_pages=max_pages),
         },
         {
             "name": "Leboncoin",
             "enabled": False,
-            "builder": lambda max_pages: scrape_leboncoin(max_pages=max_pages, use_proxies=False),
+            "builder": lambda max_pages: _scrape_with_optional_max_pages(
+                scrape_leboncoin,
+                max_pages=max_pages,
+                use_proxies=True,
+            ),
         },
         {
             "name": "Espaces Atypiques",
             "enabled": True,
-            "builder": lambda max_pages: scrape_atypiques(max_pages=max_pages),
+            "builder": lambda max_pages: _scrape_with_optional_max_pages(scrape_atypiques, max_pages=max_pages),
         },
         {
             "name": "AvoVentes",
@@ -154,6 +177,28 @@ async def run_pipeline(args, logger=None):
             if logger:
                 logger(f"[SOURCE ERROR] {source['name']} -> {exc}")
 
+    all_annonces, deduplication_summary = deduplicate_annonces(all_annonces)
+    if logger and deduplication_summary["removed"]:
+        logger(
+            "[DEDUP] {removed} doublon(s) retire(s) avant insertion "
+            "({before} -> {after})".format(
+                removed=deduplication_summary["removed"],
+                before=deduplication_summary["input_total"],
+                after=deduplication_summary["output_total"],
+            )
+        )
+
+    status_counts = {
+        "valid_scoring": 0,
+        "valid_no_scoring": 0,
+        "partial": 0,
+        "skipped": 0,
+    }
+    for annonce in all_annonces:
+        status = annonce.get("_validation_status")
+        if status in status_counts:
+            status_counts[status] += 1
+
     global_summary = {
         "started_at": start_time.isoformat(timespec="seconds"),
         "completed_at": None,
@@ -162,14 +207,19 @@ async def run_pipeline(args, logger=None):
         "log_path": None,
         "sources": source_summaries,
         "scraped_total": sum(item["scraped_total"] for item in source_summaries),
+        "normalized_before_dedup": deduplication_summary["input_total"],
         "normalized_total": len(all_annonces),
+        "deduplicated": deduplication_summary["removed"],
+        "deduplication": deduplication_summary,
         "inserted": 0,
         "updated": 0,
-        "skipped": sum(item["skipped"] for item in source_summaries),
-        "eligible_for_scoring": sum(item["eligible_for_scoring"] for item in source_summaries),
+        "skipped": status_counts["skipped"],
+        "eligible_for_scoring": status_counts["valid_scoring"],
         "scored": 0,
         "not_scored": 0,
-        "not_scored_missing_fields": sum(item["not_scored_missing_fields"] for item in source_summaries),
+        "not_scored_missing_fields": (
+            status_counts["valid_no_scoring"] + status_counts["partial"] + status_counts["skipped"]
+        ),
         "not_scored_no_reference": 0,
         "failed_sources": [item["name"] for item in source_summaries if item["status"] == "failed"],
         "db": {

@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectPath = "C:\Users\arris\Downloads\Benjamin_Immobilier_Alternance",
+    [string]$ProjectPath = "C:\Users\xanot\Documents\INFO\Benjamin_Immobilier_Alternance",
     [string]$PythonPath = "",
     [int]$MaxPages = 1,
     [int]$EnrichmentLimit = 100
@@ -9,9 +9,13 @@ $ErrorActionPreference = "Stop"
 Set-Location $ProjectPath
 
 if (-not $PythonPath) {
-    $VenvPython = Join-Path $ProjectPath ".venv\Scripts\python.exe"
-    if (Test-Path $VenvPython) {
-        $PythonPath = $VenvPython
+    $VenvCandidates = @(
+        (Join-Path $ProjectPath "venv\Scripts\python.exe"),
+        (Join-Path $ProjectPath ".venv\Scripts\python.exe")
+    )
+    $ResolvedPython = $VenvCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($ResolvedPython) {
+        $PythonPath = $ResolvedPython
     } else {
         $PythonPath = "python"
     }

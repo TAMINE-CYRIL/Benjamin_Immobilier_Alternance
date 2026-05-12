@@ -24,7 +24,7 @@ with open(schema_path, "r", encoding="utf-8") as f:
 site = {
     "url": "https://www.leboncoin.fr/recherche?category=9&locations=d_6%2Cd_83%2Cd_13&sort=time&order=desc&page=1",
     "schema": schema_leboncoin,
-    "wait_for": "css:article[data-test-id='ad']",
+    "wait_for": "css:div[data-qa-id='aditem_container']",
     "prefix": "https://www.leboncoin.fr",
     "source_site": "Leboncoin",
 }
@@ -139,6 +139,20 @@ def extract_city_from_address(address: str):
         return after.split()[0]
     return None
 
+
+def normalize_leboncoin_location(location: str):
+    """Retourne (ville, code postal) depuis une localisation Leboncoin."""
+    if not location:
+        return None, None
+
+    location = " ".join(str(location).split())
+    zip_code = extract_zip_code(location)
+    if not zip_code:
+        return location or None, None
+
+    city = extract_city_from_address(location)
+    return city, zip_code
+
 #################################################
 
 
@@ -178,7 +192,7 @@ async def fetch_with_retries(
 ############# Programme principal ###############
 
 
-async def scrape_leboncoin(max_pages: int = 2, use_proxies: bool = True):
+async def scrape_leboncoin(max_pages: int = 10, use_proxies: bool = True):
     """
     Scrape les annonces immobilières Leboncoin.
     - max_pages : nombre de pages à parcourir
@@ -269,9 +283,11 @@ async def scrape_leboncoin(max_pages: int = 2, use_proxies: bool = True):
                     raw_surface,
                 )
 
-                full_address = annonce.get("address", "")
-                annonce["zip_code"] = extract_zip_code(full_address)
-                annonce["address"] = extract_city_from_address(full_address)
+                full_address = annonce.get("address") or annonce.get("city", "")
+                city, zip_code = normalize_leboncoin_location(full_address)
+                annonce["zip_code"] = zip_code
+                annonce["city"] = city
+                annonce["address"] = full_address or city
                 annonce["source_site"] = site["source_site"]
 
                 # Classe énergie : garder juste la lettre A-G si possible

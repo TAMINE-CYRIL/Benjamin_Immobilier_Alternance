@@ -22,7 +22,7 @@ def test_search_annonces_keeps_text_filter_in_sql_parameters():
     payload = "%' OR 1=1; DROP TABLE users; --"
 
     with patch("apps.database.annonces_repo.get_connection", return_value=mock_conn):
-        search_annonces({"city": payload})
+        search_annonces({"source_site": payload})
 
     count_sql = mock_cursor.execute.call_args_list[0].args[0]
     count_params = mock_cursor.execute.call_args_list[0].args[1]
@@ -31,6 +31,39 @@ def test_search_annonces_keeps_text_filter_in_sql_parameters():
     assert "ILIKE %s" in count_sql
     assert "ESCAPE '\\'" in count_sql
     assert count_params == [r"%\%' OR 1=1; DROP TABLE users; --%"]
+
+
+def test_search_annonces_normalizes_city_filter():
+    mock_conn, mock_cursor = _mock_connection()
+
+    with patch("apps.database.annonces_repo.get_connection", return_value=mock_conn):
+        search_annonces({"city": "Aix en Provence"})
+
+    count_sql = mock_cursor.execute.call_args_list[0].args[0]
+    count_params = mock_cursor.execute.call_args_list[0].args[1]
+
+    assert "regexp_replace" in count_sql
+    assert "translate(lower(COALESCE(a.city, ''))" in count_sql
+    assert count_params[-1] == "%aix%en%provence%"
+
+
+def test_search_annonces_builds_global_query_with_parameters():
+    mock_conn, mock_cursor = _mock_connection()
+    payload = "Marseille % _"
+
+    with patch("apps.database.annonces_repo.get_connection", return_value=mock_conn):
+        search_annonces({"query": payload})
+
+    count_sql = mock_cursor.execute.call_args_list[0].args[0]
+    count_params = mock_cursor.execute.call_args_list[0].args[1]
+
+    assert payload not in count_sql
+    assert "a.title ILIKE %s" in count_sql
+    assert "a.city ILIKE %s" in count_sql
+    assert "e.zonage ILIKE %s" in count_sql
+    assert " OR " in count_sql
+    assert count_params
+    assert set(count_params) == {r"%Marseille \% \_%"}
 
 
 def test_search_annonces_ignores_malicious_sort_and_direction_values():
@@ -70,3 +103,18 @@ def test_annonces_route_rejects_invalid_zip_code_parameter():
         app.dependency_overrides.clear()
 
     assert response.status_code == 422
+
+
+def test_annonces_route_accepts_global_query_parameter():
+    app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
+    client = TestClient(app)
+
+    try:
+        with patch("apps.api.routes.annonces.search_annonces") as mock_search:
+            mock_search.return_value = {"items": [], "total": 0, "page": 1, "page_size": 25}
+            response = client.get("/api/annonces?query=Marseille")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert mock_search.call_args.args[0]["query"] == "Marseille"

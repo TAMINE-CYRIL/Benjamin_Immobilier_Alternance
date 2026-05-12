@@ -16,7 +16,12 @@ from services.enrichment.orchestrator import EnrichmentService
 def parse_args():
     parser = argparse.ArgumentParser(description="Orchestrateur Windows Benjamin Immobilier")
     parser.add_argument("--source", help="Limiter le scraping a une source")
-    parser.add_argument("--max-pages", type=int, default=1, help="Nombre de pages par source")
+    parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=None,
+        help="Nombre de pages par source. Par defaut, chaque scraper garde sa propre valeur.",
+    )
     parser.add_argument("--enrichment-limit", type=int, default=100, help="Nombre d'annonces a enrichir")
     parser.add_argument("--refresh-days", type=int, default=30, help="Rafraichir les enrichissements anciens")
     parser.add_argument("--skip-scraping", action="store_true", help="Ne pas lancer le scraping")

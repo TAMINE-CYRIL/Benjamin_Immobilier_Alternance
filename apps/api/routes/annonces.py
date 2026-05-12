@@ -16,6 +16,8 @@ def get_annonces(
     user=Depends(get_current_user),
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
+    query: Optional[str] = TEXT_FILTER,
+    q: Optional[str] = TEXT_FILTER,
     city: Optional[str] = TEXT_FILTER,
     zip_code: Optional[str] = ZIP_FILTER,
     department: Optional[str] = DEPARTMENT_FILTER,
@@ -28,12 +30,13 @@ def get_annonces(
     source_site: Optional[str] = TEXT_FILTER,
     enrichment_status: Optional[Literal["pending", "success", "partial_success", "failed"]] = None,
     zonage: Optional[str] = TEXT_FILTER,
-    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage"] = "score",
+    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage", "relevance"] = "score",
     direction: Literal["asc", "desc"] = "desc",
 ):
     return search_annonces({
         "page": page,
         "page_size": page_size,
+        "query": query or q,
         "city": city,
         "zip_code": zip_code,
         "department": department,

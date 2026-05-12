@@ -1,36 +1,36 @@
 {
     "name": "Annonces Leboncoin",
-    "baseSelector": "article[data-test-id='ad']",
+    "baseSelector": "div[data-qa-id='aditem_container']",
     "fields": [
         {
             "name": "title",
-            "selector": "p[aria-label*='Maison'], p[aria-label*='Appartement'], p[aria-label*='Terrain'], p.text-body-2.font-bold",
+            "selector": "p[aria-label*='pièce'], p[aria-label*='mètres carrés'], p[class*='text-body-2'][class*='font-bold']",
             "type": "text"
         },
         {
             "name": "price",
-            "selector": "p[data-test-id='price'] span",
+            "selector": "p[class*='text-callout'] span",
             "type": "text"
         },
         {
             "name": "price_square_meter",
-            "selector": "div.text-caption p",
+            "selector": "div[class*='text-caption'][class*='text-on-background'] p",
             "type": "text"
         },
         {
-            "name": "city",
-            "selector": "p.text-caption",
+            "name": "address",
+            "selector": "p[aria-hidden='true'][class*='text-caption'][class*='text-on-surface']",
             "type": "text"
         },
         {
             "name": "url",
-            "selector": "a[href^='/ad/']",
+            "selector": "a[aria-label='Voir l’annonce'], a[href^='/ad/ventes_immobilieres/']",
             "type": "attribute",
             "attribute": "href"
         },
         {
             "name": "energy_class",
-            "selector": "img[alt*='Classe']",
+            "selector": "img[alt*='Classe'], [aria-label*='Classe énergie'], [aria-label*='DPE']",
             "type": "attribute",
             "attribute": "alt"
         },

@@ -162,7 +162,7 @@ async def fetch_with_retries(
 
 
 
-async def scrape_logicimmo(max_pages: int = 1, use_proxies: bool = True):
+async def scrape_logicimmo(max_pages: int = 10, use_proxies: bool = True):
     """
     Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination.
 

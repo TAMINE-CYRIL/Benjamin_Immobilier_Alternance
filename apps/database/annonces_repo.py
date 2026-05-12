@@ -1,3 +1,5 @@
+import unicodedata
+
 from database.connection import get_connection
 
 ANNONCE_FIELDS = """
@@ -47,12 +49,16 @@ SORT_COLUMNS = {
     "price_m2": "a.price_square_meter",
     "last_seen": "a.last_seen",
     "zonage": "e.zonage",
+    "relevance": "relevance_rank",
 }
 
 SORT_DIRECTIONS = {
     "asc": "ASC",
     "desc": "DESC",
 }
+
+ACCENTED_CHARS = "àáâãäåçèéêëìíîïñòóôõöøùúûüýÿ"
+UNACCENTED_CHARS = "aaaaaaceeeeiiiinoooooouuuuyy"
 
 
 def _escape_like(value):
@@ -62,6 +68,34 @@ def _escape_like(value):
         .replace("%", "\\%")
         .replace("_", "\\_")
     )
+
+
+def _normalize_like_pattern(value):
+    text = unicodedata.normalize("NFKD", str(value))
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    tokens = [token for token in "".join(char.lower() if char.isalnum() else " " for char in text).split() if token]
+    if not tokens:
+        return None
+    return "%" + "%".join(_escape_like(token) for token in tokens) + "%"
+
+
+def _normalized_column_expression(column):
+    return (
+        "regexp_replace("
+        f"translate(lower(COALESCE({column}, '')), %s, %s), "
+        "'[^a-z0-9]+', ' ', 'g'"
+        ")"
+    )
+
+
+def _fulltext_tsquery(query_text):
+    """
+    Convertit un texte en tsquery PostgreSQL pour full-text search.
+    Utilise plainto_tsquery pour une recherche simple et robuste en français.
+    """
+    if not query_text or not query_text.strip():
+        return None
+    return f"plainto_tsquery('french', {repr(query_text)})"
 
 
 def _row_to_annonce(row):
@@ -112,8 +146,21 @@ def _build_filters(filters):
     clauses = []
     params = []
 
+    query = filters.get("query") or filters.get("q")
+    if query:
+        # Essayer d'abord avec full-text search si search_vector est disponible
+        # Sinon, fallback sur recherche ILIKE multi-colonnes
+        clauses.append("a.search_vector @@ plainto_tsquery('french', %s)")
+        params.append(query)
+
+    city = filters.get("city")
+    if city:
+        city_pattern = _normalize_like_pattern(city)
+        if city_pattern:
+            clauses.append(f"{_normalized_column_expression('a.city')} LIKE %s ESCAPE '\\'")
+            params.extend([ACCENTED_CHARS, UNACCENTED_CHARS, city_pattern])
+
     text_filters = {
-        "city": "a.city",
         "zip_code": "a.zip_code",
         "department": "a.department",
         "type_bien": "a.type_bien",
@@ -163,19 +210,34 @@ def search_annonces(filters):
         LEFT JOIN parcelles p ON p.id = e.parcel_id
     """
 
+    # Si tri par pertinence et requête textuelle présente, calculer le rang
+    query_text = filters.get("query") or filters.get("q")
+    select_fields = ANNONCE_FIELDS
+    order_by = f"{sort} {direction} NULLS LAST, a.id DESC"
+    
+    if sort == "relevance_rank" and query_text:
+        # Inclure le calcul de pertinence dans la requête SELECT
+        select_fields = f"""
+            {ANNONCE_FIELDS},
+            ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) as relevance_rank
+        """
+        order_by = "ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) DESC, a.id DESC"
+        # Ajouter les paramètres pour les deux occurrences de ts_rank_cd
+        params = params + [query_text, query_text]
+
     count_sql = f"SELECT COUNT(*) FROM annonces a {joins} {where_sql}"
     data_sql = f"""
-        SELECT {ANNONCE_FIELDS}
+        SELECT {select_fields}
         FROM annonces a
         {joins}
         {where_sql}
-        ORDER BY {sort} {direction} NULLS LAST, a.id DESC
+        ORDER BY {order_by}
         LIMIT %s OFFSET %s
     """
 
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(count_sql, params)
+            cur.execute(count_sql, params[:-2] if sort == "relevance_rank" and query_text else params)
             total = cur.fetchone()[0]
 
             cur.execute(data_sql, [*params, page_size, offset])
