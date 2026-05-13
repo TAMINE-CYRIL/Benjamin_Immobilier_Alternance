@@ -7,6 +7,9 @@ MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 
 
 def create_schema_migrations_table(cur):
+    """
+    Crée la table schema_migrations si elle n'existe pas déjà, pour suivre les migrations appliquées.
+    """
     cur.execute("""
     CREATE TABLE IF NOT EXISTS schema_migrations (
         version TEXT PRIMARY KEY,

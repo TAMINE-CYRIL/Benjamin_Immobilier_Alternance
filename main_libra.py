@@ -3,6 +3,9 @@ from scrapers.scrape_libramemoria import scrape_libramemoria
 
 
 async def main():
+    """
+    Programme principal pour scraper les avis de décès sur Libramemoria et 
+    sauvegarder les résultats en JSON et CSV."""
     print("Démarrage du scraping Libramemoria...")
 
     os.makedirs("data", exist_ok=True)

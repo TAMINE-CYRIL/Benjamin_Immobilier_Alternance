@@ -1,6 +1,10 @@
 from pydantic import BaseModel, ConfigDict
 
 class Annonce(BaseModel):
+    """
+    Modèle de données pour une annonce immobilière,
+    avec validation et typage strict.
+    """
     id: int
     title: str
     url: str

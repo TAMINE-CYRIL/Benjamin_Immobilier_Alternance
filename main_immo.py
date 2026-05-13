@@ -94,6 +94,10 @@ def build_source_registry():
 
 
 def create_run_logger():
+    """
+    Crée une fonction de logging 
+    qui écrit dans un fichier de log horodaté.
+    """
     os.makedirs("logs", exist_ok=True)
     os.makedirs("data", exist_ok=True)
     timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -102,7 +106,6 @@ def create_run_logger():
 
     def logger(message):
         line = f"[{dt.datetime.now().isoformat(timespec='seconds')}] {message}"
-        print(line)
         log_file.write(line + "\n")
         log_file.flush()
 
@@ -110,6 +113,9 @@ def create_run_logger():
 
 
 def _empty_source_summary(name):
+    """
+    Initialise un résumé de source avec des compteurs à zéro et un statut "pending".
+    """
     return {
         "name": name,
         "status": "pending",
@@ -134,6 +140,10 @@ def _compute_run_status(summary):
 
 
 async def run_pipeline(args, logger=None):
+    """
+    Lance la pipeline de scraping,
+    normalisation, déduplication, insertion en base et scoring des annonces immobilières.
+    """
     start_time = dt.datetime.now()
     registry = build_source_registry()
 
@@ -269,6 +279,11 @@ async def run_pipeline(args, logger=None):
 
 
 async def main():
+    """
+    Lance la pipeline de scraping, 
+    normalisation, déduplication, 
+    insertion en base et scoring des annonces immobilières.
+    """
     args = parse_args()
     logger, log_path, log_file = create_run_logger()
     try:

@@ -19,23 +19,38 @@ COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "false").lower() == "true"
 
 
 def hash_password(password):
+    """
+    Hash le mot de passe en utilisant bcrypt et retourne la version hachée.
+    """
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password, password_hash):
+    """
+    Vérifie que le mot de passe correspond au hash stocké en utilisant bcrypt.
+    """
     return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
 def _b64encode(payload):
+    """
+    Renvoie une chaîne encodée en base64 URL-safe sans les caractères de padding "=".
+    """
     return base64.urlsafe_b64encode(payload).rstrip(b"=").decode("ascii")
 
 
 def _b64decode(payload):
+    """
+    Renvoie les données décodées à partir d'une chaîne encodée en base64 URL-safe, en ajoutant les caractères de padding "=" si nécessaire.
+    """
     padding = "=" * (-len(payload) % 4)
     return base64.urlsafe_b64decode(payload + padding)
 
 
 def create_access_token(user_id):
+    """
+    Crée un token d'accès JWT pour l'utilisateur.
+    """
     now = int(time.time())
     header = {"alg": "HS256", "typ": "JWT"}
     body = {"sub": str(user_id), "iat": now, "exp": now + JWT_TTL_SECONDS}
@@ -53,6 +68,9 @@ def create_access_token(user_id):
 
 
 def decode_access_token(token):
+    """
+    Décode un token d'accès JWT et retourne le payload.
+    """
     try:
         header_b64, body_b64, signature_b64 = token.split(".")
     except ValueError as exc:
@@ -85,6 +103,9 @@ def decode_access_token(token):
 
 
 def set_auth_cookie(response, token):
+    """
+    Met en place le cookie de connexion avec le token d'accès JWT.
+    """
     response.set_cookie(
         COOKIE_NAME,
         token,
@@ -97,10 +118,17 @@ def set_auth_cookie(response, token):
 
 
 def clear_auth_cookie(response):
+    """
+    Efface le cookie de connexion.
+    """
     response.delete_cookie(COOKIE_NAME, path="/")
 
 
 def get_current_user(access_token: Optional[str] = Cookie(default=None, alias=COOKIE_NAME)):
+    """
+    Récupère l'utilisateur actuellement authentifié à partir du cookie d'authentification.
+    Si le token est invalide ou expiré, ou si l'utilisateur n'existe pas
+    """
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 

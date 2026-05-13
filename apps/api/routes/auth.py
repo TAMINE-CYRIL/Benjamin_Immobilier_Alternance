@@ -27,11 +27,17 @@ ACCOUNT_LOCK_MESSAGE = "Compte temporairement bloque. Reessayez plus tard."
 
 
 class LoginRequest(BaseModel):
+    """
+    Classe de données pour la requête de login, avec validation des champs email et password.
+    """
     email: str
     password: str
 
 
 def public_user(user):
+    """
+    Retourne une représentation publique d'un utilisateur.
+    """
     return {
         "id": user["id"],
         "email": user["email"],
@@ -41,6 +47,9 @@ def public_user(user):
 
 
 def _client_ip(request: Request):
+    """
+    Récupère l'adresse IP du client à partir de l'en-tête "x-forwarded-for" ou de la connexion directe.
+    """
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
@@ -50,6 +59,10 @@ def _client_ip(request: Request):
 
 
 def _assert_login_allowed(email):
+    """
+    Vérifie si l'adresse email n'a pas dépassé le nombre maximum de tentatives de connexion échouées.
+    Si le nombre de tentatives échouées est trop élevé, lève une exception HTTP 429 Too Many Requests.
+    """
     failed_attempts = count_recent_failed_attempts(email, LOGIN_ATTEMPT_WINDOW_MINUTES)
     if failed_attempts >= MAX_FAILED_LOGIN_ATTEMPTS:
         raise HTTPException(
@@ -59,6 +72,10 @@ def _assert_login_allowed(email):
 
 
 def _assert_ip_allowed(ip_address):
+    """
+    Vérifie si l'adresse IP n'a pas dépassé le nombre maximum de tentatives de connexion échouées.
+    Si le nombre de tentatives échouées est trop élevé, lève une exception HTTP 429 Too Many Requests.
+    """
     failed_attempts = count_recent_failed_attempts_by_ip(ip_address, LOGIN_ATTEMPT_WINDOW_MINUTES)
     if failed_attempts >= MAX_FAILED_LOGIN_ATTEMPTS_PER_IP:
         raise HTTPException(
@@ -68,6 +85,10 @@ def _assert_ip_allowed(ip_address):
 
 
 def _assert_account_unlocked(user):
+    """
+    Bloque l'accès si le compte de l'utilisateur est temporairement verrouillé en raison de trop nombreuses tentatives de connexion échouées.
+    Si le compte est verrouillé, lève une exception HTTP 429 Too Many Requests.
+    """
     locked_until = user.get("locked_until")
     if locked_until and locked_until > datetime.now():
         raise HTTPException(
@@ -77,6 +98,10 @@ def _assert_account_unlocked(user):
 
 
 def _record_failed_login(email, ip_address, user=None):
+    """
+    Enregistre une tentative de connexion échouée pour l'adresse email et l'adresse IP données.
+    Si un utilisateur est fourni, vérifie si le compte doit être verrouillé en raison de trop nombreuses tentatives échouées, et verrouille le compte si nécessaire.
+    """
     record_login_attempt(email, ip_address, success=False)
     failed_attempts = count_recent_failed_attempts(email, LOGIN_ATTEMPT_WINDOW_MINUTES)
 
@@ -122,10 +147,16 @@ def login(payload: LoginRequest, request: Request, response: Response):
 
 @router.post("/logout")
 def logout(response: Response):
+    """
+    Déconnecte l'utilisateur en effaçant le cookie d'authentification.
+    """
     clear_auth_cookie(response)
     return {"ok": True}
 
 
 @router.get("/me")
 def me(user=Depends(get_current_user)):
+    """
+    Retourne les informations de l'utilisateur actuellement authentifié.
+    """
     return {"user": public_user(user)}

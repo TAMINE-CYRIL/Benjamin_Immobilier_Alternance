@@ -33,6 +33,10 @@ def get_annonces(
     sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage", "relevance"] = "score",
     direction: Literal["asc", "desc"] = "desc",
 ):
+    """
+    Recherche des annonces immobilières avec pagination, filtres avancés et tri.
+     - `page` et `page_size` pour la pagination.
+    """
     return search_annonces({
         "page": page,
         "page_size": page_size,
@@ -56,6 +60,10 @@ def get_annonces(
 
 @router.get("/annonces/{annonce_id}")
 def get_annonce(annonce_id: int, user=Depends(get_current_user)):
+    """
+    Récupère une annonce par son ID.
+    Si l'annonce n'existe pas, retourne une erreur 404.
+    """
     annonce = fetch_annonce_by_id(annonce_id)
     if not annonce:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Annonce introuvable")

@@ -62,6 +62,9 @@ UNACCENTED_CHARS = "aaaaaaceeeeiiiinoooooouuuuyy"
 
 
 def _escape_like(value):
+    """
+    Remplace les caractères spéciaux dans une chaîne pour une utilisation dans une clause LIKE SQL.
+    """
     return (
         str(value)
         .replace("\\", "\\\\")
@@ -99,6 +102,9 @@ def _fulltext_tsquery(query_text):
 
 
 def _row_to_annonce(row):
+    """
+    Convertit une ligne de résultat en SQL en un dictionnaire d'annonce structuré.
+    """
     return {
         "id": row[0],
         "title": row[1],
@@ -143,6 +149,9 @@ def _row_to_annonce(row):
 
 
 def _build_filters(filters):
+    """
+    Construit les clauses SQL et les paramètres pour la recherche d'annonces en fonction des filtres fournis.
+    """
     clauses = []
     params = []
 
@@ -195,6 +204,9 @@ def _build_filters(filters):
 
 
 def search_annonces(filters):
+    """
+    Recherche des annonces selon les filtres fournis.
+    """
     page = max(filters.get("page") or 1, 1)
     page_size = min(max(filters.get("page_size") or 25, 1), 100)
     offset = (page - 1) * page_size
@@ -252,6 +264,9 @@ def search_annonces(filters):
 
 
 def fetch_annonce_by_id(annonce_id):
+    """
+    Fetch une annonce par son ID. Retourne None si l'annonce n'existe pas.
+    """
     sql = f"""
         SELECT {ANNONCE_FIELDS}
         FROM annonces a

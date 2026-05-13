@@ -4,7 +4,7 @@ from database.create_tables import create_tables
 
 def insert_annonces(annonces, logger=None):
     """
-    Insert or update annonces and return a structured execution summary.
+    Insére une liste d'annonces dans la base de données avec gestion des conflits et logging.
     """
     summary = {
         "total": len(annonces or []),
