@@ -298,7 +298,7 @@ def build_duplicate_key(annonce):
     """
     Build a conservative listing identity key for cross-source duplicates.
 
-    URLs are intentionally ignored because SeLoger and Logic Immo can expose the
+    URLs are intentionally ignored because SeLoger and LogicImmo can expose the
     same listing with different URLs.
     """
     if not isinstance(annonce, dict):

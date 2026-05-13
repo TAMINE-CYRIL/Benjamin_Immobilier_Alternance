@@ -124,7 +124,7 @@ def format_url(url: str):
 def extract_type_from_title(title: str):
     """
     Extrait le type de bien (appartement, maison, etc.) à partir du titre.
-    Pour Logic Immo, le type de bien est souvent le premier mot du titre.
+    Pour LogicImmo, le type de bien est souvent le premier mot du titre.
     """
     if not title:
         return None
@@ -164,7 +164,7 @@ async def fetch_with_retries(
 
 async def scrape_logicimmo(max_pages: int = 10, use_proxies: bool = True):
     """
-    Scrape plusieurs pages de Logic Immo avec Crawl4AI et gère la pagination.
+    Scrape plusieurs pages de LogicImmo avec Crawl4AI et gère la pagination.
 
     Args:
         max_pages (int): Nombre maximum de pages à scraper.
@@ -246,7 +246,7 @@ async def scrape_logicimmo(max_pages: int = 10, use_proxies: bool = True):
                 break
 
             for annonce in annonces:
-                annonce["source_site"] = "Logic Immo"
+                annonce["source_site"] = "LogicImmo"
 
                 annonce["price"] = extract_number(annonce.get("price"))
                 annonce["price_square_meter"] = extract_number(annonce.get("price_square_meter"))

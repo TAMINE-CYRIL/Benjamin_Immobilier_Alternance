@@ -58,12 +58,8 @@ def test_search_annonces_builds_global_query_with_parameters():
     count_params = mock_cursor.execute.call_args_list[0].args[1]
 
     assert payload not in count_sql
-    assert "a.title ILIKE %s" in count_sql
-    assert "a.city ILIKE %s" in count_sql
-    assert "e.zonage ILIKE %s" in count_sql
-    assert " OR " in count_sql
-    assert count_params
-    assert set(count_params) == {r"%Marseille \% \_%"}
+    assert "a.search_vector @@ plainto_tsquery('french', %s)" in count_sql
+    assert count_params == [payload]
 
 
 def test_search_annonces_ignores_malicious_sort_and_direction_values():

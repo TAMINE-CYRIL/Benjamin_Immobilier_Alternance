@@ -3,7 +3,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { formatMoney } from "../utils";
+import { formatMoney, formatScore, getScoreLevel } from "../utils";
 
 
 function hasValidCoords(annonce) {
@@ -79,6 +79,7 @@ export default function AnnoncesMap({ annonces, selectedId, onSelect }) {
               <div className="map-popup">
                 <strong>{annonce.title || "Annonce sans titre"}</strong>
                 <span>{[annonce.city, annonce.zip_code].filter(Boolean).join(" ") || "Localisation inconnue"}</span>
+                <span className={`score-chip score-${getScoreLevel(annonce.score)}`}>Score {formatScore(annonce.score)}</span>
                 <span>{formatMoney(annonce.price)}</span>
                 <button type="button" onClick={() => onSelect(annonce.id)}>
                   Voir le detail

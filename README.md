@@ -6,7 +6,7 @@
 <img src="https://img.shields.io/badge/fastapi-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
 </div>
 
-Projet de scraping, nettoyage et scoring d'annonces immobilières (sources : Bienici, SeLoger, PAP, Leboncoin, Logic Immo, Espaces Atypiques, AvoVentes).
+Projet de scraping, nettoyage et scoring d'annonces immobilières (sources : Bienici, SeLoger, PAP, Leboncoin, LogicImmo, Espaces Atypiques, AvoVentes).
 On utilise [Crawl4AI](https://github.com/unclecode/crawl4ai) pour parcourir les différents sites et extraire les données, enrichies avec les données DVF (Demandes de Valeurs Foncières) pour calculer un score d'opportunité par annonce.
 
 ## Fonctionnalités

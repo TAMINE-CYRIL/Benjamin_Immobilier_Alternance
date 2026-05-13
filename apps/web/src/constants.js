@@ -35,7 +35,7 @@ export const sourceOptions = [
   { value: "BienIci", label: "BienIci" },
   { value: "Espaces Atypiques", label: "Espaces Atypiques" },
   { value: "Leboncoin", label: "Leboncoin" },
-  { value: "Logic Immo", label: "Logic Immo" },
+  { value: "LogicImmo", label: "LogicImmo" },
   { value: "PAP", label: "PAP" },
   { value: "SeLoger", label: "SeLoger" },
 ];

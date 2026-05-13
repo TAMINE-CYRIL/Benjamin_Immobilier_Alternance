@@ -129,7 +129,7 @@ def test_deduplicate_annonces_removes_cross_site_duplicate():
         [
             {
                 "url": "https://www.logic-immo.com/detail",
-                "source_site": "Logic Immo",
+                "source_site": "LogicImmo",
                 "city": "Marseille",
                 "zip_code": "13001",
                 "price": "250000",

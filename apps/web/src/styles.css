@@ -368,7 +368,7 @@ select:focus {
 
 .annonce-card-button {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(230px, 0.9fr) auto;
+  grid-template-columns: 74px minmax(0, 1.5fr) minmax(230px, 0.9fr) auto;
   width: 100%;
   min-height: 96px;
   gap: 16px;
@@ -394,6 +394,78 @@ select:focus {
 .annonce-card-badges {
   display: grid;
   gap: 6px;
+}
+
+.score-pill {
+  display: grid;
+  width: 68px;
+  min-height: 62px;
+  place-items: center;
+  align-content: center;
+  border: 1px solid #d7e3f1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #4e6d93;
+  line-height: 1;
+}
+
+.score-pill strong {
+  color: #16304f;
+  font-size: 22px;
+}
+
+.score-pill span {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.score-chip {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.score-high {
+  border-color: #9ed8b3;
+  background: #ecfdf3;
+  color: #166534;
+}
+
+.score-high strong {
+  color: #166534;
+}
+
+.score-medium {
+  border-color: #f4d58d;
+  background: #fff8e6;
+  color: #92400e;
+}
+
+.score-medium strong {
+  color: #92400e;
+}
+
+.score-low {
+  border-color: #f4b4a7;
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.score-low strong {
+  color: #b42318;
+}
+
+.score-unknown {
+  border-color: #d7e3f1;
+  background: #f8fafc;
+  color: #60746e;
 }
 
 .annonce-card-main strong {

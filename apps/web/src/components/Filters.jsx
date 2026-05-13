@@ -1,5 +1,5 @@
 import React from "react";
-import { propertyTypeOptions } from "../constants";
+import { propertyTypeOptions, sourceOptions } from "../constants";
 
 export function Filters({ filters, onChange, onSubmit, onReset }) {
   function update(name, value) {
@@ -17,7 +17,11 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
           <option key={option.value || "all"} value={option.value}>{option.label}</option>
         ))}
       </select>
-      <input placeholder="Source" value={filters.source_site} onChange={(event) => update("source_site", event.target.value)} />
+      <select value={filters.source_site} onChange={(event) => update("source_site", event.target.value)}>
+        {sourceOptions.map((option) => (
+          <option key={option.value || "all"} value={option.value}>{option.label}</option>
+        ))}
+      </select>
       <input placeholder="Zonage" value={filters.zonage} onChange={(event) => update("zonage", event.target.value)} />
       <input type="number" placeholder="Prix min" value={filters.price_min} onChange={(event) => update("price_min", event.target.value)} />
       <input type="number" placeholder="Prix max" value={filters.price_max} onChange={(event) => update("price_max", event.target.value)} />

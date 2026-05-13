@@ -1,5 +1,5 @@
 import React from "react";
-import { formatMoney } from "../utils";
+import { formatMoney, formatScore, getScoreLevel } from "../utils";
 
 function hasValidCoords(annonce) {
   const rawLatitude = annonce.enrichment?.latitude;
@@ -26,6 +26,10 @@ export function AnnoncesList({ annonces, selectedId, onSelect }) {
         return (
           <article className={`annonce-card${selected ? " annonce-card-selected" : ""}`} key={annonce.id}>
             <button type="button" className="annonce-card-button" onClick={() => onSelect(annonce.id)}>
+              <span className={`score-pill score-${getScoreLevel(annonce.score)}`}>
+                <strong>{formatScore(annonce.score)}</strong>
+                <span>Score</span>
+              </span>
               <span className="annonce-card-main">
                 <strong>{annonce.title || "Annonce sans titre"}</strong>
                 <span>{[annonce.city, annonce.zip_code].filter(Boolean).join(" ") || "Localisation inconnue"}</span>
