@@ -1,4 +1,5 @@
-import psycopg2, os
+import psycopg2
+import os
 
 try:
     from dotenv import load_dotenv

@@ -92,7 +92,7 @@ def test_search_annonces_with_sort_relevance():
         mock_cursor.fetchall.return_value = [tuple(mock_row)]
         mock_conn.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
         
-        result = search_annonces({
+        search_annonces({
             "query": "maison",
             "sort": "relevance",
             "direction": "desc"

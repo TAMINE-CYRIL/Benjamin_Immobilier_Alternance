@@ -3,7 +3,9 @@
 
 ############# Imports ##############
 
-import json, os, regex as re
+import json
+import os
+import regex as re
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig
@@ -75,7 +77,7 @@ def format_price(price: str) -> int | float | None:
     try:
         value = float(price)
         return int(value) if value.is_integer() else value
-    except:
+    except ValueError:
         return None
 
 
@@ -195,11 +197,11 @@ async def scrape_avoventes() -> list:
             return []
         
         if result.status_code == 429:
-            print(f"429 Too Many Requests reçu, arrêt du scraping.")
+            print("429 Too Many Requests reçu, arrêt du scraping.")
             return []
             
         if result.status_code == 403:
-            print(f"403 Forbidden reçu, arrêt du scraping.")
+            print("403 Forbidden reçu, arrêt du scraping.")
             return []
 
         annonces = json.loads(result.extracted_content)

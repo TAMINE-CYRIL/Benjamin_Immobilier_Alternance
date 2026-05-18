@@ -17,7 +17,7 @@ def import_dvf_with_staging(dvf_path: Path, year: int):
     print(f"Import DVF : {dvf_path.name} (année {year})")
 
     # Table de staging pour l'import des données DVF
-    print(f"   Création de la table de staging...")
+    print("   Création de la table de staging...")
     cur.execute("DROP TABLE IF EXISTS dvf_staging;")
     cur.execute("""
         CREATE TABLE dvf_staging (
@@ -83,7 +83,7 @@ def import_dvf_with_staging(dvf_path: Path, year: int):
     """, (year,))
     conn.commit()
 
-    print(f"Insertion des colonnes utiles dans dvf_raw...")
+    print("Insertion des colonnes utiles dans dvf_raw...")
     cur.execute("""
         INSERT INTO dvf_raw (
             annee,
@@ -113,7 +113,7 @@ def import_dvf_with_staging(dvf_path: Path, year: int):
     rows_inserted = cur.rowcount
     conn.commit()
 
-    print(f"Nettoyage de la table de staging...")
+    print("Nettoyage de la table de staging...")
     cur.execute("DROP TABLE IF EXISTS dvf_staging;")
     conn.commit()
 

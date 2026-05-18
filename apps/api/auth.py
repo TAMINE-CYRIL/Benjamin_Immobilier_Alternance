@@ -7,7 +7,7 @@ import time
 from typing import Optional
 
 import bcrypt
-from fastapi import Cookie, Depends, HTTPException, Response, status
+from fastapi import Cookie, HTTPException, status
 
 from apps.database.users_repo import get_user_by_id
 

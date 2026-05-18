@@ -3,7 +3,10 @@
 
 ############# Imports ##############
 
-import json, os, asyncio, re
+import json
+import os
+import asyncio
+import re
 from crawl4ai import AsyncWebCrawler, CacheMode, JsonCssExtractionStrategy, ProxyConfig
 from crawl4ai.async_configs import CrawlerRunConfig
 from utils.cleaning import extract_number

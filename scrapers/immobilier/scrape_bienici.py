@@ -3,7 +3,11 @@
 
 ############# Imports ##############
 
-import json, os, asyncio, random, re
+import json
+import os
+import asyncio
+import random
+import re
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig

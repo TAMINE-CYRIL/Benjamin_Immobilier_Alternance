@@ -2,7 +2,11 @@ from crawl4ai import AsyncWebCrawler, CacheMode, JsonCssExtractionStrategy
 from crawl4ai.async_configs import CrawlerRunConfig
 from utils.cleaning import extract_number
 from utils.config import get_browser_config
-import asyncio, json, os, random, regex as re
+import asyncio
+import json
+import os
+import random
+import regex as re
 
 
 
