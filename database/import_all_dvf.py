@@ -3,7 +3,6 @@ import re
 
 from import_dvf import import_dvf_with_staging
 from aggregate_dvf import aggregate_dvf, aggregate_dvf_multi_years
-#from connection import get_connection
 from stats_nb_transactions import compute_nb_transactions_quartiles
 
 

@@ -5,6 +5,9 @@ NB_TRANSACTION_STATS = None
 
 
 def load_nb_transaction_stats(force_reload=False):
+    """
+    Charge les statistiques globales du nombre de transactions à partir de la table dvf_nb_transactions_stats.
+    """
     global NB_TRANSACTION_STATS
 
     if NB_TRANSACTION_STATS is not None and not force_reload:
@@ -45,6 +48,10 @@ def evaluate_annonce(
     nb_transactions,
     nb_transaction_stats=None,
 ):
+    """
+    Evalue une annonce en calculant un score de 0 à 100 basé sur l'écart de son prix au m2 par rapport à la médiane,
+    ajusté par la position de son prix dans les quartiles et le nombre de transactions dans
+    """
     if not all([prix_annonce_m2, prix_m2_med, prix_m2_q1, prix_m2_q3]):
         return None
 

@@ -100,6 +100,9 @@ def create_fulltext_search_trigger():
     connexion.commit()
     cursor.close()
     connexion.close()
+
+
+def create_users_table():
     """
     Cree la table des utilisateurs qui peuvent acceder au dashboard prive.
     """
@@ -180,15 +183,16 @@ def populate_fulltext_search_vector():
         setweight(to_tsvector('french', COALESCE(zip_code, '')), 'C')
     WHERE search_vector IS NULL;
     """)
-
-    cursor.execute("SELECT ROW_COUNT() as count;")
-    row_count = cursor.fetchone()
+    row_count = cursor.rowcount
     
     connexion.commit()
     cursor.close()
     connexion.close()
     
-    return row_count[0] if row_count else 0
+    return row_count
+
+
+def create_dvf_tables():
     """
     Crée les tables nécessaires pour les données DVF dans la base de données si elles n'existent pas déjà.
     """
@@ -287,6 +291,9 @@ def populate_fulltext_search_vector():
 
 
 def create_table_stats():
+    """
+    Crée la table pour stocker les statistiques sur le nombre de transactions.
+    """
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -389,7 +396,7 @@ def create_enrichment_tables():
 
 def create_annonces_archive_table():
     """
-    Cree une table d'archive pour conserver un historique des annonces purgees.
+    Crée une table d'archive pour conserver un historique des annonces purgees.
     Les enrichissements associes sont stockes en snapshot JSONB avant suppression.
     """
     conn = get_connection()
@@ -441,7 +448,7 @@ def create_annonces_archive_table():
 
 def create_automation_tables():
     """
-    Cree la table de suivi des executions automatisees.
+    Crée la table de suivi des executions automatisees.
     """
     conn = get_connection()
     cur = conn.cursor()
