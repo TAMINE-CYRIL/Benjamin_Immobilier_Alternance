@@ -2,6 +2,9 @@ from database.connection import get_connection
 
 
 def get_user_by_email(email):
+    """
+    Récupère un utilisateur par son adresse email. Retourne None si l'utilisateur n'existe pas.
+    """
     sql = """
         SELECT id, email, password_hash, is_active, created_at, locked_until
         FROM users
@@ -28,6 +31,9 @@ def get_user_by_email(email):
 
 
 def get_user_by_id(user_id):
+    """
+    Récupère un utilisateur par son ID. Retourne None si l'utilisateur n'existe pas.
+    """
     sql = """
         SELECT id, email, is_active, created_at, locked_until
         FROM users
@@ -53,6 +59,9 @@ def get_user_by_id(user_id):
 
 
 def create_user(email, password_hash, is_active=True):
+    """
+    Crée un nouvel utilisateur avec l'email, le hash de mot de passe et le statut actif spécifiés. Retourne les informations de l'utilisateur créé.
+    """
     sql = """
         INSERT INTO users (email, password_hash, is_active)
         VALUES (%s, %s, %s)
@@ -74,6 +83,9 @@ def create_user(email, password_hash, is_active=True):
 
 
 def lock_user_for_minutes(user_id, minutes):
+    """
+    Verrouille un utilisateur pour un nombre de minutes spécifié en mettant à jour le champ locked_until.
+    """
     sql = """
         UPDATE users
         SET locked_until = NOW() + (%s * INTERVAL '1 minute')
@@ -87,6 +99,9 @@ def lock_user_for_minutes(user_id, minutes):
 
 
 def clear_user_lock(user_id):
+    """
+    Retire le verouillage d'un utilisateur en mettant à jour le champ locked_until à NULL.
+    """
     sql = """
         UPDATE users
         SET locked_until = NULL

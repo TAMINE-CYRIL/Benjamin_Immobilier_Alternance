@@ -6,6 +6,11 @@ import { DetailPanel } from "./DetailPanel";
 import { Filters } from "./Filters";
 import AnnoncesMap from "./AnnoncesMap";
 
+/**
+ * Composant de page de tableau de bord.
+ * @param {*} user, onLogout 
+ * @returns 
+ */
 export function Dashboard({ user, onLogout }) {
   const [filters, setFilters] = useState(emptyFilters);
   const [page, setPage] = useState(1);
@@ -18,6 +23,11 @@ export function Dashboard({ user, onLogout }) {
 
   const totalPages = useMemo(() => Math.max(Math.ceil(data.total / data.page_size), 1), [data]);
 
+  /**
+   * Charge les annonces selon la page et les filtres spécifiés.
+   * @param {*} nextPage 
+   * @param {*} nextFilters 
+   */
   async function load(nextPage = page, nextFilters = filters) {
     setLoading(true);
     setError("");
@@ -38,6 +48,10 @@ export function Dashboard({ user, onLogout }) {
     load(1, filters);
   }, []);
 
+  /**
+   * Gère la sélection d'une annonce et charge ses détails.
+   * @param {*} id 
+   */
   async function handleSelect(id) {
     setSelectedId(id);
     setDetailLoading(true);
@@ -52,23 +66,37 @@ export function Dashboard({ user, onLogout }) {
     }
   }
 
+  /**
+   * Gère la déconnexion de l'utilisateur.
+   */
   async function handleLogout() {
     await logout();
     onLogout();
   }
 
+  /**
+   * Initialise la recherche avec les filtres actuels lors de la soumission du formulaire de filtres.
+   * @param {*} event 
+   */
   function submitFilters(event) {
     event.preventDefault();
     setPage(1);
     load(1, filters);
   }
 
+  /**
+   * Réinitialise les filtres à leur état initial et recharge les annonces.
+   */
   function resetFilters() {
     setFilters(emptyFilters);
     setPage(1);
     load(1, emptyFilters);
   }
 
+  /**
+   * Fonction pour se rendre à la page spécifiée avec les filtres actuels.
+   * @param {*} nextPage 
+   */
   function goToPage(nextPage) {
     setPage(nextPage);
     load(nextPage, filters);

@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { login } from "../api";
 
+
+/**
+ * Fonction qui retourne un composant SVG représentant une icône de mail.
+ * @returns Un SVG qui représente l'icone de mail
+ */
 function MailIcon() {
   return (
     <svg viewBox="0 0 24 24" role="presentation">
@@ -10,6 +15,10 @@ function MailIcon() {
   );
 }
 
+/**
+ * Fonction qui retourne un composant SVG représentant une icône de verrou.
+ * @returns Un SVG qui représente l'icone de verrou
+ */
 function LockIcon() {
   return (
     <svg viewBox="0 0 24 24" role="presentation">
@@ -19,6 +28,16 @@ function LockIcon() {
   );
 }
 
+/**
+ * Fonction qui retourne un composant représentant un champ de saisie.
+ * @param {string} label - Le libellé du champ.
+ * @param {string} type - Le type du champ (par défaut "text").
+ * @param {string} autoComplete - L'attribut autocomplete pour le champ.
+ * @param {string} value - La valeur du champ.
+ * @param {function} onChange - La fonction de gestion du changement de valeur.
+ * @param {React.ReactNode} icon - L'icône à afficher dans le champ.
+ * @returns Un composant React pour le champ de saisie.
+ */
 function LoginField({ label, type = "text", autoComplete, value, onChange, icon }) {
   return (
     <label className="field">
@@ -31,6 +50,12 @@ function LoginField({ label, type = "text", autoComplete, value, onChange, icon 
   );
 }
 
+
+/**
+ * Composant de page de connexion.
+ * @param {*} param0 
+ * @returns 
+ */
 export function LoginPage({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

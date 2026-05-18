@@ -22,3 +22,4 @@ if (-not $PythonPath) {
 }
 
 & $PythonPath -m services.jobs.run_automation --max-pages $MaxPages --enrichment-limit $EnrichmentLimit
+exit $LASTEXITCODE

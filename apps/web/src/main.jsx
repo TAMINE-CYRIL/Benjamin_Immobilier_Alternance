@@ -7,7 +7,10 @@ import "./styles.css";
 import "leaflet/dist/leaflet.css";
 
 
-
+/**
+ * Composant principal de l'application qui gère l'état de l'utilisateur et affiche soit la page de connexion, soit le tableau de bord en fonction de l'état de connexion.
+ * @returns 
+ */
 function App() {
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(true);

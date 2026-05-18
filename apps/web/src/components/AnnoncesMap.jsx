@@ -6,6 +6,11 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { formatMoney, formatScore, getScoreLevel } from "../utils";
 
 
+/**
+ * Vérifie si une annonce dispose de coordonnées valides.
+ * @param {*} annonce 
+ * @returns true si l'annonce a des coordonnées valides, false sinon.
+ */
 function hasValidCoords(annonce) {
   const rawLatitude = annonce.enrichment?.latitude;
   const rawLongitude = annonce.enrichment?.longitude;
@@ -17,6 +22,11 @@ function hasValidCoords(annonce) {
   return Number.isFinite(latitude) && Number.isFinite(longitude);
 }
 
+/**
+ * Composant représentant la vue de la carte.
+ * @param {*} annonces, selectedId 
+ * @returns La carte se recentre automatiquement sur l'annonce sélectionnée. Si aucune annonce n'est sélectionnée, la carte s'adapte pour afficher toutes les annonces avec des coordonnées valides.
+ */
 function MapViewport({ annonces, selectedId }) {
   const map = useMap();
 
@@ -48,6 +58,11 @@ function MapViewport({ annonces, selectedId }) {
   return null;
 }
 
+/**
+ * Composant représentant la carte des annonces.
+ * @param {*} param0 
+ * @returns 
+ */
 export default function AnnoncesMap({ annonces, selectedId, onSelect }) {
   const annoncesAvecCoords = annonces.filter(hasValidCoords);
 

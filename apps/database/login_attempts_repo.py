@@ -2,6 +2,9 @@ from database.connection import get_connection
 
 
 def record_login_attempt(email, ip_address, success):
+    """
+    Enregistre une tentative de connexion dans la base de données.
+    """
     sql = """
         INSERT INTO login_attempts (email, ip_address, success)
         VALUES (%s, %s, %s)
@@ -14,6 +17,9 @@ def record_login_attempt(email, ip_address, success):
 
 
 def count_recent_failed_attempts(email, window_minutes):
+    """
+    Compte le nombre de tentatives de connexion échouées pour une adresse email donnée au cours des dernières minutes spécifiées.
+    """
     sql = """
         SELECT COUNT(*)
         FROM login_attempts
@@ -31,6 +37,9 @@ def count_recent_failed_attempts(email, window_minutes):
 
 
 def count_recent_failed_attempts_by_ip(ip_address, window_minutes):
+    """
+    Compte le nombre de tentatives de connexion échouées pour une adresse IP donnée au cours des dernières minutes spécifiées.
+    """
     if not ip_address:
         return 0
 
@@ -51,6 +60,9 @@ def count_recent_failed_attempts_by_ip(ip_address, window_minutes):
 
 
 def clear_failed_attempts(email):
+    """
+    Efface les tentatives de connexion échouées pour une adresse email donnée.
+    """
     sql = """
         DELETE FROM login_attempts
         WHERE lower(email) = lower(%s)

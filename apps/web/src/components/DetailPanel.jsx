@@ -1,6 +1,12 @@
 import React from "react";
 import { formatMoney } from "../utils";
 
+
+/**
+ * Composant de panneau de détails pour afficher les informations d'une annonce.
+ * @param {*} annonce, loading, onClose 
+ * @returns 
+ */
 export function DetailPanel({ annonce, loading, onClose }) {
   if (!annonce && !loading) return null;
   const enrichment = annonce?.enrichment || {};

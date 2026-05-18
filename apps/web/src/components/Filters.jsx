@@ -1,6 +1,12 @@
 import React from "react";
 import { propertyTypeOptions, sourceOptions } from "../constants";
 
+
+/**
+ * Composant de filtres pour la recherche de biens immobiliers.
+ * @param {*} param0 
+ * @returns 
+ */
 export function Filters({ filters, onChange, onSubmit, onReset }) {
   function update(name, value) {
     onChange({ ...filters, [name]: value });

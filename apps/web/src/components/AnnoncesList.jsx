@@ -1,6 +1,11 @@
 import React from "react";
 import { formatMoney, formatScore, getScoreLevel } from "../utils";
 
+/**
+ * Vérifie si une annonce a des coordonnées valides.
+ * @param {*} annonce 
+ * @returns true si l'annonce a des coordonnées valides, false sinon.
+ */
 function hasValidCoords(annonce) {
   const rawLatitude = annonce.enrichment?.latitude;
   const rawLongitude = annonce.enrichment?.longitude;
@@ -12,6 +17,11 @@ function hasValidCoords(annonce) {
   return Number.isFinite(latitude) && Number.isFinite(longitude);
 }
 
+/**
+ * Composant représentant la liste des annonces.
+ * @param {*} annonces, selectedId, onSelect 
+ * @returns Une liste d'annonces avec leurs informations principales, leur score et leur statut d'enrichissement. Permet de sélectionner une annonce pour voir plus de détails.
+ */
 export function AnnoncesList({ annonces, selectedId, onSelect }) {
   if (!annonces.length) {
     return <div className="empty">Aucune annonce ne correspond aux filtres.</div>;

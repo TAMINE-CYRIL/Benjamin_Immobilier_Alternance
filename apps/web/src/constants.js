@@ -1,3 +1,4 @@
+// Valeurs initiales pour les filtres de recherche d'annonces immobilières.
 export const emptyFilters = {
   query: "",
   city: "",
@@ -16,6 +17,7 @@ export const emptyFilters = {
   direction: "desc",
 };
 
+// Options pour les types de biens immobiliers.
 export const propertyTypeOptions = [
   { value: "", label: "Tous types" },
   { value: "Appartement", label: "Appartement" },
@@ -29,6 +31,7 @@ export const propertyTypeOptions = [
   { value: "Autres", label: "Autres" },
 ];
 
+// Options pour les sources des annonces immobilières.
 export const sourceOptions = [
   { value: "", label: "Toutes sources" },
   { value: "AvoVentes", label: "AvoVentes" },
