@@ -47,7 +47,10 @@ MOBILE_USER_AGENTS = [
 
 
 def get_random_user_agent(mobile: bool = False) -> str:
-    """Retourne un User-Agent réaliste randomisé."""
+    """
+    Retourne un User-Agent réaliste randomisé.
+    Si mobile=True, retourne un UA mobile, sinon desktop.
+    """
     pool = MOBILE_USER_AGENTS if mobile else DESKTOP_USER_AGENTS
     return random.choice(pool)
 

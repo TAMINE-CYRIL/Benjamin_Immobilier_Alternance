@@ -3,6 +3,11 @@ from services.deals import evaluate_annonce
 
 
 def score_annonces(annonce_ids=None, logger=None):
+    """
+    Calcule un score pour chaque annonce en fonction de ses caractéristiques et de références statistiques.
+    - annonce_ids : liste des IDs des annonces à noter (si None, toutes les annonces sont prises en compte)
+    - logger : fonction de journalisation (optionnelle)
+    """
     summary = {
         "eligible_for_scoring": 0,
         "scored": 0,

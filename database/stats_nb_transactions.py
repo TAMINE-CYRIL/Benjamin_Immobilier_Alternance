@@ -1,6 +1,10 @@
 from connection import get_connection
 
 def compute_nb_transactions_quartiles():
+    """
+    Ajoute ou met à jour une ligne dans la table dvf_nb_transactions_stats avec les quartiles du nombre de transactions
+    calculés à partir de la table dvf_stats_multi_annees.
+    """
     conn = get_connection()
     cur = conn.cursor()
 

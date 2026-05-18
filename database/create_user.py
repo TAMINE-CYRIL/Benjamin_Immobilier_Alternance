@@ -13,6 +13,12 @@ from database.create_tables import create_users_table
 
 
 def main():
+    """
+    Script pour créer un utilisateur pour le dashboard privé.
+    Usage: python create_user.py <email> [password]
+    Si le mot de passe n'est pas fourni en argument, il sera demandé de manière sécurisée.
+    Le mot de passe doit contenir au moins 8 caractères.
+    """
     parser = argparse.ArgumentParser(description="Cree un utilisateur pour le dashboard prive.")
     parser.add_argument("email", help="Email de connexion")
     parser.add_argument("password", nargs="?", help="Mot de passe. Si absent, il sera demande.")

@@ -6,6 +6,11 @@ from database.connection import get_connection
 
 
 def create_run(run_type="full", log_path=None):
+    """
+    Crée une nouvelle entrée dans la table automation_runs pour suivre l'exécution d'un processus d'automatisation.
+    - run_type : type de processus (ex: "full", "dvf_import", "annonces_scraping", etc.)
+    - log_path : chemin vers le fichier de log associé à ce run (optionnel)
+    """
     conn = get_connection()
     cur = conn.cursor()
     try:
@@ -26,6 +31,13 @@ def create_run(run_type="full", log_path=None):
 
 
 def finish_run(run_id, status, summary=None, error_message=None):
+    """
+    Met à jour l'entrée de la table automation_runs pour indiquer la fin d'un processus d'automatisation.
+    - run_id : ID du run à mettre à jour
+    - status : statut final du run ("success", "failure", etc.)
+    - summary : résumé des résultats du run (optionnel, doit être JSON-serializable)
+    - error_message : message d'erreur en cas d'échec (optionnel)
+    """
     completed_at = dt.datetime.now()
     conn = get_connection()
     cur = conn.cursor()
@@ -49,6 +61,10 @@ def finish_run(run_id, status, summary=None, error_message=None):
 
 
 def list_runs(limit=20):
+    """
+    Liste les runs d'automatisation.
+    - limit : nombre maximum de runs à retourner (par défaut : 20, max : 100)
+    """
     safe_limit = min(max(int(limit or 20), 1), 100)
     conn = get_connection()
     cur = conn.cursor()
