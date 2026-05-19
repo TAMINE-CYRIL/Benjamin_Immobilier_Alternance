@@ -7,13 +7,17 @@ from fastapi import HTTPException, Response
 
 from apps.api.routes.auth import (
     LoginRequest,
+    MemberInvitationRequest,
     PasswordResetConfirmRequest,
     PasswordResetRequest,
     confirm_password_reset,
+    invite_member,
     login,
+    members,
     request_password_reset,
 )
 from apps.api.auth import create_access_token, set_auth_cookie
+from services.email import EmailDeliveryError
 
 
 def _request(ip="127.0.0.1"):
@@ -260,3 +264,160 @@ def test_password_reset_request_does_not_reveal_unknown_email():
     assert result == {"ok": True}
     send_email.assert_not_called()
     audit_event.assert_called_once()
+
+
+def test_invite_member_creates_user_and_sends_password_creation_email():
+    current_user = {"id": 7, "email": "admin@example.com", "is_active": True}
+    created_user = {
+        "id": 2,
+        "email": "new@example.com",
+        "is_active": True,
+        "created_at": "now",
+    }
+    reset = {
+        "user_id": 2,
+        "email": "new@example.com",
+        "token": "invite-token",
+        "expires_at": "later",
+    }
+
+    with patch("apps.api.routes.auth.get_user_by_email", return_value=None):
+        with patch("apps.api.routes.auth.hash_password", return_value="temporary-hash") as hash_password_mock:
+            with patch("apps.api.routes.auth.create_user", return_value=created_user) as create_user_mock:
+                with patch("apps.api.routes.auth.create_password_reset_token", return_value=reset) as create_token:
+                    with patch("apps.api.routes.auth.send_email") as send_email:
+                        with patch("apps.api.routes.auth.record_audit_event") as audit_event:
+                            result = invite_member(
+                                MemberInvitationRequest(email=" New@Example.com "),
+                                _request(),
+                                current_user,
+                            )
+
+    assert result == {"ok": True, "created": True, "user": created_user}
+    hash_password_mock.assert_called_once()
+    create_user_mock.assert_called_once_with("new@example.com", "temporary-hash", is_active=True)
+    create_token.assert_called_once_with(
+        "new@example.com",
+        ttl_minutes=60,
+        created_by_user_id=7,
+        created_by_email="admin@example.com",
+        ip_address="127.0.0.1",
+    )
+    send_email.assert_called_once()
+    assert "invite-token" in send_email.call_args.args[2]
+    assert audit_event.call_count == 2
+
+
+def test_invite_member_rejects_invalid_email():
+    current_user = {"id": 7, "email": "admin@example.com", "is_active": True}
+
+    with patch("apps.api.routes.auth.get_user_by_email") as get_user:
+        with pytest.raises(HTTPException) as exc:
+            invite_member(
+                MemberInvitationRequest(email="not-an-email"),
+                _request(),
+                current_user,
+            )
+
+    assert exc.value.status_code == 422
+    get_user.assert_not_called()
+
+
+def test_invite_member_resends_invitation_for_existing_user():
+    current_user = {"id": 7, "email": "admin@example.com", "is_active": True}
+    existing_user = {
+        "id": 2,
+        "email": "existing@example.com",
+        "password_hash": "hash",
+        "is_active": True,
+        "created_at": "now",
+        "locked_until": None,
+    }
+    reset = {
+        "user_id": 2,
+        "email": "existing@example.com",
+        "token": "invite-token",
+        "expires_at": "later",
+    }
+
+    with patch("apps.api.routes.auth.get_user_by_email", return_value=existing_user):
+        with patch("apps.api.routes.auth.create_user") as create_user_mock:
+            with patch("apps.api.routes.auth.create_password_reset_token", return_value=reset):
+                with patch("apps.api.routes.auth.send_email") as send_email:
+                    with patch("apps.api.routes.auth.record_audit_event"):
+                        result = invite_member(
+                            MemberInvitationRequest(email="existing@example.com"),
+                            _request(),
+                            current_user,
+                        )
+
+    assert result["ok"] is True
+    assert result["created"] is False
+    assert result["user"]["email"] == "existing@example.com"
+    create_user_mock.assert_not_called()
+    send_email.assert_called_once()
+
+
+def test_invite_member_exposes_email_configuration_error_in_development(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "development")
+    current_user = {"id": 7, "email": "admin@example.com", "is_active": True}
+    created_user = {
+        "id": 2,
+        "email": "new@example.com",
+        "is_active": True,
+        "created_at": "now",
+    }
+    reset = {
+        "user_id": 2,
+        "email": "new@example.com",
+        "token": "invite-token",
+        "expires_at": "later",
+    }
+
+    with patch("apps.api.routes.auth.get_user_by_email", return_value=None):
+        with patch("apps.api.routes.auth.hash_password", return_value="temporary-hash"):
+            with patch("apps.api.routes.auth.create_user", return_value=created_user):
+                with patch("apps.api.routes.auth.create_password_reset_token", return_value=reset):
+                    with patch(
+                        "apps.api.routes.auth.send_email",
+                        side_effect=EmailDeliveryError("SMTP_HOST is not configured"),
+                    ):
+                        with patch("apps.api.routes.auth.record_audit_event"):
+                            with pytest.raises(HTTPException) as exc:
+                                invite_member(
+                                    MemberInvitationRequest(email="new@example.com"),
+                                    _request(),
+                                    current_user,
+                                )
+
+    assert exc.value.status_code == 502
+    assert "SMTP_HOST is not configured" in exc.value.detail
+
+
+def test_members_lists_dashboard_users():
+    current_user = {"id": 7, "email": "admin@example.com", "is_active": True}
+    users = [
+        {
+            "id": 7,
+            "email": "admin@example.com",
+            "is_active": True,
+            "created_at": "now",
+            "locked_until": None,
+        },
+        {
+            "id": 8,
+            "email": "member@example.com",
+            "is_active": True,
+            "created_at": "later",
+            "locked_until": None,
+        },
+    ]
+
+    with patch("apps.api.routes.auth.list_users", return_value=users) as list_users_mock:
+        result = members(current_user)
+
+    assert result["items"] == [
+        {"id": 7, "email": "admin@example.com", "is_active": True, "created_at": "now"},
+        {"id": 8, "email": "member@example.com", "is_active": True, "created_at": "later"},
+    ]
+    list_users_mock.assert_called_once_with()

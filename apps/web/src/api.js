@@ -75,6 +75,17 @@ export function confirmPasswordReset(token, newPassword) {
   });
 }
 
+export function inviteMember(email) {
+  return request("/api/auth/members", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function listMembers() {
+  return request("/api/auth/members");
+}
+
 /**
  * Recherche les annonces selon les paramètres fournis.
  * @param {*} params Les critères de recherche.

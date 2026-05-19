@@ -270,6 +270,15 @@ Réinitialisation de mot de passe utilisateur :
 - Le lien ouvre le dashboard avec `?reset_token=...` et affiche le formulaire de nouveau mot de passe.
 - Le token est stocke uniquement sous forme de hash, expire par defaut apres 60 minutes et devient invalide apres usage.
 
+Ajout d'un acces depuis le dashboard :
+
+- Tout utilisateur connecte peut renseigner une adresse e-mail dans le panneau `Membres`.
+- L'API `POST /api/auth/members` cree le compte si l'e-mail n'existe pas encore, avec un mot de passe temporaire aleatoire stocke uniquement sous forme de hash bcrypt.
+- Le nouveau membre recoit un lien a usage unique pour choisir lui-meme son mot de passe ; le mot de passe final n'est jamais envoye par e-mail ni stocke en clair.
+- Si le compte existe deja, aucun doublon n'est cree et une nouvelle invitation est envoyee.
+- Le dashboard recharge la liste des comptes apres invitation pour confirmer visuellement la creation ou l'existence du membre.
+- La creation, l'envoi d'invitation, les echecs d'e-mail et la definition du mot de passe sont journalises dans `audit_events`.
+
 Un script de secours existe pour generer un token manuellement en cas d'incident SMTP :
 
 ```bash

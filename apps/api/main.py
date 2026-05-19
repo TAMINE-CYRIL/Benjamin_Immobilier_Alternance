@@ -2,11 +2,14 @@ import hmac
 import os
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+
+load_dotenv()
 
 from apps.api.auth import CSRF_COOKIE_NAME, validate_security_config
 from apps.api.routes.auth import router as auth_router

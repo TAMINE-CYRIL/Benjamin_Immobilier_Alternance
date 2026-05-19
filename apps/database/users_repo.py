@@ -58,6 +58,34 @@ def get_user_by_id(user_id):
     }
 
 
+def list_users(limit=50):
+    """
+    Liste les utilisateurs du dashboard, du plus recent au plus ancien.
+    """
+    sql = """
+        SELECT id, email, is_active, created_at, locked_until
+        FROM users
+        ORDER BY created_at DESC, id DESC
+        LIMIT %s
+    """
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, (limit,))
+            rows = cur.fetchall()
+
+    return [
+        {
+            "id": row[0],
+            "email": row[1],
+            "is_active": row[2],
+            "created_at": row[3],
+            "locked_until": row[4],
+        }
+        for row in rows
+    ]
+
+
 def create_user(email, password_hash, is_active=True):
     """
     Crée un nouvel utilisateur avec l'email, le hash de mot de passe et le statut actif spécifiés. Retourne les informations de l'utilisateur créé.

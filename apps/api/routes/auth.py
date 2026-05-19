@@ -1,12 +1,20 @@
 import os
-from urllib.parse import urlencode
+import re
+import secrets
 from datetime import datetime
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 
-from apps.api.auth import clear_auth_cookie, create_access_token, hash_password, set_auth_cookie, verify_password
-from apps.api.auth import get_current_user
+from apps.api.auth import (
+    clear_auth_cookie,
+    create_access_token,
+    get_current_user,
+    hash_password,
+    set_auth_cookie,
+    verify_password,
+)
 from apps.database.audit_repo import record_audit_event
 from apps.database.login_attempts_repo import (
     clear_failed_attempts,
@@ -15,7 +23,14 @@ from apps.database.login_attempts_repo import (
     record_login_attempt,
 )
 from apps.database.password_reset_repo import consume_password_reset_token, create_password_reset_token
-from apps.database.users_repo import clear_user_lock, get_user_by_email, lock_user_for_minutes, update_user_password
+from apps.database.users_repo import (
+    clear_user_lock,
+    create_user,
+    get_user_by_email,
+    list_users,
+    lock_user_for_minutes,
+    update_user_password,
+)
 from services.email import EmailDeliveryError, send_email
 
 
@@ -29,6 +44,7 @@ PASSWORD_RESET_TTL_MINUTES = int(os.getenv("PASSWORD_RESET_TTL_MINUTES", "60"))
 LOGIN_BLOCK_MESSAGE = "Trop de tentatives. Reessayez plus tard."
 IP_BLOCK_MESSAGE = "Trop de tentatives depuis cette adresse IP. Reessayez plus tard."
 ACCOUNT_LOCK_MESSAGE = "Compte temporairement bloque. Reessayez plus tard."
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class LoginRequest(BaseModel):
@@ -50,6 +66,13 @@ class PasswordResetConfirmRequest(BaseModel):
 class PasswordResetRequest(BaseModel):
     """
     Demande d'envoi d'un lien de reinitialisation de mot de passe.
+    """
+    email: str
+
+
+class MemberInvitationRequest(BaseModel):
+    """
+    Donnees necessaires pour inviter manuellement un membre.
     """
     email: str
 
@@ -76,6 +99,13 @@ def _client_ip(request: Request):
     if request.client:
         return request.client.host
     return None
+
+
+def _normalize_email(email):
+    normalized = email.strip().lower()
+    if not normalized or len(normalized) > 254 or not EMAIL_PATTERN.fullmatch(normalized):
+        raise HTTPException(status_code=422, detail="Adresse email invalide.")
+    return normalized
 
 
 def _assert_login_allowed(email):
@@ -187,6 +217,26 @@ def _send_password_reset_email(email, reset_url):
     send_email(email, subject, body)
 
 
+def _send_member_invitation_email(email, invitation_url):
+    subject = "Creation de votre acces Benjamin Immobilier"
+    body = "\n".join([
+        "Bonjour,",
+        "",
+        "Un acces au tableau de bord Benjamin Immobilier vient de vous etre cree.",
+        f"Ouvrez ce lien pour choisir votre mot de passe : {invitation_url}",
+        "",
+        f"Ce lien expire dans {PASSWORD_RESET_TTL_MINUTES} minutes et ne peut etre utilise qu'une seule fois.",
+        "Si vous n'attendiez pas cette invitation, ignorez ce message.",
+    ])
+    send_email(email, subject, body)
+
+
+def _email_delivery_error_message(exc):
+    if os.getenv("APP_ENV", "development").lower() in {"prod", "production"}:
+        return "Email d'invitation non envoye."
+    return f"Email d'invitation non envoye: {exc}"
+
+
 @router.post("/login")
 def login(payload: LoginRequest, request: Request, response: Response):
     email = payload.email.strip()
@@ -294,6 +344,87 @@ def confirm_password_reset(payload: PasswordResetConfirmRequest, request: Reques
         ip_address=_client_ip(request),
     )
     return {"ok": True}
+
+
+@router.post("/members")
+def invite_member(payload: MemberInvitationRequest, request: Request, current_user=Depends(get_current_user)):
+    """
+    Cree un membre si necessaire puis lui envoie un lien pour choisir son mot de passe.
+    """
+    email = _normalize_email(payload.email)
+
+    ip_address = _client_ip(request)
+    user = get_user_by_email(email)
+    created = False
+
+    if not user:
+        temporary_password = secrets.token_urlsafe(48)
+        user = create_user(email, hash_password(temporary_password), is_active=True)
+        created = True
+        _record_audit_event(
+            "member_created",
+            user_id=user["id"],
+            email=user["email"],
+            ip_address=ip_address,
+            metadata={
+                "created_by_user_id": current_user["id"],
+                "created_by_email": current_user.get("email"),
+            },
+        )
+
+    reset = create_password_reset_token(
+        user["email"],
+        ttl_minutes=PASSWORD_RESET_TTL_MINUTES,
+        created_by_user_id=current_user["id"],
+        created_by_email=current_user.get("email"),
+        ip_address=ip_address,
+    )
+    if not reset:
+        _record_audit_event(
+            "member_invitation_failed",
+            user_id=user["id"],
+            email=user["email"],
+            ip_address=ip_address,
+            metadata={"reason": "token_creation_failed", "created": created},
+        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invitation impossible.")
+
+    invitation_url = _password_reset_url(request, reset["token"])
+    try:
+        _send_member_invitation_email(reset["email"], invitation_url)
+        _record_audit_event(
+            "member_invitation_sent",
+            user_id=reset["user_id"],
+            email=reset["email"],
+            ip_address=ip_address,
+            metadata={
+                "created": created,
+                "invited_by_user_id": current_user["id"],
+                "invited_by_email": current_user.get("email"),
+            },
+        )
+    except EmailDeliveryError as exc:
+        _record_audit_event(
+            "member_invitation_email_failed",
+            user_id=reset["user_id"],
+            email=reset["email"],
+            ip_address=ip_address,
+            metadata={"error": str(exc), "created": created},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=_email_delivery_error_message(exc),
+        )
+
+    return {"ok": True, "created": created, "user": public_user(user)}
+
+
+@router.get("/members")
+def members(current_user=Depends(get_current_user)):
+    """
+    Retourne les comptes ayant acces au dashboard.
+    """
+    return {"items": [public_user(user) for user in list_users()]}
 
 
 @router.get("/me")
