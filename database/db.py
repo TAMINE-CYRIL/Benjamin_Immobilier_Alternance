@@ -1,4 +1,5 @@
 from database.connection import get_connection
+from database.create_tables import create_tables
 
 def insert_annonces(annonces, logger=None):
     """

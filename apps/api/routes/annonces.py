@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from typing import Literal, Optional
 
 from apps.api.auth import get_current_user
+from apps.database.audit_repo import record_audit_event
 from apps.database.annonces_repo import fetch_annonce_by_id, search_annonces
 
 router = APIRouter()
@@ -67,5 +68,15 @@ def get_annonce(annonce_id: int, user=Depends(get_current_user)):
     annonce = fetch_annonce_by_id(annonce_id)
     if not annonce:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Annonce introuvable")
+
+    try:
+        record_audit_event(
+            "annonce_detail_viewed",
+            user_id=user["id"],
+            email=user.get("email"),
+            metadata={"annonce_id": annonce_id},
+        )
+    except Exception:
+        pass
 
     return annonce

@@ -236,6 +236,25 @@ select:focus {
   box-shadow: 0 12px 30px rgba(14, 39, 80, 0.18);
 }
 
+.text-button {
+  min-height: 0;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2b74d8;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.text-button:hover {
+  color: #16304f;
+}
+
+.text-button.centered {
+  justify-self: center;
+}
+
 .login-footnote {
   margin: 8px 0 0;
   text-align: center;
@@ -245,6 +264,11 @@ select:focus {
 
 .error {
   color: #b42318;
+}
+
+.success-message {
+  color: #067647;
+  line-height: 1.4;
 }
 
 .dashboard {

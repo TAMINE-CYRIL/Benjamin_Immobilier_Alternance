@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { login } from "../api";
+import React, { useMemo, useState } from "react";
+import { confirmPasswordReset, login, requestPasswordReset } from "../api";
 
 
 /**
@@ -57,9 +57,15 @@ function LoginField({ label, type = "text", autoComplete, value, onChange, icon 
  * @returns 
  */
 export function LoginPage({ onLogin }) {
+  const initialResetToken = useMemo(() => new URLSearchParams(window.location.search).get("reset_token") || "", []);
+  const [mode, setMode] = useState(initialResetToken ? "reset" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetToken, setResetToken] = useState(initialResetToken);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event) {
@@ -77,6 +83,62 @@ export function LoginPage({ onLogin }) {
     }
   }
 
+  async function handleRequestReset(event) {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      await requestPasswordReset(email);
+      setMessage("Si un compte existe pour cette adresse, un lien de reinitialisation vient d'etre envoye.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleConfirmReset(event) {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (newPassword !== confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await confirmPasswordReset(resetToken, newPassword);
+      window.history.replaceState({}, "", window.location.pathname);
+      setPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setResetToken("");
+      setMode("login");
+      setMessage("Votre mot de passe a ete mis a jour. Vous pouvez vous connecter.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function switchMode(nextMode) {
+    setMode(nextMode);
+    setError("");
+    setMessage("");
+  }
+
+  const title = mode === "login" ? "Bonjour" : mode === "forgot" ? "Mot de passe oublie" : "Nouveau mot de passe";
+  const intro = mode === "login"
+    ? "Connectez-vous pour acceder a votre espace."
+    : mode === "forgot"
+      ? "Renseignez votre adresse e-mail pour recevoir un lien securise."
+      : "Choisissez un nouveau mot de passe pour votre compte.";
+
   return (
     <main className="login-shell">
       <section className="login-hero" aria-hidden="true">
@@ -89,36 +151,76 @@ export function LoginPage({ onLogin }) {
       </section>
 
       <section className="login-side">
-        <form className="login-panel" onSubmit={handleSubmit}>
+        <form
+          className="login-panel"
+          onSubmit={mode === "login" ? handleSubmit : mode === "forgot" ? handleRequestReset : handleConfirmReset}
+        >
           <div className="login-copy">
-            <h2>Bonjour</h2>
-            <p className="login-intro">Connectez-vous pour acceder a votre espace.</p>
+            <h2>{title}</h2>
+            <p className="login-intro">{intro}</p>
           </div>
 
-          <LoginField
-            label="Adresse e-mail"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            icon={<MailIcon />}
-          />
+          {mode !== "reset" ? (
+            <LoginField
+              label="Adresse e-mail"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              icon={<MailIcon />}
+            />
+          ) : null}
 
-          <LoginField
-            label="Mot de passe"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            icon={<LockIcon />}
-          />
+          {mode === "login" ? (
+            <>
+              <LoginField
+                label="Mot de passe"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                icon={<LockIcon />}
+              />
+              <button className="text-button" type="button" onClick={() => switchMode("forgot")}>
+                Mot de passe oublie ?
+              </button>
+            </>
+          ) : null}
+
+          {mode === "reset" ? (
+            <>
+              <LoginField
+                label="Nouveau mot de passe"
+                type="password"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                icon={<LockIcon />}
+              />
+              <LoginField
+                label="Confirmer le mot de passe"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                icon={<LockIcon />}
+              />
+            </>
+          ) : null}
 
           {error ? <p className="error">{error}</p> : null}
+          {message ? <p className="success-message">{message}</p> : null}
 
           <button className="login-submit" type="submit" disabled={loading}>
-            {loading ? "Connexion..." : "Se connecter"}
+            {loading ? "Traitement..." : mode === "login" ? "Se connecter" : mode === "forgot" ? "Envoyer le lien" : "Mettre a jour"}
             <span aria-hidden="true">→</span>
           </button>
+
+          {mode !== "login" ? (
+            <button className="text-button centered" type="button" onClick={() => switchMode("login")}>
+              Retour a la connexion
+            </button>
+          ) : null}
 
           <p className="login-footnote">© 2026 Benjamin Immobilier</p>
         </form>

@@ -2,7 +2,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$BackupPath,
     [string]$ProjectPath = "C:\Users\arris\Downloads\Benjamin_Immobilier_Alternance",
-    [string]$PgRestorePath = "pg_restore"
+    [string]$PgRestorePath = "pg_restore",
+    [string]$GpgPath = "gpg"
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,19 +23,38 @@ if (Test-Path $EnvPath) {
 
 if (-not $env:PG_DB) { throw "PG_DB est manquant dans l'environnement ou .env" }
 
-$env:PGPASSWORD = $env:PG_PASSWORD
-& $PgRestorePath `
-    --clean `
-    --if-exists `
-    --no-owner `
-    --dbname=$env:PG_DB `
-    --host=$env:PG_HOST `
-    --port=$env:PG_PORT `
-    --username=$env:PG_USER `
-    $BackupPath
+$RestorePath = $BackupPath
+$TempPath = $null
 
-if ($LASTEXITCODE -ne 0) {
-    throw "pg_restore a echoue avec le code $LASTEXITCODE"
+if ($BackupPath.EndsWith(".gpg")) {
+    $TempPath = Join-Path $env:TEMP ("restore_" + [System.Guid]::NewGuid().ToString() + ".dump")
+    & $GpgPath --batch --yes --decrypt --output $TempPath $BackupPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "gpg a echoue avec le code $LASTEXITCODE"
+    }
+    $RestorePath = $TempPath
+}
+
+try {
+    $env:PGPASSWORD = $env:PG_PASSWORD
+    & $PgRestorePath `
+        --clean `
+        --if-exists `
+        --no-owner `
+        --dbname=$env:PG_DB `
+        --host=$env:PG_HOST `
+        --port=$env:PG_PORT `
+        --username=$env:PG_USER `
+        $RestorePath
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "pg_restore a echoue avec le code $LASTEXITCODE"
+    }
+}
+finally {
+    if ($TempPath -and (Test-Path $TempPath)) {
+        Remove-Item -Path $TempPath -Force
+    }
 }
 
 Write-Host "Base restauree depuis: $BackupPath"

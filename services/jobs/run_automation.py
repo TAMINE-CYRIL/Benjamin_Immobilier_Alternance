@@ -10,6 +10,7 @@ from database.create_tables import create_all_tables
 from database.migrations import apply_pending_migrations
 from database.reset_db import cleanup
 from main_immo import create_run_logger, run_pipeline
+from apps.database.audit_repo import record_audit_event
 from services.enrichment.orchestrator import EnrichmentService
 
 
@@ -46,6 +47,13 @@ def _write_summary(path, payload):
         json.dump(payload, outfile, ensure_ascii=False, indent=2, default=str)
 
 
+def _audit_automation(event_type, metadata):
+    try:
+        record_audit_event(event_type, metadata=metadata)
+    except Exception:
+        pass
+
+
 async def run(args=None):
     args = args or parse_args()
     create_all_tables()
@@ -64,6 +72,7 @@ async def run(args=None):
 
     try:
         logger("===== Lancement automatisation V2 =====")
+        _audit_automation("automation_started", {"run_id": run_record["id"], "log_path": log_path})
 
         if args.skip_scraping:
             summary["stages"]["scraping"] = {"status": "skipped"}
@@ -102,6 +111,7 @@ async def run(args=None):
         summary["status"] = _status_from_stages(summary["stages"])
         finish_run(run_record["id"], summary["status"], summary=summary)
         _write_summary(args.output_json, summary)
+        _audit_automation("automation_finished", {"run_id": run_record["id"], "status": summary["status"]})
         logger(f"Automatisation terminee - statut: {summary['status']}")
         return summary
     except Exception as exc:
@@ -112,6 +122,7 @@ async def run(args=None):
         summary["error_message"] = str(exc)
         finish_run(run_record["id"], "failed", summary=summary, error_message=str(exc))
         _write_summary(args.output_json, summary)
+        _audit_automation("automation_failed", {"run_id": run_record["id"], "error": str(exc)})
         logger(f"[AUTOMATION ERROR] {exc}")
         raise
     finally:

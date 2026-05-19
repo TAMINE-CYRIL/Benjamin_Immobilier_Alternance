@@ -121,13 +121,37 @@ L'architecture recommandee repose sur une application web modulaire, capable d'i
 
 ### 7.1 Securite
 
-- Hebergement cloud securise, par exemple OVH, AWS ou equivalent.
+- Hebergement cloud securise, par exemple OVH, AWS ou equivalent, derriere un reverse proxy HTTPS.
+- Acces au site uniquement en HTTPS en production, avec HSTS et redirection HTTP vers HTTPS.
 - Authentification des utilisateurs :
-  - SSO ;
-  - tokens d'acces.
-- Gestion des droits utilisateurs selon les roles.
-- Protection des endpoints API.
-- Journalisation des actions sensibles.
+  - tokens d'acces signes ;
+  - cookies `HttpOnly`, `Secure`, `SameSite=Lax` ou `Strict`, avec duree de vie configurable ;
+  - reinitialisation de mot de passe par email avec token a usage unique, expiration et audit ;
+  - SSO ou MFA a prevoir en phase 2 si l'application est exposee sur Internet.
+- Tout environnement de production doit refuser de demarrer avec des secrets par defaut ou trop faibles.
+- Protection CSRF des routes mutantes, car l'authentification repose sur des cookies.
+- Principe du moindre privilege pour les fonctions d'exploitation, imports, exports, suppressions et parametres.
+- Protection des endpoints API par authentification, validation stricte des parametres et en-tetes HTTP de securite.
+- Journalisation des actions sensibles dans un journal d'audit non modifiable depuis l'interface :
+  - connexions et echecs de connexion ;
+  - consultations sensibles ;
+  - exports ;
+  - lancements d'automatisations ;
+  - changements d'utilisateurs et de droits.
+- Gestion des secrets :
+  - fichier `.env` exclu du versionnement ;
+  - modele `.env.example` sans secret reel ;
+  - rotation des secrets en cas d'incident ;
+  - analyse de secrets avant livraison.
+- Analyse des dependances Python et npm avant mise en production.
+- Sauvegardes PostgreSQL chiffrees, stockees separement, avec retention definie et test de restauration regulier.
+- Verification TLS activee pour les API externes ; aucun contournement TLS ne doit etre autorise en production.
+- Supervision minimale :
+  - alertes sur echecs de connexion repetes ;
+  - erreurs API ;
+  - automatisations echouees ;
+  - sauvegardes absentes ;
+  - espace disque faible.
 
 ### 7.2 Conformite RGPD
 
@@ -135,6 +159,9 @@ L'architecture recommandee repose sur une application web modulaire, capable d'i
 - Minimisation des donnees collectees.
 - Conservation limitee des donnees sensibles.
 - Tracabilite des traitements.
+- Registre des traitements de donnees.
+- Purge automatique des donnees obsoletes.
+- Procedure d'export ou de suppression sur demande legitime.
 
 ### 7.3 Evolutivite
 

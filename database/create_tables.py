@@ -123,7 +123,6 @@ def create_users_table():
     cursor.execute("""
     ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP(0);
     """)
-
     cursor.execute("""
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     """)
@@ -154,6 +153,72 @@ def create_login_attempts_table():
         "CREATE INDEX IF NOT EXISTS idx_login_attempts_email_created_at ON login_attempts(lower(email), created_at DESC);",
         "CREATE INDEX IF NOT EXISTS idx_login_attempts_ip_created_at ON login_attempts(ip_address, created_at DESC);",
         "CREATE INDEX IF NOT EXISTS idx_login_attempts_success ON login_attempts(success);",
+    ]
+    for statement in index_statements:
+        cursor.execute(statement)
+
+    connexion.commit()
+    cursor.close()
+    connexion.close()
+
+
+def create_audit_events_table():
+    """
+    Cree le journal d'audit des actions sensibles.
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS audit_events (
+        id BIGSERIAL PRIMARY KEY,
+        event_type TEXT NOT NULL,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        email TEXT,
+        ip_address TEXT,
+        metadata JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    index_statements = [
+        "CREATE INDEX IF NOT EXISTS idx_audit_events_created_at ON audit_events(created_at DESC);",
+        "CREATE INDEX IF NOT EXISTS idx_audit_events_event_type ON audit_events(event_type);",
+        "CREATE INDEX IF NOT EXISTS idx_audit_events_user_id ON audit_events(user_id);",
+    ]
+    for statement in index_statements:
+        cursor.execute(statement)
+
+    connexion.commit()
+    cursor.close()
+    connexion.close()
+
+
+def create_password_reset_tokens_table():
+    """
+    Cree la table des tokens de reinitialisation de mot de passe.
+    """
+    connexion = get_connection()
+    cursor = connexion.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id BIGSERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token_hash TEXT NOT NULL UNIQUE,
+        expires_at TIMESTAMP(0) NOT NULL,
+        used_at TIMESTAMP(0),
+        created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_by_email TEXT,
+        ip_address TEXT,
+        created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    index_statements = [
+        "CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);",
+        "CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires_at ON password_reset_tokens(expires_at);",
+        "CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_used_at ON password_reset_tokens(used_at);",
     ]
     for statement in index_statements:
         cursor.execute(statement)
@@ -489,6 +554,8 @@ def create_all_tables():
     create_fulltext_search_trigger()
     create_users_table()
     create_login_attempts_table()
+    create_audit_events_table()
+    create_password_reset_tokens_table()
     create_dvf_tables()
     create_table_stats()
     create_enrichment_tables()

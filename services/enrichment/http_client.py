@@ -19,6 +19,7 @@ class JsonHttpClient:
     def __init__(self, timeout=20, ssl_verify=None):
         self.timeout = timeout
         self.ssl_verify = ssl_verify if ssl_verify is not None else os.getenv("ENRICHMENT_SSL_VERIFY", "true") != "false"
+        self.allow_insecure_ssl_fallback = os.getenv("APP_ENV", "development").lower() not in {"prod", "production"}
 
     def _ssl_context(self, verify=None):
         should_verify = self.ssl_verify if verify is None else verify
@@ -43,7 +44,7 @@ class JsonHttpClient:
             with urllib.request.urlopen(request, timeout=self.timeout, context=self._ssl_context()) as response:
                 body = response.read().decode("utf-8")
         except URLError as exc:
-            if self.ssl_verify and "CERTIFICATE_VERIFY_FAILED" in str(exc):
+            if self.ssl_verify and self.allow_insecure_ssl_fallback and "CERTIFICATE_VERIFY_FAILED" in str(exc):
                 with urllib.request.urlopen(request, timeout=self.timeout, context=self._ssl_context(verify=False)) as response:
                     body = response.read().decode("utf-8")
             else:

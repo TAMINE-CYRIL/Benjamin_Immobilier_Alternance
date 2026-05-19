@@ -4,11 +4,21 @@
  * @param {*} options Les options de la requête (méthode, corps, etc.).
  * @returns La réponse de l'API au format JSON.
  */
+function readCookie(name) {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${name}=`))
+    ?.split("=")[1];
+}
+
 async function request(path, options = {}) {
+  const method = (options.method || "GET").toUpperCase();
+  const csrfToken = method === "GET" || method === "HEAD" ? null : readCookie("csrf_token");
   const response = await fetch(path, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(csrfToken ? { "X-CSRF-Token": decodeURIComponent(csrfToken) } : {}),
       ...(options.headers || {}),
     },
     ...options,
@@ -49,6 +59,20 @@ export function login(email, password) {
  */
 export function logout() {
   return request("/api/auth/logout", { method: "POST" });
+}
+
+export function requestPasswordReset(email) {
+  return request("/api/auth/password-reset/request", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function confirmPasswordReset(token, newPassword) {
+  return request("/api/auth/password-reset/confirm", {
+    method: "POST",
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
 }
 
 /**

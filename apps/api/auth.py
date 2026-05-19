@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import os
+import secrets
 import time
 from typing import Optional
 
@@ -13,9 +14,38 @@ from apps.database.users_repo import get_user_by_id
 
 
 COOKIE_NAME = os.getenv("AUTH_COOKIE_NAME", "access_token")
-JWT_SECRET = os.getenv("JWT_SECRET", "change-me-in-production")
+CSRF_COOKIE_NAME = os.getenv("CSRF_COOKIE_NAME", "csrf_token")
 JWT_TTL_SECONDS = int(os.getenv("JWT_TTL_SECONDS", "86400"))
-COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "false").lower() == "true"
+DEFAULT_JWT_SECRET = "change-me-in-production"
+PRODUCTION_ENVS = {"prod", "production"}
+
+
+def is_production():
+    return os.getenv("APP_ENV", "development").lower() in PRODUCTION_ENVS
+
+
+def _env_bool(name, default=False):
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    return raw_value.lower() in {"1", "true", "yes", "on"}
+
+
+def cookie_secure_enabled():
+    return _env_bool("AUTH_COOKIE_SECURE", default=is_production())
+
+
+def get_jwt_secret():
+    secret = os.getenv("JWT_SECRET", DEFAULT_JWT_SECRET)
+    if is_production() and (not secret or secret == DEFAULT_JWT_SECRET or len(secret) < 32):
+        raise RuntimeError("JWT_SECRET must be set to a strong value in production")
+    return secret
+
+
+def validate_security_config():
+    get_jwt_secret()
+    if is_production() and not cookie_secure_enabled():
+        raise RuntimeError("AUTH_COOKIE_SECURE must be true in production")
 
 
 def hash_password(password):
@@ -60,7 +90,7 @@ def create_access_token(user_id):
         _b64encode(json.dumps(body, separators=(",", ":")).encode("utf-8")),
     ])
     signature = hmac.new(
-        JWT_SECRET.encode("utf-8"),
+        get_jwt_secret().encode("utf-8"),
         signing_input.encode("ascii"),
         hashlib.sha256,
     ).digest()
@@ -78,7 +108,7 @@ def decode_access_token(token):
 
     signing_input = f"{header_b64}.{body_b64}"
     expected_signature = hmac.new(
-        JWT_SECRET.encode("utf-8"),
+        get_jwt_secret().encode("utf-8"),
         signing_input.encode("ascii"),
         hashlib.sha256,
     ).digest()
@@ -110,7 +140,16 @@ def set_auth_cookie(response, token):
         COOKIE_NAME,
         token,
         httponly=True,
-        secure=COOKIE_SECURE,
+        secure=cookie_secure_enabled(),
+        samesite="lax",
+        max_age=JWT_TTL_SECONDS,
+        path="/",
+    )
+    response.set_cookie(
+        CSRF_COOKIE_NAME,
+        secrets.token_urlsafe(32),
+        httponly=False,
+        secure=cookie_secure_enabled(),
         samesite="lax",
         max_age=JWT_TTL_SECONDS,
         path="/",
@@ -122,6 +161,7 @@ def clear_auth_cookie(response):
     Efface le cookie de connexion.
     """
     response.delete_cookie(COOKIE_NAME, path="/")
+    response.delete_cookie(CSRF_COOKIE_NAME, path="/")
 
 
 def get_current_user(access_token: Optional[str] = Cookie(default=None, alias=COOKIE_NAME)):

@@ -82,6 +82,35 @@ def create_user(email, password_hash, is_active=True):
     }
 
 
+def update_user_password(user_id, password_hash):
+    """
+    Met a jour le hash de mot de passe d'un utilisateur et retire un blocage eventuel.
+    """
+    sql = """
+        UPDATE users
+        SET password_hash = %s,
+            locked_until = NULL
+        WHERE id = %s
+        RETURNING id, email, is_active, created_at
+    """
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, (password_hash, user_id))
+            row = cur.fetchone()
+        conn.commit()
+
+    if not row:
+        return None
+
+    return {
+        "id": row[0],
+        "email": row[1],
+        "is_active": row[2],
+        "created_at": row[3],
+    }
+
+
 def lock_user_for_minutes(user_id, minutes):
     """
     Verrouille un utilisateur pour un nombre de minutes spécifié en mettant à jour le champ locked_until.

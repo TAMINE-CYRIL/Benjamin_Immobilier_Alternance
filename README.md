@@ -84,6 +84,7 @@ crawl4ai-setup   # Installe les navigateurs Playwright
 Créer un fichier `.env` à la racine :
 
 ```env
+APP_ENV=development
 PG_DB=nom_de_la_base
 PG_USER=utilisateur
 PG_PASSWORD=mot_de_passe
@@ -94,9 +95,25 @@ PG_PORT=5432
 PROXIES=http://user:pass@host:port,...
 
 # Dashboard prive
-JWT_SECRET=une-cle-longue-et-aleatoire
+JWT_SECRET=une-cle-longue-et-aleatoire-de-32-caracteres-minimum
 AUTH_COOKIE_SECURE=false
+CSRF_COOKIE_NAME=csrf_token
+ALLOWED_HOSTS=127.0.0.1,localhost
+API_CORS_ORIGINS=http://127.0.0.1:5173
+FRONTEND_BASE_URL=http://127.0.0.1:5173
+PASSWORD_RESET_BASE_URL=http://127.0.0.1:5173
+PASSWORD_RESET_TTL_MINUTES=60
+
+# Envoi des emails de reinitialisation
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USERNAME=notification@example.com
+SMTP_PASSWORD=mot_de_passe_smtp
+SMTP_FROM=notification@example.com
+SMTP_USE_TLS=true
 ```
+
+Copier `.env.example` pour obtenir la liste complète des variables. En production, `APP_ENV=production`, `AUTH_COOKIE_SECURE=true`, `FORCE_HTTPS=true`, `ALLOWED_HOSTS` et `API_CORS_ORIGINS` doivent être renseignés explicitement. L'API refuse de démarrer avec le secret JWT par défaut en production.
 
 ## Utilisation
 
@@ -200,6 +217,7 @@ GET /api/jobs/runs?limit=20
 ### 6 bis. Migrations et sauvegardes
 
 Les migrations SQL versionnees sont placees dans `database/migrations/` et suivies dans la table `schema_migrations`.
+Chaque nouvelle migration doit etre commit avec le code qui l'utilise, afin qu'un deploiement ou une nouvelle installation retrouve exactement le meme schema.
 
 Application manuelle :
 
@@ -213,11 +231,19 @@ Sauvegarde PostgreSQL au format custom :
 .\scripts\backup_database.ps1
 ```
 
+Sauvegarde chiffrée avec rétention et ACL restreinte :
+
+```powershell
+.\scripts\backup_database.ps1 -GpgRecipient ops@example.com -RetentionDays 30 -RestrictAcl
+```
+
 Restauration depuis une sauvegarde :
 
 ```powershell
 .\scripts\restore_database.ps1 -BackupPath .\data\backups\nom_du_dump.dump
 ```
+
+Les fichiers `.dump.gpg` sont déchiffrés temporairement pendant la restauration puis supprimés.
 
 Par defaut, les annonces non revues depuis 30 jours sont copiees dans `annonces_archive` avec un snapshot JSONB de leur enrichissement, puis supprimees de `annonces`.
 
@@ -230,10 +256,36 @@ uvicorn apps.api.main:app --reload
 Créer un utilisateur pour le dashboard privé :
 
 ```bash
-python database/create_user.py admin@example.com motdepasse
+python database/create_user.py utilisateur@example.com motdepasse
 ```
 
 L'endpoint `GET /api/annonces` est protégé par authentification et retourne les annonces filtrées sous forme paginée.
+Les routes d'exploitation comme `GET /api/jobs/runs` sont protégées par authentification.
+
+Réinitialisation de mot de passe utilisateur :
+
+- L'utilisateur clique sur `Mot de passe oublie ?` depuis l'ecran de connexion.
+- Il renseigne son email.
+- Si le compte existe, l'API genere un token a usage unique et envoie un lien par SMTP.
+- Le lien ouvre le dashboard avec `?reset_token=...` et affiche le formulaire de nouveau mot de passe.
+- Le token est stocke uniquement sous forme de hash, expire par defaut apres 60 minutes et devient invalide apres usage.
+
+Un script de secours existe pour generer un token manuellement en cas d'incident SMTP :
+
+```bash
+python database/create_password_reset_token.py utilisateur@example.com --ttl-minutes 60 --created-by-email support@example.com
+```
+
+### 7 bis. Sécurité applicative
+
+- Authentification par JWT signé stocké en cookie `HttpOnly`.
+- Cookie CSRF séparé et en-tête `X-CSRF-Token` requis sur les routes API mutantes hors login.
+- Cookies `Secure` activés automatiquement en production, avec refus des secrets JWT faibles ou par défaut.
+- Headers sécurité HTTP : CSP minimale, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS si HTTPS forcé.
+- Hôtes et origines CORS configurables via `ALLOWED_HOSTS` et `API_CORS_ORIGINS`.
+- Journal d'audit en base (`audit_events`) pour connexions, échecs, consultations sensibles et automatisations.
+- Réinitialisation de mot de passe par email, avec token a usage unique, expirant et audité.
+- Dépendances frontend et Python épinglées ; lancer `npm run audit` côté `apps/web` et un scan de secrets avant livraison.
 
 ### 8. Demarrer le dashboard web
 
