@@ -54,16 +54,16 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
         <option value="price">Prix</option>
         <option value="surface">Surface</option>
         <option value="price_m2">Prix/m2</option>
-        <option value="last_seen">Derniere vue</option>
+        <option value="last_seen">Dernière vue</option>
         <option value="zonage">Zonage</option>
         <option value="distance">Distance</option>
       </select>
       <select value={filters.direction} onChange={(event) => update("direction", event.target.value)}>
-        <option value="desc">Decroissant</option>
+        <option value="desc">Décroissant</option>
         <option value="asc">Croissant</option>
       </select>
       <button type="submit">Filtrer</button>
-      <button type="button" className="secondary" onClick={onReset}>Reinitialiser</button>
+      <button type="button" className="secondary" onClick={onReset}>Réinitialiser</button>
     </form>
   );
 }

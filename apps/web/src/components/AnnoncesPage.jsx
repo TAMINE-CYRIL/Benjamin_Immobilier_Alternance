@@ -113,7 +113,7 @@ export function AnnoncesPage() {
           <div className="list-panel">
             <div className="list-head">
               <div>
-                <p className="eyebrow">Resultats</p>
+                <p className="eyebrow">Résultats</p>
                 <h2>Annonces</h2>
               </div>
               <span>{data.items.length} sur cette page</span>
@@ -124,7 +124,7 @@ export function AnnoncesPage() {
       </section>
 
       <nav className="pagination">
-        <button className="secondary" disabled={page <= 1} onClick={() => goToPage(page - 1)}>Precedent</button>
+        <button className="secondary" disabled={page <= 1} onClick={() => goToPage(page - 1)}>Précédent</button>
         <span>Page {page} / {totalPages}</span>
         <button className="secondary" disabled={page >= totalPages} onClick={() => goToPage(page + 1)}>Suivant</button>
       </nav>

@@ -45,8 +45,8 @@ export function MembersPage() {
       await loadMembers();
       setMemberMessage(
         result.created
-          ? "Invitation envoyee. Le membre pourra choisir son mot de passe par email."
-          : "Invitation renvoyee a ce membre existant."
+          ? "Invitation envoyée. Le membre pourra choisir son mot de passe par email."
+          : "Invitation renvoyée à ce membre existant."
       );
     } catch (err) {
       setMemberError(err.message);
@@ -59,7 +59,7 @@ export function MembersPage() {
     <section className="member-panel">
       <div>
         <p className="eyebrow">Membres</p>
-        <h2>Ajouter un acces</h2>
+        <h2>Ajouter un accès</h2>
         <span className="member-count">
           {membersLoading ? "Chargement..." : `${members.length} compte(s)`}
         </span>

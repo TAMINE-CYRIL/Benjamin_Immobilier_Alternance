@@ -91,7 +91,7 @@ export function LoginPage({ onLogin }) {
 
     try {
       await requestPasswordReset(email);
-      setMessage("Si un compte existe pour cette adresse, un lien de reinitialisation vient d'etre envoye.");
+      setMessage("Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -118,7 +118,7 @@ export function LoginPage({ onLogin }) {
       setConfirmPassword("");
       setResetToken("");
       setMode("login");
-      setMessage("Votre mot de passe a ete mis a jour. Vous pouvez vous connecter.");
+      setMessage("Votre mot de passe a été mis à jour. Vous pouvez vous connecter.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -134,9 +134,9 @@ export function LoginPage({ onLogin }) {
 
   const title = mode === "login" ? "Bonjour" : mode === "forgot" ? "Mot de passe oublie" : "Nouveau mot de passe";
   const intro = mode === "login"
-    ? "Connectez-vous pour acceder a votre espace."
+    ? "Connectez-vous pour accéder a votre espace."
     : mode === "forgot"
-      ? "Renseignez votre adresse e-mail pour recevoir un lien securise."
+      ? "Renseignez votre adresse e-mail pour recevoir un lien sécurisé."
       : "Choisissez un nouveau mot de passe pour votre compte.";
 
   return (
@@ -144,9 +144,11 @@ export function LoginPage({ onLogin }) {
       <section className="login-hero" aria-hidden="true">
         <div className="login-hero-grid" />
         <div className="login-brand">
-          <p className="login-brand-kicker">Benjamin</p>
-          <h1>Immobilier</h1>
-          <span>Pole developpement</span>
+          <h1>
+            Benjamin
+            <span>Immobilier</span>
+          </h1>
+          <p>Pôle développement</p>
         </div>
       </section>
 
@@ -212,13 +214,13 @@ export function LoginPage({ onLogin }) {
           {message ? <p className="success-message">{message}</p> : null}
 
           <button className="login-submit" type="submit" disabled={loading}>
-            {loading ? "Traitement..." : mode === "login" ? "Se connecter" : mode === "forgot" ? "Envoyer le lien" : "Mettre a jour"}
+            {loading ? "Traitement..." : mode === "login" ? "Se connecter" : mode === "forgot" ? "Envoyer le lien" : "Mettre à jour"}
             <span aria-hidden="true">→</span>
           </button>
 
           {mode !== "login" ? (
             <button className="text-button centered" type="button" onClick={() => switchMode("login")}>
-              Retour a la connexion
+              Retour à la connexion
             </button>
           ) : null}
 

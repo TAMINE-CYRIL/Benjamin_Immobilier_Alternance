@@ -71,10 +71,10 @@ export default function AnnoncesMap({ annonces, selectedId, onSelect }) {
       <div className="map-head">
         <div>
           <p className="eyebrow">Carte</p>
-          <h2>Recherche geographique</h2>
+          <h2>Recherche géographique</h2>
         </div>
         <span className="map-count">
-          {annoncesAvecCoords.length} localisee(s) / {annonces.length}
+          {annoncesAvecCoords.length} localisée(s) / {annonces.length}
         </span>
       </div>
 
@@ -97,7 +97,7 @@ export default function AnnoncesMap({ annonces, selectedId, onSelect }) {
                 <span className={`score-chip score-${getScoreLevel(annonce.score)}`}>Score {formatScore(annonce.score)}</span>
                 <span>{formatMoney(annonce.price)}</span>
                 <button type="button" onClick={() => onSelect(annonce.id)}>
-                  Voir le detail
+                  Voir le détail
                 </button>
               </div>
             </Popup>
@@ -106,7 +106,7 @@ export default function AnnoncesMap({ annonces, selectedId, onSelect }) {
       </MapContainer>
 
       {!annoncesAvecCoords.length ? (
-        <div className="map-empty">Aucune annonce de cette page ne dispose de coordonnees exploitables.</div>
+        <div className="map-empty">Aucune annonce de cette page ne dispose de coordonnées exploitables.</div>
       ) : null}
     </section>
   );
