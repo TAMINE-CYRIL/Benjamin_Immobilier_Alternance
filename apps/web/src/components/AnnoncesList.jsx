@@ -1,5 +1,5 @@
 import React from "react";
-import { formatMoney, formatScore, getScoreLevel } from "../utils";
+import { formatDistance, formatMoney, formatScore, getScoreLevel } from "../utils";
 
 /**
  * Vérifie si une annonce a des coordonnées valides.
@@ -48,6 +48,7 @@ export function AnnoncesList({ annonces, selectedId, onSelect }) {
                 <span>{formatMoney(annonce.price)}</span>
                 <span>{annonce.surface ? `${annonce.surface} m2` : "Surface inconnue"}</span>
                 <span>{annonce.price_m2 ? `${Math.round(annonce.price_m2)} EUR/m2` : "Prix/m2 inconnu"}</span>
+                {annonce.distance_m !== undefined ? <span>{formatDistance(annonce.distance_m)}</span> : null}
               </span>
               <span className="annonce-card-badges">
                 <span className={`status-pill status-${annonce.enrichment?.status || "pending"}`}>

@@ -101,11 +101,24 @@ def _fulltext_tsquery(query_text):
     return f"plainto_tsquery('french', {repr(query_text)})"
 
 
-def _row_to_annonce(row):
+def _geo_values(filters):
+    center_lat = filters.get("center_lat")
+    center_lon = filters.get("center_lon")
+    radius_km = filters.get("radius_km")
+    if center_lat is None or center_lon is None or radius_km is None:
+        return None
+    return float(center_lat), float(center_lon), float(radius_km) * 1000
+
+
+def _distance_expression():
+    return "ST_Distance(e.location, ST_SetSRID(ST_MakePoint(%s, %s), 4326)::geography)"
+
+
+def _row_to_annonce(row, include_distance=False):
     """
     Convertit une ligne de résultat en SQL en un dictionnaire d'annonce structuré.
     """
-    return {
+    annonce = {
         "id": row[0],
         "title": row[1],
         "url": row[2],
@@ -146,6 +159,11 @@ def _row_to_annonce(row):
             "parcel_commune_code": row[36],
         },
     }
+
+    if include_distance:
+        annonce["distance_m"] = row[37]
+
+    return annonce
 
 
 def _build_filters(filters):
@@ -200,6 +218,15 @@ def _build_filters(filters):
             clauses.append(f"{column} {operator} %s")
             params.append(value)
 
+    geo_values = _geo_values(filters)
+    if geo_values:
+        center_lat, center_lon, radius_m = geo_values
+        clauses.append(
+            "e.location IS NOT NULL AND "
+            "ST_DWithin(e.location, ST_SetSRID(ST_MakePoint(%s, %s), 4326)::geography, %s)"
+        )
+        params.extend([center_lon, center_lat, radius_m])
+
     return clauses, params
 
 
@@ -211,11 +238,12 @@ def search_annonces(filters):
     page_size = min(max(filters.get("page_size") or 25, 1), 100)
     offset = (page - 1) * page_size
 
-    clauses, params = _build_filters(filters)
+    clauses, where_params = _build_filters(filters)
     where_sql = f"WHERE {' AND '.join(clauses)}" if clauses else ""
 
     sort = SORT_COLUMNS.get(filters.get("sort") or "score", SORT_COLUMNS["score"])
     direction = SORT_DIRECTIONS.get(filters.get("direction") or "desc", SORT_DIRECTIONS["desc"])
+    geo_values = _geo_values(filters)
 
     joins = """
         LEFT JOIN annonce_enrichments e ON e.annonce_id = a.id
@@ -225,17 +253,32 @@ def search_annonces(filters):
     # Si tri par pertinence et requête textuelle présente, calculer le rang
     query_text = filters.get("query") or filters.get("q")
     select_fields = ANNONCE_FIELDS
+    select_params = []
+    order_params = []
+    include_distance = bool(geo_values)
     order_by = f"{sort} {direction} NULLS LAST, a.id DESC"
+
+    if geo_values:
+        center_lat, center_lon, _radius_m = geo_values
+        distance_sql = _distance_expression()
+        select_fields = f"""
+            {select_fields},
+            {distance_sql} AS distance_m
+        """
+        select_params.extend([center_lon, center_lat])
+
+        if filters.get("sort") == "distance":
+            order_by = "distance_m ASC NULLS LAST, a.id DESC"
     
     if sort == "relevance_rank" and query_text:
         # Inclure le calcul de pertinence dans la requête SELECT
         select_fields = f"""
-            {ANNONCE_FIELDS},
+            {select_fields},
             ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) as relevance_rank
         """
         order_by = "ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) DESC, a.id DESC"
-        # Ajouter les paramètres pour les deux occurrences de ts_rank_cd
-        params = params + [query_text, query_text]
+        select_params.append(query_text)
+        order_params.append(query_text)
 
     count_sql = f"SELECT COUNT(*) FROM annonces a {joins} {where_sql}"
     data_sql = f"""
@@ -249,14 +292,14 @@ def search_annonces(filters):
 
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(count_sql, params[:-2] if sort == "relevance_rank" and query_text else params)
+            cur.execute(count_sql, where_params)
             total = cur.fetchone()[0]
 
-            cur.execute(data_sql, [*params, page_size, offset])
+            cur.execute(data_sql, [*select_params, *where_params, *order_params, page_size, offset])
             rows = cur.fetchall()
 
     return {
-        "items": [_row_to_annonce(row) for row in rows],
+        "items": [_row_to_annonce(row, include_distance=include_distance) for row in rows],
         "total": total,
         "page": page,
         "page_size": page_size,

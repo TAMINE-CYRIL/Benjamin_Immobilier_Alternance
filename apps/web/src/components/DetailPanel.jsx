@@ -1,5 +1,5 @@
 import React from "react";
-import { formatMoney } from "../utils";
+import { formatDistance, formatMoney } from "../utils";
 
 
 /**
@@ -30,6 +30,7 @@ export function DetailPanel({ annonce, loading, onClose }) {
             <dt>DPE</dt><dd>{annonce.energy_class || "-"}</dd>
             <dt>Agence</dt><dd>{annonce.agency || "-"}</dd>
             <dt>Derniere vue</dt><dd>{annonce.last_seen || "-"}</dd>
+            {annonce.distance_m !== undefined ? <><dt>Distance</dt><dd>{formatDistance(annonce.distance_m)}</dd></> : null}
           </dl>
           <section className="detail-section">
             <p className="eyebrow">Enrichissement foncier</p>

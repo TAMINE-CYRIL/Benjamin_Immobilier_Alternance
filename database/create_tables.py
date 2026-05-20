@@ -378,10 +378,26 @@ def create_table_stats():
 def create_enrichment_tables():
     """
     Cree les tables d'enrichissement cadastre et urbanisme.
-    Les geometries sont stockees en JSONB pour rester utilisables sans extension PostGIS.
+    Les geometries restent aussi stockees en JSONB pour compatibilite.
     """
     conn = get_connection()
     cur = conn.cursor()
+
+    cur.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+    cur.execute("""
+    CREATE OR REPLACE FUNCTION safe_geom_from_geojson(geojson JSONB)
+    RETURNS geometry AS $$
+    BEGIN
+        IF geojson IS NULL THEN
+            RETURN NULL;
+        END IF;
+
+        RETURN ST_SetSRID(ST_MakeValid(ST_GeomFromGeoJSON(geojson::text)), 4326);
+    EXCEPTION WHEN OTHERS THEN
+        RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql IMMUTABLE;
+    """)
 
     cur.execute("""
     CREATE TABLE IF NOT EXISTS parcelles (
@@ -394,6 +410,7 @@ def create_enrichment_tables():
         centroid_lat NUMERIC,
         centroid_lon NUMERIC,
         geometry_json JSONB,
+        geom geometry(Geometry, 4326),
         raw_data JSONB,
         created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP
@@ -407,6 +424,7 @@ def create_enrichment_tables():
         status TEXT NOT NULL DEFAULT 'pending',
         latitude NUMERIC,
         longitude NUMERIC,
+        location geography(Point, 4326),
         parcel_id INTEGER REFERENCES parcelles(id),
         parcel_key TEXT,
         zip_code TEXT,
@@ -432,6 +450,8 @@ def create_enrichment_tables():
     """)
 
     alter_statements = [
+        "ALTER TABLE parcelles ADD COLUMN IF NOT EXISTS geom geometry(Geometry, 4326);",
+        "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS location geography(Point, 4326);",
         "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS geocode_status TEXT;",
         "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS cadastre_status TEXT;",
         "ALTER TABLE annonce_enrichments ADD COLUMN IF NOT EXISTS gpu_status TEXT;",
@@ -445,11 +465,13 @@ def create_enrichment_tables():
 
     index_statements = [
         "CREATE INDEX IF NOT EXISTS idx_parcelles_commune_code ON parcelles(commune_code);",
+        "CREATE INDEX IF NOT EXISTS idx_parcelles_geom ON parcelles USING GIST(geom);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_annonce_id ON annonce_enrichments(annonce_id);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_zip_code ON annonce_enrichments(zip_code);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_parcel_id ON annonce_enrichments(parcel_id);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_status ON annonce_enrichments(status);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_zonage ON annonce_enrichments(zonage);",
+        "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_location ON annonce_enrichments USING GIST(location);",
     ]
     for statement in index_statements:
         cur.execute(statement)

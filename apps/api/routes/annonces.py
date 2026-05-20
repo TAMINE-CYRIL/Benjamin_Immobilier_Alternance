@@ -31,13 +31,30 @@ def get_annonces(
     source_site: Optional[str] = TEXT_FILTER,
     enrichment_status: Optional[Literal["pending", "success", "partial_success", "failed"]] = None,
     zonage: Optional[str] = TEXT_FILTER,
-    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage", "relevance"] = "score",
+    center_lat: Optional[float] = Query(None, ge=-90, le=90),
+    center_lon: Optional[float] = Query(None, ge=-180, le=180),
+    radius_km: Optional[float] = Query(None, ge=0.1, le=100),
+    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage", "relevance", "distance"] = "score",
     direction: Literal["asc", "desc"] = "desc",
 ):
     """
     Recherche des annonces immobilières avec pagination, filtres avancés et tri.
      - `page` et `page_size` pour la pagination.
     """
+    geo_values = [center_lat, center_lon, radius_km]
+    has_partial_geo_filter = any(value is not None for value in geo_values) and not all(value is not None for value in geo_values)
+    if has_partial_geo_filter:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="center_lat, center_lon et radius_km doivent etre fournis ensemble",
+        )
+
+    if sort == "distance" and not all(value is not None for value in geo_values):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Le tri par distance necessite center_lat, center_lon et radius_km",
+        )
+
     return search_annonces({
         "page": page,
         "page_size": page_size,
@@ -54,6 +71,9 @@ def get_annonces(
         "source_site": source_site,
         "enrichment_status": enrichment_status,
         "zonage": zonage,
+        "center_lat": center_lat,
+        "center_lon": center_lon,
+        "radius_km": radius_km,
         "sort": sort,
         "direction": direction,
     })

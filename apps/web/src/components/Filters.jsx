@@ -9,7 +9,11 @@ import { propertyTypeOptions, sourceOptions } from "../constants";
  */
 export function Filters({ filters, onChange, onSubmit, onReset }) {
   function update(name, value) {
-    onChange({ ...filters, [name]: value });
+    const nextFilters = { ...filters, [name]: value };
+    if (name === "sort" && value === "distance") {
+      nextFilters.direction = "asc";
+    }
+    onChange(nextFilters);
   }
 
   return (
@@ -34,6 +38,9 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
       <input type="number" placeholder="Surface min" value={filters.surface_min} onChange={(event) => update("surface_min", event.target.value)} />
       <input type="number" placeholder="Surface max" value={filters.surface_max} onChange={(event) => update("surface_max", event.target.value)} />
       <input type="number" placeholder="Score min" value={filters.score_min} onChange={(event) => update("score_min", event.target.value)} />
+      <input type="number" step="0.000001" placeholder="Latitude centre" value={filters.center_lat} onChange={(event) => update("center_lat", event.target.value)} />
+      <input type="number" step="0.000001" placeholder="Longitude centre" value={filters.center_lon} onChange={(event) => update("center_lon", event.target.value)} />
+      <input type="number" step="0.1" placeholder="Rayon km" value={filters.radius_km} onChange={(event) => update("radius_km", event.target.value)} />
       <select value={filters.enrichment_status} onChange={(event) => update("enrichment_status", event.target.value)}>
         <option value="">Tous enrichissements</option>
         <option value="success">Enrichi</option>
@@ -49,6 +56,7 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
         <option value="price_m2">Prix/m2</option>
         <option value="last_seen">Derniere vue</option>
         <option value="zonage">Zonage</option>
+        <option value="distance">Distance</option>
       </select>
       <select value={filters.direction} onChange={(event) => update("direction", event.target.value)}>
         <option value="desc">Decroissant</option>

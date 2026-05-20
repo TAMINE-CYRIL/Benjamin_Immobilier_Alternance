@@ -54,9 +54,9 @@ def upsert_parcelle(parcel, latitude=None, longitude=None):
     sql = """
         INSERT INTO parcelles (
             parcel_key, commune_code, section, numero, contenance,
-            centroid_lat, centroid_lon, geometry_json, raw_data, updated_at
+            centroid_lat, centroid_lon, geometry_json, geom, raw_data, updated_at
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, safe_geom_from_geojson(%s::jsonb), %s, CURRENT_TIMESTAMP)
         ON CONFLICT (parcel_key) DO UPDATE
         SET commune_code = EXCLUDED.commune_code,
             section = EXCLUDED.section,
@@ -65,6 +65,7 @@ def upsert_parcelle(parcel, latitude=None, longitude=None):
             centroid_lat = EXCLUDED.centroid_lat,
             centroid_lon = EXCLUDED.centroid_lon,
             geometry_json = EXCLUDED.geometry_json,
+            geom = EXCLUDED.geom,
             raw_data = EXCLUDED.raw_data,
             updated_at = CURRENT_TIMESTAMP
         RETURNING id;
@@ -84,6 +85,7 @@ def upsert_parcelle(parcel, latitude=None, longitude=None):
                 latitude,
                 longitude,
                 Json(parcel.get("geometry_json")),
+                Json(parcel.get("geometry_json")),
                 Json(parcel.get("raw_data")),
             ),
         )
@@ -98,7 +100,7 @@ def upsert_parcelle(parcel, latitude=None, longitude=None):
 def upsert_enrichment(enrichment):
     sql = """
         INSERT INTO annonce_enrichments (
-            annonce_id, status, latitude, longitude, parcel_id, parcel_key, zip_code,
+            annonce_id, status, latitude, longitude, location, parcel_id, parcel_key, zip_code,
             zonage, prescriptions, servitudes, documents,
             raw_geocode, raw_cadastre, raw_gpu,
             geocode_status, cadastre_status, gpu_status,
@@ -106,7 +108,12 @@ def upsert_enrichment(enrichment):
             error_message, enriched_at, updated_at
         )
         VALUES (
-            %s, %s, %s, %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            CASE
+                WHEN %s IS NULL OR %s IS NULL THEN NULL
+                ELSE ST_SetSRID(ST_MakePoint(%s, %s), 4326)::geography
+            END,
+            %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s,
             %s, %s, %s,
@@ -117,6 +124,7 @@ def upsert_enrichment(enrichment):
         SET status = EXCLUDED.status,
             latitude = EXCLUDED.latitude,
             longitude = EXCLUDED.longitude,
+            location = EXCLUDED.location,
             parcel_id = EXCLUDED.parcel_id,
             parcel_key = EXCLUDED.parcel_key,
             zip_code = EXCLUDED.zip_code,
@@ -150,6 +158,10 @@ def upsert_enrichment(enrichment):
                 enrichment["status"],
                 enrichment.get("latitude"),
                 enrichment.get("longitude"),
+                enrichment.get("latitude"),
+                enrichment.get("longitude"),
+                enrichment.get("longitude"),
+                enrichment.get("latitude"),
                 enrichment.get("parcel_id"),
                 enrichment.get("parcel_key"),
                 enrichment.get("zip_code"),

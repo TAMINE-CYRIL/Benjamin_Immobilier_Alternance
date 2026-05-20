@@ -47,11 +47,16 @@ export function AnnoncesPage() {
    * @param {*} id
    */
   async function handleSelect(id) {
+    const listAnnonce = data.items.find((annonce) => annonce.id === id);
     setSelectedId(id);
     setDetailLoading(true);
-    setSelected({});
+    setSelected(listAnnonce || {});
     try {
-      setSelected(await getAnnonce(id));
+      const detail = await getAnnonce(id);
+      setSelected({
+        ...detail,
+        ...(listAnnonce?.distance_m !== undefined ? { distance_m: listAnnonce.distance_m } : {}),
+      });
     } catch (err) {
       setError(err.message);
       setSelected(null);

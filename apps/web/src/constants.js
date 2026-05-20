@@ -13,6 +13,9 @@ export const emptyFilters = {
   source_site: "",
   enrichment_status: "",
   zonage: "",
+  center_lat: "",
+  center_lon: "",
+  radius_km: "",
   sort: "score",
   direction: "desc",
 };

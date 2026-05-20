@@ -26,6 +26,16 @@ export function formatScore(value) {
   }).format(score);
 }
 
+export function formatDistance(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  const distance = Number(value);
+  if (!Number.isFinite(distance)) return "-";
+  if (distance >= 1000) {
+    return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(distance / 1000)} km`;
+  }
+  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(distance)} m`;
+}
+
 /**
  * Détermine le niveau d'un score.
  * @param {*} value La valeur du score.
