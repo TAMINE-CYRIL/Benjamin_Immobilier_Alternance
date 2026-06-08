@@ -12,8 +12,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Genere un token de reinitialisation de mot de passe.")
-    parser.add_argument("email", help="Email de l'utilisateur a reinitialiser")
+    parser = argparse.ArgumentParser(description="Genere un token de réinitialisation de mot de passe.")
+    parser.add_argument("email", help="Email de l'utilisateur a réinitialiser")
     parser.add_argument("--ttl-minutes", type=int, default=60, help="Duree de validite du token")
     parser.add_argument("--created-by-email", default=None, help="Email de la personne qui genere le token")
     args = parser.parse_args()
@@ -42,7 +42,7 @@ def main():
     except Exception:
         pass
 
-    print(f"Token de reinitialisation pour {reset['email']}:")
+    print(f"Token de réinitialisation pour {reset['email']}:")
     print(reset["token"])
     print(f"Expire le: {reset['expires_at']}")
 

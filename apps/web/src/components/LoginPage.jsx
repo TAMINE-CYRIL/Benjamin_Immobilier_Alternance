@@ -132,7 +132,7 @@ export function LoginPage({ onLogin }) {
     setMessage("");
   }
 
-  const title = mode === "login" ? "Bonjour" : mode === "forgot" ? "Mot de passe oublie" : "Nouveau mot de passe";
+  const title = mode === "login" ? "Bonjour" : mode === "forgot" ? "Mot de passe oublié" : "Nouveau mot de passe";
   const intro = mode === "login"
     ? "Connectez-vous pour accéder a votre espace."
     : mode === "forgot"
@@ -184,7 +184,7 @@ export function LoginPage({ onLogin }) {
                 icon={<LockIcon />}
               />
               <button className="text-button" type="button" onClick={() => switchMode("forgot")}>
-                Mot de passe oublie ?
+                Mot de passe oublié ?
               </button>
             </>
           ) : null}

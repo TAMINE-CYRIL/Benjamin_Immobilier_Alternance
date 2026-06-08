@@ -57,7 +57,7 @@ class LoginRequest(BaseModel):
 
 class PasswordResetConfirmRequest(BaseModel):
     """
-    Donnees necessaires pour appliquer un token de reinitialisation.
+    Donnees necessaires pour appliquer un token de réinitialisation.
     """
     token: str
     new_password: str
@@ -65,7 +65,7 @@ class PasswordResetConfirmRequest(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     """
-    Demande d'envoi d'un lien de reinitialisation de mot de passe.
+    Demande d'envoi d'un lien de réinitialisation de mot de passe.
     """
     email: str
 
@@ -204,28 +204,28 @@ def _password_reset_url(request: Request, token: str):
 
 
 def _send_password_reset_email(email, reset_url):
-    subject = "Reinitialisation de votre mot de passe Benjamin Immobilier"
+    subject = "Réinitialisation de votre mot de passe Benjamin Immobilier"
     body = "\n".join([
         "Bonjour,",
         "",
-        "Vous avez demande la reinitialisation de votre mot de passe.",
+        "Vous avez demande la réinitialisation de votre mot de passe.",
         f"Ouvrez ce lien pour choisir un nouveau mot de passe : {reset_url}",
         "",
         f"Ce lien expire dans {PASSWORD_RESET_TTL_MINUTES} minutes et ne peut etre utilise qu'une seule fois.",
-        "Si vous n'etes pas a l'origine de cette demande, ignorez ce message.",
+        "Si vous n'êtes pas a l'origine de cette demande, ignorez ce message.",
     ])
     send_email(email, subject, body)
 
 
 def _send_member_invitation_email(email, invitation_url):
-    subject = "Creation de votre acces Benjamin Immobilier"
+    subject = "Création de votre accès Benjamin Immobilier"
     body = "\n".join([
         "Bonjour,",
         "",
-        "Un acces au tableau de bord Benjamin Immobilier vient de vous etre cree.",
+        "Un accès au tableau de bord Benjamin Immobilier vient de vous être créé.",
         f"Ouvrez ce lien pour choisir votre mot de passe : {invitation_url}",
         "",
-        f"Ce lien expire dans {PASSWORD_RESET_TTL_MINUTES} minutes et ne peut etre utilise qu'une seule fois.",
+        f"Ce lien expire dans {PASSWORD_RESET_TTL_MINUTES} minutes et ne peut etre utilisé qu'une seule fois.",
         "Si vous n'attendiez pas cette invitation, ignorez ce message.",
     ])
     send_email(email, subject, body)
@@ -233,8 +233,8 @@ def _send_member_invitation_email(email, invitation_url):
 
 def _email_delivery_error_message(exc):
     if os.getenv("APP_ENV", "development").lower() in {"prod", "production"}:
-        return "Email d'invitation non envoye."
-    return f"Email d'invitation non envoye: {exc}"
+        return "Email d'invitation non envoyé."
+    return f"Email d'invitation non envoyé: {exc}"
 
 
 @router.post("/login")
@@ -278,7 +278,7 @@ def logout(response: Response):
 @router.post("/password-reset/request")
 def request_password_reset(payload: PasswordResetRequest, request: Request):
     """
-    Envoie un lien de reinitialisation si le compte existe, sans divulguer l'existence du compte.
+    Envoie un lien de réinitialisation si le compte existe, sans divulguer l'existence du compte.
     """
     email = payload.email.strip()
     ip_address = _client_ip(request)
@@ -319,7 +319,7 @@ def request_password_reset(payload: PasswordResetRequest, request: Request):
 @router.post("/password-reset/confirm")
 def confirm_password_reset(payload: PasswordResetConfirmRequest, request: Request):
     """
-    Reinitialise le mot de passe a partir d'un token a usage unique envoye par email.
+    Réinitialise le mot de passe a partir d'un token a usage unique envoye par email.
     """
     if len(payload.new_password) < 8:
         raise HTTPException(

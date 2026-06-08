@@ -126,7 +126,7 @@ L'architecture recommandee repose sur une application web modulaire, capable d'i
 - Authentification des utilisateurs :
   - tokens d'acces signes ;
   - cookies `HttpOnly`, `Secure`, `SameSite=Lax` ou `Strict`, avec duree de vie configurable ;
-  - reinitialisation de mot de passe par email avec token a usage unique, expiration et audit ;
+  - réinitialisation de mot de passe par email avec token a usage unique, expiration et audit ;
   - SSO ou MFA a prevoir en phase 2 si l'application est exposee sur Internet.
 - Tout environnement de production doit refuser de demarrer avec des secrets par defaut ou trop faibles.
 - Protection CSRF des routes mutantes, car l'authentification repose sur des cookies.

@@ -10,7 +10,7 @@ def _hash_token(token):
 
 def create_password_reset_token(email, ttl_minutes=60, created_by_user_id=None, created_by_email=None, ip_address=None):
     """
-    Cree un token de reinitialisation a usage unique pour un utilisateur existant.
+    Cree un token de réinitialisation a usage unique pour un utilisateur existant.
     Le token clair est retourne une seule fois et seul son hash est stocke.
     """
     token = secrets.token_urlsafe(32)

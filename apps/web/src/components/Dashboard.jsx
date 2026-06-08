@@ -28,7 +28,7 @@ export function Dashboard({ user, onLogout }) {
         </div>
         <div className="user-box">
           <span>{user.email}</span>
-          <button className="secondary" onClick={handleLogout}>Deconnexion</button>
+          <button className="secondary" onClick={handleLogout}>Déconnexion</button>
         </div>
       </header>
 

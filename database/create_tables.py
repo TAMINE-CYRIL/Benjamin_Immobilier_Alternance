@@ -214,7 +214,7 @@ def create_audit_events_table():
 
 def create_password_reset_tokens_table():
     """
-    Cree la table des tokens de reinitialisation de mot de passe.
+    Cree la table des tokens de réinitialisation de mot de passe.
     """
     connexion = get_connection()
     cursor = connexion.cursor()

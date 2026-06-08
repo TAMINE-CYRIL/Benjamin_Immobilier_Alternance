@@ -110,7 +110,7 @@ FRONTEND_BASE_URL=http://127.0.0.1:5173
 PASSWORD_RESET_BASE_URL=http://127.0.0.1:5173
 PASSWORD_RESET_TTL_MINUTES=60
 
-# Envoi des emails de reinitialisation
+# Envoi des emails de réinitialisation
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USERNAME=notification@example.com
@@ -277,7 +277,7 @@ Les routes d'exploitation comme `GET /api/jobs/runs` sont protégées par authen
 
 Réinitialisation de mot de passe utilisateur :
 
-- L'utilisateur clique sur `Mot de passe oublie ?` depuis l'ecran de connexion.
+- L'utilisateur clique sur `Mot de passe oublié ?` depuis l'ecran de connexion.
 - Il renseigne son email.
 - Si le compte existe, l'API genere un token a usage unique et envoie un lien par SMTP.
 - Le lien ouvre le dashboard avec `?reset_token=...` et affiche le formulaire de nouveau mot de passe.
