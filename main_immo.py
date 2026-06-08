@@ -5,7 +5,7 @@ import json
 import os
 
 from database.db import insert_annonces
-from database.score_annonce import score_annonces
+from database.score_annonce import MIN_SCORE_TO_SAVE, score_annonce_payloads
 from scrapers.immobilier.scrape_atypiques import scrape_atypiques
 from scrapers.immobilier.scrape_avoventes import scrape_avoventes
 from scrapers.immobilier.scrape_bienici import scrape_bienici
@@ -244,6 +244,8 @@ async def run_pipeline(args, logger=None):
         "scoring": {
             "eligible_for_scoring": 0,
             "scored": 0,
+            "retained": 0,
+            "filtered_below_min_score": 0,
             "not_scored_missing_fields": 0,
             "not_scored_no_reference": 0,
             "errors": 0,
@@ -251,14 +253,13 @@ async def run_pipeline(args, logger=None):
     }
 
     if not args.no_db and all_annonces:
-        db_summary = insert_annonces(all_annonces, logger=logger)
-        global_summary["db"] = db_summary
-        global_summary["inserted"] = db_summary["inserted"]
-        global_summary["updated"] = db_summary["updated"]
-        global_summary["skipped"] += db_summary["skipped"]
-
-        if not args.no_score and db_summary["processed_ids"]:
-            scoring_summary = score_annonces(db_summary["processed_ids"], logger=logger)
+        annonces_to_save = all_annonces
+        if not args.no_score:
+            annonces_to_save, scoring_summary = score_annonce_payloads(
+                all_annonces,
+                min_score=MIN_SCORE_TO_SAVE,
+                logger=logger,
+            )
             global_summary["scoring"] = scoring_summary
             global_summary["scored"] = scoring_summary["scored"]
             global_summary["not_scored_missing_fields"] += scoring_summary["not_scored_missing_fields"]
@@ -266,7 +267,14 @@ async def run_pipeline(args, logger=None):
             global_summary["not_scored"] = (
                 scoring_summary["not_scored_missing_fields"] + scoring_summary["not_scored_no_reference"]
             )
-        else:
+
+        db_summary = insert_annonces(annonces_to_save, logger=logger)
+        global_summary["db"] = db_summary
+        global_summary["inserted"] = db_summary["inserted"]
+        global_summary["updated"] = db_summary["updated"]
+        global_summary["skipped"] += db_summary["skipped"]
+
+        if args.no_score:
             global_summary["not_scored"] = global_summary["eligible_for_scoring"]
     else:
         global_summary["not_scored"] = global_summary["eligible_for_scoring"]

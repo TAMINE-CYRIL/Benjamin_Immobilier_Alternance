@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from database.db import create_tables, get_connection, insert_annonces
 from database.reset_db import cleanup
-from database.score_annonce import score_annonces
+from database.score_annonce import score_annonce_payloads, score_annonces
 from main_immo import _scrape_with_optional_max_pages, run_pipeline
 
 
@@ -156,6 +156,42 @@ def test_score_annonces_handles_missing_reference():
     assert summary["eligible_for_scoring"] == 1
     assert summary["not_scored_no_reference"] == 1
     assert summary["scored"] == 0
+
+
+def test_score_annonce_payloads_only_keeps_scores_strictly_above_20():
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+    mock_cursor.fetchone.side_effect = [
+        (3000, 2500, 3500, 100),
+        (3000, 2500, 3500, 100),
+    ]
+    annonces = [
+        {
+            "url": "http://score-20",
+            "price_square_meter": 4000,
+            "zip_code": "13001",
+            "type_bien": "Appartement",
+        },
+        {
+            "url": "http://score-21",
+            "price_square_meter": 2000,
+            "zip_code": "13001",
+            "type_bien": "Appartement",
+        },
+    ]
+
+    with patch("database.score_annonce.get_connection", return_value=mock_conn), patch(
+        "database.score_annonce.evaluate_annonce",
+        side_effect=[20, 21],
+    ):
+        retained, summary = score_annonce_payloads(annonces, min_score=20)
+
+    assert [annonce["url"] for annonce in retained] == ["http://score-21"]
+    assert retained[0]["score"] == 21
+    assert summary["scored"] == 2
+    assert summary["retained"] == 1
+    assert summary["filtered_below_min_score"] == 1
 
 
 def test_run_pipeline_respects_flags_and_avoids_duplicates():

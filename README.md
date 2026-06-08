@@ -24,8 +24,14 @@ On utilise [Crawl4AI](https://github.com/unclecode/crawl4ai) pour parcourir les 
 ## Prérequis
 
 - Python 3.9+
-- PostgreSQL
+- PostgreSQL avec PostGIS installe sur le serveur qui execute la base
 - Git (optionnel)
+
+PostGIS est necessaire pour les enrichissements geographiques (`geometry`,
+`geography`, `ST_DWithin`, index GiST). Sur Windows, installez PostGIS via Stack
+Builder pour la meme version majeure de PostgreSQL que votre serveur. Sur
+Debian/Ubuntu, installez par exemple `postgresql-XX-postgis-3` et
+`postgresql-XX-postgis-3-scripts` en remplacant `XX` par la version PostgreSQL.
 
 ## Structure du dépôt
 
@@ -121,6 +127,13 @@ Copier `.env.example` pour obtenir la liste complète des variables. En producti
 
 ```bash
 python database/create_tables.py
+```
+
+Si PostgreSQL repond que l'extension `postgis` n'est pas disponible, installez
+PostGIS cote serveur, puis activez-la dans la base :
+
+```sql
+CREATE EXTENSION IF NOT EXISTS postgis;
 ```
 
 ### 2. Importer les données DVF

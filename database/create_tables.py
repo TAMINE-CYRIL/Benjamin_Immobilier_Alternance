@@ -3,6 +3,24 @@ try:
 except ImportError:
     from connection import get_connection
 
+
+POSTGIS_INSTALL_HINT = (
+    "PostGIS est requis pour creer les tables d'enrichissement geographique, "
+    "mais l'extension n'est pas installee sur le serveur PostgreSQL. "
+    "Installez PostGIS pour la version de PostgreSQL qui execute cette base, "
+    "puis relancez `python database/create_tables.py`."
+)
+
+
+def ensure_postgis_extension(cursor):
+    try:
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+    except Exception as exc:
+        if getattr(exc, "pgcode", None) in {"0A000", "58P01"}:
+            raise RuntimeError(POSTGIS_INSTALL_HINT) from exc
+        raise
+
+
 def create_tables():
     """
     Crée les tables nécessaires dans la base de données si elles n'existent pas déjà.
@@ -383,7 +401,13 @@ def create_enrichment_tables():
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+    try:
+        ensure_postgis_extension(cur)
+    except RuntimeError:
+        cur.close()
+        conn.close()
+        raise
+
     cur.execute("""
     CREATE OR REPLACE FUNCTION safe_geom_from_geojson(geojson JSONB)
     RETURNS geometry AS $$
