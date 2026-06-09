@@ -248,5 +248,5 @@ def test_enrichment_service_partial_with_only_coordinates(monkeypatch):
     )
     result = service.enrich_annonce({"id": 44, "city": "Marseille"})
 
-    assert result["status"] == "partial"
+    assert result["status"] == "partial_success"
     assert result["diagnostic_message"] == "Enrichissement partiel: parcelle introuvable, zonage urbanisme absent"

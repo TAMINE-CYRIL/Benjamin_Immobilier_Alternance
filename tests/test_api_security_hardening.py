@@ -7,7 +7,7 @@ from apps.api.main import app
 
 def test_security_headers_are_added_to_api_responses():
     app.dependency_overrides[get_current_user] = lambda: {"id": 1, "email": "a@example.com", "is_active": True}
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     try:
         with patch("apps.api.routes.annonces.search_annonces") as mock_search:
@@ -23,7 +23,7 @@ def test_security_headers_are_added_to_api_responses():
 
 
 def test_csrf_is_required_for_mutating_api_routes():
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     response = client.post("/api/auth/logout")
 
@@ -32,7 +32,7 @@ def test_csrf_is_required_for_mutating_api_routes():
 
 
 def test_csrf_accepts_double_submit_token_for_mutating_api_routes():
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
     client.cookies.set("csrf_token", "known-token")
 
     response = client.post("/api/auth/logout", headers={"X-CSRF-Token": "known-token"})
@@ -41,7 +41,7 @@ def test_csrf_accepts_double_submit_token_for_mutating_api_routes():
 
 
 def test_password_reset_confirm_is_exempt_from_csrf():
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     with patch("apps.api.routes.auth.consume_password_reset_token", return_value=None):
         response = client.post(
@@ -53,7 +53,7 @@ def test_password_reset_confirm_is_exempt_from_csrf():
 
 
 def test_password_reset_request_is_exempt_from_csrf():
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     with patch("apps.api.routes.auth.create_password_reset_token", return_value=None):
         response = client.post(
@@ -65,7 +65,7 @@ def test_password_reset_request_is_exempt_from_csrf():
 
 
 def test_jobs_runs_requires_authenticated_user():
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     response = client.get("/api/jobs/runs")
 
@@ -78,7 +78,7 @@ def test_jobs_runs_authenticated_access_is_audited():
         "email": "user@example.com",
         "is_active": True,
     }
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     try:
         with patch("apps.api.routes.jobs.list_runs", return_value=[]) as list_runs:

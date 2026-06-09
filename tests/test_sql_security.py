@@ -79,7 +79,7 @@ def test_search_annonces_ignores_malicious_sort_and_direction_values():
 
 def test_annonces_route_rejects_invalid_sort_parameter():
     app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     try:
         response = client.get("/api/annonces?sort=price;DROP TABLE users")
@@ -91,7 +91,7 @@ def test_annonces_route_rejects_invalid_sort_parameter():
 
 def test_annonces_route_rejects_invalid_zip_code_parameter():
     app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     try:
         response = client.get("/api/annonces?zip_code=75000';DROP TABLE users")
@@ -103,7 +103,7 @@ def test_annonces_route_rejects_invalid_zip_code_parameter():
 
 def test_annonces_route_accepts_global_query_parameter():
     app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     try:
         with patch("apps.api.routes.annonces.search_annonces") as mock_search:
@@ -114,3 +114,30 @@ def test_annonces_route_accepts_global_query_parameter():
 
     assert response.status_code == 200
     assert mock_search.call_args.args[0]["query"] == "Marseille"
+
+
+def test_annonces_route_validates_ranges_and_relevance_sort():
+    app.dependency_overrides[get_current_user] = lambda: {"id": 1, "is_active": True}
+    client = TestClient(app, base_url="http://localhost")
+
+    try:
+        invalid_range = client.get("/api/annonces?rooms_min=5&rooms_max=2")
+        missing_query = client.get("/api/annonces?sort=relevance")
+        with patch("apps.api.routes.annonces.search_annonces") as mock_search:
+            mock_search.return_value = {"items": [], "total": 0, "page": 1, "page_size": 25}
+            valid = client.get(
+                "/api/annonces?query=terrain&sort=relevance&energy_class=D"
+                "&recent_days=7&has_parcel=true&parcel_surface_min=300"
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert invalid_range.status_code == 422
+    assert missing_query.status_code == 422
+    assert valid.status_code == 200
+    filters = mock_search.call_args.args[0]
+    assert filters["sort"] == "relevance"
+    assert filters["energy_class"] == "D"
+    assert filters["recent_days"] == 7
+    assert filters["has_parcel"] is True
+    assert filters["parcel_surface_min"] == 300

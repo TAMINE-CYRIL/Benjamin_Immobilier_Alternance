@@ -1,4 +1,5 @@
 import React from "react";
+import { enrichmentStatusLabels } from "../constants";
 import { formatDistance, formatMoney, formatScore, getScoreLevel } from "../utils";
 
 /**
@@ -52,7 +53,7 @@ export function AnnoncesList({ annonces, selectedId, onSelect }) {
               </span>
               <span className="annonce-card-badges">
                 <span className={`status-pill status-${annonce.enrichment?.status || "pending"}`}>
-                  {annonce.enrichment?.status || "pending"}
+                  {enrichmentStatusLabels[annonce.enrichment?.status] || "En attente"}
                 </span>
               </span>
             </button>

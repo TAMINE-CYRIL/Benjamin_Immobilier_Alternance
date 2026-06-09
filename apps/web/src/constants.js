@@ -8,11 +8,21 @@ export const emptyFilters = {
   price_max: "",
   surface_min: "",
   surface_max: "",
+  rooms_min: "",
+  rooms_max: "",
+  price_m2_min: "",
+  price_m2_max: "",
   type_bien: "",
   score_min: "",
+  score_max: "",
+  energy_class: "",
   source_site: "",
   enrichment_status: "",
   zonage: "",
+  parcel_surface_min: "",
+  parcel_surface_max: "",
+  has_parcel: "",
+  recent_days: "",
   center_lat: "",
   center_lon: "",
   radius_km: "",
@@ -40,8 +50,22 @@ export const sourceOptions = [
   { value: "AvoVentes", label: "AvoVentes" },
   { value: "BienIci", label: "BienIci" },
   { value: "Espaces Atypiques", label: "Espaces Atypiques" },
-  { value: "Leboncoin", label: "Leboncoin" },
   { value: "LogicImmo", label: "LogicImmo" },
   { value: "PAP", label: "PAP" },
   { value: "SeLoger", label: "SeLoger" },
 ];
+
+export const enrichmentStatusOptions = [
+  { value: "", label: "Tous enrichissements" },
+  { value: "success", label: "Enrichi" },
+  { value: "partial_success", label: "Partiellement enrichi" },
+  { value: "not_found", label: "Introuvable" },
+  { value: "failed", label: "Erreur" },
+  { value: "pending", label: "En attente" },
+];
+
+export const enrichmentStatusLabels = Object.fromEntries(
+  enrichmentStatusOptions
+    .filter((option) => option.value)
+    .map((option) => [option.value, option.label]),
+);

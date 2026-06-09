@@ -64,6 +64,32 @@ def test_build_filters_with_price_range():
     assert 500000 in params
 
 
+def test_build_filters_with_module3_business_filters():
+    clauses, params = _build_filters({
+        "rooms_min": 2,
+        "rooms_max": 5,
+        "price_m2_min": 2500,
+        "price_m2_max": 6000,
+        "score_max": 80,
+        "energy_class": "d",
+        "parcel_surface_min": 300,
+        "parcel_surface_max": 1200,
+        "has_parcel": True,
+        "recent_days": 7,
+    })
+
+    sql = " ".join(clauses)
+    assert "a.rooms >= %s" in sql
+    assert "a.rooms <= %s" in sql
+    assert "a.price_square_meter >= %s" in sql
+    assert "a.score <= %s" in sql
+    assert "UPPER(a.energy_class) = %s" in sql
+    assert "p.contenance >= %s" in sql
+    assert "e.parcel_id IS NOT NULL" in sql
+    assert "a.first_seen >= CURRENT_TIMESTAMP" in sql
+    assert params == [ "D", 80, 2, 5, 2500, 6000, 300, 1200, 7]
+
+
 def test_search_annonces_basic():
     """Test basique de search_annonces sans filtre."""
     with patch("apps.database.annonces_repo.get_connection") as mock_conn:
@@ -87,8 +113,8 @@ def test_search_annonces_with_sort_relevance():
     with patch("apps.database.annonces_repo.get_connection") as mock_conn:
         mock_cursor = MagicMock()
         mock_cursor.fetchone.return_value = [1]
-        # Mock une ligne retournée avec les colonnes attendues (37 colonnes + relevance_rank)
-        mock_row = list(range(37)) + [0.8]  # 37 colonnes + relevance_rank
+        # Mock une ligne retournée avec les colonnes attendues (38 colonnes + relevance_rank)
+        mock_row = list(range(38)) + [0.8]
         mock_cursor.fetchall.return_value = [tuple(mock_row)]
         mock_conn.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
         

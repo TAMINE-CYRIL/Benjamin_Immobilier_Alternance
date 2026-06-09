@@ -20,6 +20,7 @@ ANNONCE_FIELDS = """
     a.energy_class,
     a.sale_date,
     a.visit_date,
+    a.first_seen,
     a.last_seen,
     e.status AS enrichment_status,
     e.latitude,
@@ -136,32 +137,33 @@ def _row_to_annonce(row, include_distance=False):
         "energy_class": row[14],
         "sale_date": row[15],
         "visit_date": row[16],
-        "last_seen": row[17],
+        "first_seen": row[17],
+        "last_seen": row[18],
         "enrichment": {
-            "status": row[18] or "pending",
-            "latitude": row[19],
-            "longitude": row[20],
-            "parcel_key": row[21],
-            "zonage": row[22],
-            "prescriptions": row[23] or [],
-            "servitudes": row[24] or [],
-            "documents": row[25] or [],
-            "error": row[26],
-            "enriched_at": row[27],
-            "geocode_status": row[28],
-            "cadastre_status": row[29],
-            "gpu_status": row[30],
-            "geocode_score": row[31],
-            "geocode_type": row[32],
-            "geocode_query": row[33],
-            "diagnostic_message": row[34],
-            "parcel_surface": row[35],
-            "parcel_commune_code": row[36],
+            "status": row[19] or "pending",
+            "latitude": row[20],
+            "longitude": row[21],
+            "parcel_key": row[22],
+            "zonage": row[23],
+            "prescriptions": row[24] or [],
+            "servitudes": row[25] or [],
+            "documents": row[26] or [],
+            "error": row[27],
+            "enriched_at": row[28],
+            "geocode_status": row[29],
+            "cadastre_status": row[30],
+            "gpu_status": row[31],
+            "geocode_score": row[32],
+            "geocode_type": row[33],
+            "geocode_query": row[34],
+            "diagnostic_message": row[35],
+            "parcel_surface": row[36],
+            "parcel_commune_code": row[37],
         },
     }
 
     if include_distance:
-        annonce["distance_m"] = row[37]
+        annonce["distance_m"] = row[38]
 
     return annonce
 
@@ -205,18 +207,41 @@ def _build_filters(filters):
         clauses.append("COALESCE(e.status, 'pending') = %s")
         params.append(enrichment_status)
 
+    energy_class = filters.get("energy_class")
+    if energy_class:
+        clauses.append("UPPER(a.energy_class) = %s")
+        params.append(energy_class.upper())
+
     range_filters = [
         ("price_min", "a.price", ">="),
         ("price_max", "a.price", "<="),
         ("surface_min", "a.surface", ">="),
         ("surface_max", "a.surface", "<="),
         ("score_min", "a.score", ">="),
+        ("score_max", "a.score", "<="),
+        ("rooms_min", "a.rooms", ">="),
+        ("rooms_max", "a.rooms", "<="),
+        ("price_m2_min", "a.price_square_meter", ">="),
+        ("price_m2_max", "a.price_square_meter", "<="),
+        ("parcel_surface_min", "p.contenance", ">="),
+        ("parcel_surface_max", "p.contenance", "<="),
     ]
     for key, column, operator in range_filters:
         value = filters.get(key)
         if value is not None:
             clauses.append(f"{column} {operator} %s")
             params.append(value)
+
+    has_parcel = filters.get("has_parcel")
+    if has_parcel is True:
+        clauses.append("e.parcel_id IS NOT NULL")
+    elif has_parcel is False:
+        clauses.append("e.parcel_id IS NULL")
+
+    recent_days = filters.get("recent_days")
+    if recent_days is not None:
+        clauses.append("a.first_seen >= CURRENT_TIMESTAMP - (%s * INTERVAL '1 day')")
+        params.append(recent_days)
 
     geo_values = _geo_values(filters)
     if geo_values:
@@ -276,7 +301,10 @@ def search_annonces(filters):
             {select_fields},
             ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) as relevance_rank
         """
-        order_by = "ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) DESC, a.id DESC"
+        order_by = (
+            "ts_rank_cd(a.search_vector, plainto_tsquery('french', %s), 32) DESC, "
+            "a.score DESC NULLS LAST, a.id DESC"
+        )
         select_params.append(query_text)
         order_params.append(query_text)
 
@@ -328,4 +356,3 @@ def fetch_annonce_by_id(annonce_id):
         return None
 
     return _row_to_annonce(row)
-

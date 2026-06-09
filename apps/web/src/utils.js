@@ -36,6 +36,16 @@ export function formatDistance(value) {
   return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(distance)} m`;
 }
 
+export function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
 /**
  * Détermine le niveau d'un score.
  * @param {*} value La valeur du score.

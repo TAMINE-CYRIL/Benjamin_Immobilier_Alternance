@@ -36,6 +36,7 @@ def cleanup(days=30, logger=None, archive=True):
                         energy_class,
                         sale_date,
                         visit_date,
+                        first_seen,
                         last_seen,
                         enrichment_snapshot,
                         purge_reason
@@ -59,6 +60,7 @@ def cleanup(days=30, logger=None, archive=True):
                         a.energy_class,
                         a.sale_date,
                         a.visit_date,
+                        a.first_seen,
                         a.last_seen,
                         CASE
                             WHEN e.id IS NULL THEN NULL

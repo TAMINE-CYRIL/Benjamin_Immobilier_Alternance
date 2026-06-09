@@ -74,6 +74,9 @@ def test_insert_annonces_returns_structured_summary():
     assert summary["updated"] == 0
     assert summary["processed_ids"] == [42]
     mock_conn.commit.assert_called_once()
+    insert_sql = mock_cursor.execute.call_args_list[1].args[0]
+    assert "first_seen" not in insert_sql
+    assert "last_seen = CURRENT_TIMESTAMP" in insert_sql
 
 
 def test_insert_annonces_skips_missing_url():
@@ -124,6 +127,7 @@ def test_cleanup_archives_before_deleting_old_annonces():
     assert "DELETE FROM annonces" in delete_sql
     assert mock_cursor.execute.call_args_list[0].args[1] == ("last_seen older than 30 days", 30)
     assert mock_cursor.execute.call_args_list[1].args[1] == (30,)
+    assert "first_seen" in archive_sql
 
 
 def test_score_annonces_ignores_missing_fields_without_error():

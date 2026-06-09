@@ -6,7 +6,7 @@ from services.enrichment.repository import fetch_annonces_to_enrich, upsert_enri
 
 STATUS_PENDING = "pending"
 STATUS_SUCCESS = "success"
-STATUS_PARTIAL = "partial"
+STATUS_PARTIAL = "partial_success"
 STATUS_FAILED = "failed"
 STATUS_NOT_FOUND = "not_found"
 

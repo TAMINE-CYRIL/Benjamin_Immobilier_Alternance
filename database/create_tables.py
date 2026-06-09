@@ -48,6 +48,7 @@ def create_tables():
         energy_class TEXT,
         sale_date TEXT,    
         visit_date TEXT,
+        first_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         search_vector tsvector,
         UNIQUE(url, city, zip_code)             
@@ -58,6 +59,11 @@ def create_tables():
     cursor.execute("""
     ALTER TABLE annonces ADD COLUMN IF NOT EXISTS search_vector tsvector;
     """)
+    cursor.execute("""
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS first_seen TIMESTAMP(0);
+    UPDATE annonces SET first_seen = last_seen WHERE first_seen IS NULL;
+    ALTER TABLE annonces ALTER COLUMN first_seen SET DEFAULT CURRENT_TIMESTAMP;
+    """)
 
     index_statements = [
         "CREATE INDEX IF NOT EXISTS idx_annonces_score ON annonces(score);",
@@ -67,6 +73,10 @@ def create_tables():
         "CREATE INDEX IF NOT EXISTS idx_annonces_type_bien ON annonces(type_bien);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_price ON annonces(price);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_surface ON annonces(surface);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_rooms ON annonces(rooms);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_price_square_meter ON annonces(price_square_meter);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_energy_class ON annonces(energy_class);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_first_seen ON annonces(first_seen);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_last_seen ON annonces(last_seen);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_search_vector ON annonces USING GIN(search_vector);",
     ]
@@ -122,7 +132,7 @@ def create_fulltext_search_trigger():
 
 def create_users_table():
     """
-    Cree la table des utilisateurs qui peuvent acceder au dashboard prive.
+    Crée la table des utilisateurs qui peuvent accéder au dashboard privé.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
@@ -152,7 +162,7 @@ def create_users_table():
 
 def create_login_attempts_table():
     """
-    Cree l'historique des tentatives de connexion pour detecter le brute force.
+    Crée l'historique des tentatives de connexion pour detecter le brute force.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
@@ -182,7 +192,7 @@ def create_login_attempts_table():
 
 def create_audit_events_table():
     """
-    Cree le journal d'audit des actions sensibles.
+    Crée le journal d'audit des actions sensibles.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
@@ -214,7 +224,7 @@ def create_audit_events_table():
 
 def create_password_reset_tokens_table():
     """
-    Cree la table des tokens de réinitialisation de mot de passe.
+    Crée la table des tokens de réinitialisation de mot de passe.
     """
     connexion = get_connection()
     cursor = connexion.cursor()
@@ -489,6 +499,7 @@ def create_enrichment_tables():
 
     index_statements = [
         "CREATE INDEX IF NOT EXISTS idx_parcelles_commune_code ON parcelles(commune_code);",
+        "CREATE INDEX IF NOT EXISTS idx_parcelles_contenance ON parcelles(contenance);",
         "CREATE INDEX IF NOT EXISTS idx_parcelles_geom ON parcelles USING GIST(geom);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_annonce_id ON annonce_enrichments(annonce_id);",
         "CREATE INDEX IF NOT EXISTS idx_annonce_enrichments_zip_code ON annonce_enrichments(zip_code);",
@@ -534,12 +545,17 @@ def create_annonces_archive_table():
         energy_class TEXT,
         sale_date TEXT,
         visit_date TEXT,
+        first_seen TIMESTAMP(0),
         last_seen TIMESTAMP(0),
         enrichment_snapshot JSONB,
         archived_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         purge_reason TEXT,
         UNIQUE(annonce_id, last_seen)
     );
+    """)
+    cur.execute("""
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS first_seen TIMESTAMP(0);
+    UPDATE annonces_archive SET first_seen = last_seen WHERE first_seen IS NULL;
     """)
 
     index_statements = [

@@ -1,5 +1,6 @@
 import React from "react";
-import { formatDistance, formatMoney } from "../utils";
+import { enrichmentStatusLabels } from "../constants";
+import { formatDate, formatDistance, formatMoney } from "../utils";
 
 
 /**
@@ -24,19 +25,21 @@ export function DetailPanel({ annonce, loading, onClose }) {
             <dt>Score</dt><dd>{annonce.score ?? "-"}</dd>
             <dt>Prix</dt><dd>{formatMoney(annonce.price)}</dd>
             <dt>Surface</dt><dd>{annonce.surface ? `${annonce.surface} m2` : "-"}</dd>
+            <dt>Pièces</dt><dd>{annonce.rooms ?? "-"}</dd>
             <dt>Prix/m2</dt><dd>{annonce.price_m2 ? `${Math.round(annonce.price_m2)} EUR` : "-"}</dd>
             <dt>Localisation</dt><dd>{[annonce.city, annonce.zip_code, annonce.department].filter(Boolean).join(" - ") || "-"}</dd>
             <dt>Type</dt><dd>{annonce.type_bien || "-"}</dd>
             <dt>DPE</dt><dd>{annonce.energy_class || "-"}</dd>
             <dt>Agence</dt><dd>{annonce.agency || "-"}</dd>
-            <dt>Dernière vue</dt><dd>{annonce.last_seen || "-"}</dd>
+            <dt>Première détection</dt><dd>{formatDate(annonce.first_seen)}</dd>
+            <dt>Dernière détection</dt><dd>{formatDate(annonce.last_seen)}</dd>
             {annonce.distance_m !== undefined ? <><dt>Distance</dt><dd>{formatDistance(annonce.distance_m)}</dd></> : null}
           </dl>
           <section className="detail-section">
             <p className="eyebrow">Enrichissement foncier</p>
             <dl>
               <dt>Statut</dt>
-              <dd><span className={`status-pill status-${enrichment.status || "pending"}`}>{enrichment.status || "pending"}</span></dd>
+              <dd><span className={`status-pill status-${enrichment.status || "pending"}`}>{enrichmentStatusLabels[enrichment.status] || "En attente"}</span></dd>
               <dt>Diagnostic</dt><dd>{enrichment.diagnostic_message || "-"}</dd>
               <dt>Géocodage</dt>
               <dd>{[enrichment.geocode_status, enrichment.geocode_score ? `score ${Number(enrichment.geocode_score).toFixed(2)}` : null, enrichment.geocode_type].filter(Boolean).join(" - ") || "-"}</dd>

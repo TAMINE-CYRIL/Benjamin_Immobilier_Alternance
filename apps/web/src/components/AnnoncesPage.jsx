@@ -33,6 +33,7 @@ export function AnnoncesPage() {
       setData(result);
     } catch (err) {
       setError(err.message);
+      setData({ items: [], total: 0, page: nextPage, page_size: 25 });
     } finally {
       setLoading(false);
     }
@@ -118,7 +119,11 @@ export function AnnoncesPage() {
               </div>
               <span>{data.items.length} sur cette page</span>
             </div>
-            <AnnoncesList annonces={data.items} selectedId={selectedId} onSelect={handleSelect} />
+            {error ? (
+              <div className="empty error-state">Impossible de charger les annonces : {error}</div>
+            ) : (
+              <AnnoncesList annonces={data.items} selectedId={selectedId} onSelect={handleSelect} />
+            )}
           </div>
         </section>
       </section>

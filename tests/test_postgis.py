@@ -52,7 +52,7 @@ def test_build_filters_adds_radius_filter_only_with_complete_geo_parameters():
 def test_search_annonces_returns_distance_and_sorts_nearest_first():
     mock_conn, mock_cursor = _mock_connection()
     mock_cursor.fetchone.return_value = (1,)
-    mock_cursor.fetchall.return_value = [tuple(list(range(37)) + [1234.5])]
+    mock_cursor.fetchall.return_value = [tuple(list(range(38)) + [1234.5])]
 
     with patch("apps.database.annonces_repo.get_connection", return_value=mock_conn):
         result = search_annonces({
