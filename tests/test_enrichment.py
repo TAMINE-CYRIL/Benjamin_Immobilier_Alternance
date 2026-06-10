@@ -182,6 +182,7 @@ def test_enrichment_service_success_does_not_duplicate_parcel(monkeypatch):
         address_client=OkAddressClient(),
         cadastre_client=OkCadastreClient(),
         gpu_client=OkGpuClient(),
+        gpu_enabled=True,
     )
     result = service.enrich_annonce({"id": 42, "city": "Marseille"})
 
@@ -194,7 +195,7 @@ def test_enrichment_service_success_does_not_duplicate_parcel(monkeypatch):
     assert stored[0]["zonage"] == "UA"
 
 
-def test_enrichment_service_success_with_zonage_without_parcel(monkeypatch):
+def test_enrichment_service_gpu_does_not_replace_missing_cadastre(monkeypatch):
     stored = []
 
     monkeypatch.setattr("services.enrichment.orchestrator.upsert_enrichment", lambda enrichment: stored.append(enrichment))
@@ -215,16 +216,17 @@ def test_enrichment_service_success_with_zonage_without_parcel(monkeypatch):
         address_client=OkAddressClient(),
         cadastre_client=EmptyCadastreClient(),
         gpu_client=OkGpuClient(),
+        gpu_enabled=True,
     )
     result = service.enrich_annonce({"id": 43, "city": "Marseille"})
 
-    assert result["status"] == "success"
+    assert result["status"] == "partial_success"
     assert result["cadastre_status"] == "not_found"
     assert result["gpu_status"] == "success"
-    assert "zonage urbanisme trouves" in result["diagnostic_message"]
+    assert result["diagnostic_message"] == "Enrichissement partiel: parcelle introuvable"
 
 
-def test_enrichment_service_partial_with_only_coordinates(monkeypatch):
+def test_enrichment_service_disables_gpu_by_default(monkeypatch):
     stored = []
 
     monkeypatch.setattr("services.enrichment.orchestrator.upsert_enrichment", lambda enrichment: stored.append(enrichment))
@@ -237,16 +239,47 @@ def test_enrichment_service_partial_with_only_coordinates(monkeypatch):
         def find_parcel(self, latitude, longitude):
             return None
 
-    class EmptyGpuClient:
+    class UnexpectedGpuClient:
         def fetch_urbanism(self, latitude, longitude, geometry=None):
-            return {"zonage": None, "prescriptions": [], "servitudes": [], "documents": [], "raw": {}}
+            raise AssertionError("Le GPU ne doit pas etre appele")
 
     service = EnrichmentService(
         address_client=OkAddressClient(),
         cadastre_client=EmptyCadastreClient(),
-        gpu_client=EmptyGpuClient(),
+        gpu_client=UnexpectedGpuClient(),
     )
     result = service.enrich_annonce({"id": 44, "city": "Marseille"})
 
     assert result["status"] == "partial_success"
-    assert result["diagnostic_message"] == "Enrichissement partiel: parcelle introuvable, zonage urbanisme absent"
+    assert result["gpu_status"] == "disabled"
+    assert result["diagnostic_message"] == "Enrichissement partiel: parcelle introuvable"
+
+
+def test_enrichment_service_gpu_failure_does_not_degrade_cadastre_success(monkeypatch):
+    monkeypatch.setattr("services.enrichment.orchestrator.upsert_enrichment", lambda enrichment: None)
+    monkeypatch.setattr("services.enrichment.orchestrator.upsert_parcelle", lambda parcel, latitude, longitude: 99)
+
+    class OkAddressClient:
+        def geocode_annonce(self, annonce):
+            return {"status": "success", "latitude": 43.2965, "longitude": 5.3698, "raw": {}}
+
+    class OkCadastreClient:
+        def find_parcel(self, latitude, longitude):
+            return {"parcel_key": "13055-A-42", "geometry_json": {}, "raw_response": {}}
+
+    class FailedGpuClient:
+        def fetch_urbanism(self, latitude, longitude, geometry=None):
+            raise RuntimeError("indisponible")
+
+    service = EnrichmentService(
+        address_client=OkAddressClient(),
+        cadastre_client=OkCadastreClient(),
+        gpu_client=FailedGpuClient(),
+        gpu_enabled=True,
+    )
+    result = service.enrich_annonce({"id": 45, "city": "Marseille"})
+
+    assert result["status"] == "success"
+    assert result["gpu_status"] == "failed"
+    assert result.get("error_message") is None
+    assert result["diagnostic_message"] == "Coordonnees et parcelle cadastrale trouvees"

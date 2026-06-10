@@ -17,7 +17,7 @@ On utilise [Crawl4AI](https://github.com/unclecode/crawl4ai) pour parcourir les 
 - Rotation de proxies et randomisation des User-Agents dans `utils/config.py`
 - Import et agrégation des données DVF (prix médian au m² par code postal, type de bien, année)
 - Système de scoring des annonces basé sur l'écart au prix marché DVF (`services/deals.py`)
-- Enrichissement cadastre et urbanisme (API Adresse, API Carto Cadastre, GPU) dans `services/enrichment/`
+- Enrichissement géographique et cadastral (API Adresse, API Carto Cadastre) dans `services/enrichment/`
 - API REST FastAPI exposant les annonces scorées (`apps/api/`)
 - Tests unitaires avec pytest dans `tests/`
 
@@ -162,15 +162,20 @@ python main_libra.py
 
 Génère `data/avis_deces.json` et `data/avis_deces.csv`.
 
-### 5. Enrichir les annonces avec cadastre et urbanisme
+### 5. Enrichir les annonces avec le cadastre
 
 ```bash
 python -m services.enrichment.run --limit 100
 ```
 
-Cette commande traite les annonces non enrichies ou anciennes, géocode la localisation via le service de géocodage Géoplateforme, rattache l'annonce à une parcelle cadastrale via l'API Carto Cadastre, puis interroge le Géoportail de l'Urbanisme pour récupérer le zonage, les prescriptions et les servitudes. Pappers n'est pas utilisé dans cette V1.
+Cette commande traite les annonces non enrichies ou anciennes, géocode la localisation via le service de géocodage Géoplateforme et rattache l'annonce à une parcelle cadastrale via l'API Carto Cadastre.
 
-Chaque enrichissement stocke aussi un diagnostic par étape (`geocode_status`, `cadastre_status`, `gpu_status`, score de géocodage, type de résultat, message métier) pour expliquer les résultats partiels.
+Chaque enrichissement stocke aussi un diagnostic par étape (`geocode_status`, `cadastre_status`, score de géocodage, type de résultat, message métier) pour expliquer les résultats partiels.
+
+Le client du Géoportail de l'Urbanisme est conservé pour une réactivation future,
+mais il est désactivé par défaut car le zonage n'est actuellement pas retourné de
+manière exploitable. Une erreur GPU ne modifie jamais le statut global de
+l'enrichissement.
 
 Variables optionnelles si les endpoints publics changent :
 
@@ -178,6 +183,7 @@ Variables optionnelles si les endpoints publics changent :
 ADDRESS_API_URL=https://data.geopf.fr/geocodage/search
 CADASTRE_API_URL=https://apicarto.ign.fr/api/cadastre/parcelle
 GPU_API_BASE_URL=https://apicarto.ign.fr/api/gpu
+ENABLE_GPU_ENRICHMENT=false
 MIN_GEOCODE_SCORE=0.45
 ```
 
@@ -192,7 +198,7 @@ L'orchestrateur V2 lance en une seule commande :
 - scraping des sources activees
 - insertion ou mise a jour des annonces
 - scoring DVF
-- enrichissement cadastre et urbanisme
+- enrichissement géographique et cadastral
 - archivage puis nettoyage des annonces non revues depuis 30 jours
 - ecriture d'un log dans `logs/`
 - stockage du statut du run dans la table `automation_runs`
@@ -321,11 +327,28 @@ L'interface React est disponible sur `http://127.0.0.1:5173` et proxifie les app
 
 ## Système de scoring
 
-Le score (0–100) est calculé dans `services/deals.py` selon trois critères :
+Le scoring V2.1 produit trois informations distinctes :
 
-- **Écart au prix médian DVF** : plus l'annonce est décotée par rapport au marché local, plus le score est élevé.
-- **Position dans l'interquartile** : bonus si l'annonce se situe sous le Q1 des prix du secteur.
-- **Fiabilité de la référence** : pondération selon le nombre de transactions DVF disponibles sur la zone (plus il y en a, plus le score est fiable).
+- un score d'opportunité de 0 à 100 ;
+- un niveau de confiance de 0 à 100 ;
+- un niveau de risque (`low`, `medium` ou `high`).
+
+Le détail est conservé dans `annonces.score_details` avec la version de
+l'algorithme, les raisons et les points de vigilance. Les composantes sont :
+
+- décote par rapport au marché DVF : 40 points ;
+- potentiel foncier et parcellaire : 30 points ;
+- liquidité locale : 10 points ;
+- signaux textuels de l'annonce : 15 points ;
+- énergie : 5 points.
+
+Le zonage urbanistique est exclu du score, de la confiance et du niveau de
+risque tant qu'aucune source fiable ne l'alimente.
+
+Une donnée absente reçoit une valeur neutre et réduit la confiance. Elle n'est
+donc pas confondue avec un critère défavorable. Toutes les annonces sont
+conservées, même avec un score faible, afin de permettre l'audit et le
+recalibrage du modèle.
 
 Les données DVF utilisées couvrent les départements 06, 13 et 83, et excluent automatiquement les valeurs aberrantes (prix au m² hors de la plage 500–20 000 €, surfaces hors 10–500 m²).
 

@@ -39,6 +39,11 @@ def create_tables():
         adjuged_price NUMERIC,
         zip_code TEXT,
         score NUMERIC,
+        score_confidence NUMERIC,
+        score_risk_level TEXT,
+        score_details JSONB DEFAULT '{}'::jsonb,
+        score_version TEXT,
+        scored_at TIMESTAMP(0),
         department TEXT,
         rooms INTEGER,
         price_square_meter NUMERIC,
@@ -48,6 +53,7 @@ def create_tables():
         energy_class TEXT,
         sale_date TEXT,    
         visit_date TEXT,
+        description TEXT,
         first_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         search_vector tsvector,
@@ -61,12 +67,20 @@ def create_tables():
     """)
     cursor.execute("""
     ALTER TABLE annonces ADD COLUMN IF NOT EXISTS first_seen TIMESTAMP(0);
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS description TEXT;
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS score_confidence NUMERIC;
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS score_risk_level TEXT;
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS score_details JSONB DEFAULT '{}'::jsonb;
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS score_version TEXT;
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS scored_at TIMESTAMP(0);
     UPDATE annonces SET first_seen = last_seen WHERE first_seen IS NULL;
     ALTER TABLE annonces ALTER COLUMN first_seen SET DEFAULT CURRENT_TIMESTAMP;
     """)
 
     index_statements = [
         "CREATE INDEX IF NOT EXISTS idx_annonces_score ON annonces(score);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_score_confidence ON annonces(score_confidence);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_score_risk_level ON annonces(score_risk_level);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_city ON annonces(city);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_zip_code ON annonces(zip_code);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_department ON annonces(department);",
@@ -536,6 +550,11 @@ def create_annonces_archive_table():
         adjuged_price NUMERIC,
         zip_code TEXT,
         score NUMERIC,
+        score_confidence NUMERIC,
+        score_risk_level TEXT,
+        score_details JSONB,
+        score_version TEXT,
+        scored_at TIMESTAMP(0),
         department TEXT,
         rooms INTEGER,
         price_square_meter NUMERIC,
@@ -545,6 +564,7 @@ def create_annonces_archive_table():
         energy_class TEXT,
         sale_date TEXT,
         visit_date TEXT,
+        description TEXT,
         first_seen TIMESTAMP(0),
         last_seen TIMESTAMP(0),
         enrichment_snapshot JSONB,
@@ -555,6 +575,12 @@ def create_annonces_archive_table():
     """)
     cur.execute("""
     ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS first_seen TIMESTAMP(0);
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS description TEXT;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS score_confidence NUMERIC;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS score_risk_level TEXT;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS score_details JSONB;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS score_version TEXT;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS scored_at TIMESTAMP(0);
     UPDATE annonces_archive SET first_seen = last_seen WHERE first_seen IS NULL;
     """)
 

@@ -40,7 +40,13 @@ ANNONCE_FIELDS = """
     e.geocode_query,
     e.diagnostic_message,
     p.contenance AS parcel_surface,
-    p.commune_code AS parcel_commune_code
+    p.commune_code AS parcel_commune_code,
+    a.description,
+    a.score_confidence,
+    a.score_risk_level,
+    a.score_details,
+    a.score_version,
+    a.scored_at
 """
 
 SORT_COLUMNS = {
@@ -49,7 +55,6 @@ SORT_COLUMNS = {
     "surface": "a.surface",
     "price_m2": "a.price_square_meter",
     "last_seen": "a.last_seen",
-    "zonage": "e.zonage",
     "relevance": "relevance_rank",
 }
 
@@ -139,6 +144,12 @@ def _row_to_annonce(row, include_distance=False):
         "visit_date": row[16],
         "first_seen": row[17],
         "last_seen": row[18],
+        "description": row[38],
+        "score_confidence": row[39],
+        "score_risk_level": row[40],
+        "score_details": row[41] or {},
+        "score_version": row[42],
+        "scored_at": row[43],
         "enrichment": {
             "status": row[19] or "pending",
             "latitude": row[20],
@@ -163,7 +174,7 @@ def _row_to_annonce(row, include_distance=False):
     }
 
     if include_distance:
-        annonce["distance_m"] = row[38]
+        annonce["distance_m"] = row[44]
 
     return annonce
 
@@ -194,7 +205,6 @@ def _build_filters(filters):
         "department": "a.department",
         "type_bien": "a.type_bien",
         "source_site": "a.source_site",
-        "zonage": "e.zonage",
     }
     for key, column in text_filters.items():
         value = filters.get(key)

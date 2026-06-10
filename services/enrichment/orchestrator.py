@@ -1,3 +1,5 @@
+import os
+
 from services.enrichment.cadastre import CadastreClient
 from services.enrichment.geo import AddressClient
 from services.enrichment.gpu import GpuClient
@@ -18,7 +20,7 @@ def _base_enrichment(annonce):
         "zip_code": annonce.get("zip_code"),
         "geocode_status": "pending",
         "cadastre_status": "pending",
-        "gpu_status": "pending",
+        "gpu_status": "disabled",
         "prescriptions": [],
         "servitudes": [],
         "documents": [],
@@ -31,35 +33,34 @@ def _diagnostic(enrichment):
     if enrichment.get("status") == STATUS_FAILED:
         return enrichment.get("error_message") or "Erreur technique pendant l'enrichissement"
     if enrichment.get("status") == STATUS_SUCCESS:
-        if enrichment.get("parcel_id") and enrichment.get("zonage"):
-            return "Coordonnees, parcelle cadastrale et zonage trouves"
         if enrichment.get("parcel_id"):
             return "Coordonnees et parcelle cadastrale trouvees"
-        return "Coordonnees et zonage urbanisme trouves"
+        return "Coordonnees trouvees"
 
     missing = []
     if enrichment.get("geocode_status") != "success":
         missing.append("geocodage incomplet")
     if enrichment.get("cadastre_status") != "success":
         missing.append("parcelle introuvable")
-    if enrichment.get("gpu_status") != "success":
-        missing.append("zonage urbanisme absent")
     return "Enrichissement partiel: " + ", ".join(missing)
 
 
 def _final_status(enrichment):
     if enrichment.get("geocode_status") != "success":
         return STATUS_NOT_FOUND
-    if enrichment.get("cadastre_status") == "success" or enrichment.get("gpu_status") == "success":
+    if enrichment.get("cadastre_status") == "success":
         return STATUS_SUCCESS
     return STATUS_PARTIAL
 
 
 class EnrichmentService:
-    def __init__(self, address_client=None, cadastre_client=None, gpu_client=None, logger=None):
+    def __init__(self, address_client=None, cadastre_client=None, gpu_client=None, logger=None, gpu_enabled=None):
         self.address_client = address_client or AddressClient()
         self.cadastre_client = cadastre_client or CadastreClient()
-        self.gpu_client = gpu_client or GpuClient()
+        if gpu_enabled is None:
+            gpu_enabled = os.getenv("ENABLE_GPU_ENRICHMENT", "false").lower() in {"1", "true", "yes", "on"}
+        self.gpu_enabled = gpu_enabled
+        self.gpu_client = (gpu_client or GpuClient()) if gpu_enabled else None
         self.logger = logger
 
     def log(self, message):
@@ -105,19 +106,18 @@ class EnrichmentService:
                 enrichment["parcel_key"] = parcel["parcel_key"]
                 enrichment["raw_cadastre"] = parcel.get("raw_response") or parcel.get("raw_data")
 
-            geometry = parcel.get("geometry_json") if parcel else None
-            try:
-                urbanism = self.gpu_client.fetch_urbanism(latitude, longitude, geometry=geometry)
-                enrichment["zonage"] = urbanism.get("zonage")
-                enrichment["prescriptions"] = urbanism.get("prescriptions") or []
-                enrichment["servitudes"] = urbanism.get("servitudes") or []
-                enrichment["documents"] = urbanism.get("documents") or []
-                enrichment["raw_gpu"] = urbanism.get("raw")
-                enrichment["gpu_status"] = "success" if enrichment.get("zonage") else "not_found"
-            except Exception as exc:
-                enrichment["gpu_status"] = "failed"
-                gpu_error = f"GPU indisponible: {exc}"
-                enrichment["error_message"] = "; ".join(filter(None, [enrichment.get("error_message"), gpu_error]))
+            if self.gpu_enabled:
+                geometry = parcel.get("geometry_json") if parcel else None
+                try:
+                    urbanism = self.gpu_client.fetch_urbanism(latitude, longitude, geometry=geometry)
+                    enrichment["zonage"] = urbanism.get("zonage")
+                    enrichment["prescriptions"] = urbanism.get("prescriptions") or []
+                    enrichment["servitudes"] = urbanism.get("servitudes") or []
+                    enrichment["documents"] = urbanism.get("documents") or []
+                    enrichment["raw_gpu"] = urbanism.get("raw")
+                    enrichment["gpu_status"] = "success" if enrichment.get("zonage") else "not_found"
+                except Exception:
+                    enrichment["gpu_status"] = "failed"
 
             enrichment["status"] = _final_status(enrichment)
             enrichment["diagnostic_message"] = _diagnostic(enrichment)

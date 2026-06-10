@@ -130,39 +130,47 @@ def test_cleanup_archives_before_deleting_old_annonces():
     assert "first_seen" in archive_sql
 
 
-def test_score_annonces_ignores_missing_fields_without_error():
+def test_score_annonces_scores_with_low_confidence_when_fields_are_missing():
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
     mock_cursor.fetchall.return_value = [
-        (1, None, "13001", "Appartement", "C"),
-        (2, 5000, None, "Appartement", "C"),
+        (1, None, "13001", "Appartement", "C", "Annonce", None, 50, None, None, [], []),
+        (2, 5000, None, "Appartement", "C", "Annonce", None, 50, None, None, [], []),
     ]
 
-    with patch("database.score_annonce.get_connection", return_value=mock_conn):
+    with patch("database.score_annonce.get_connection", return_value=mock_conn), patch(
+        "database.score_annonce.load_nb_transaction_stats",
+        return_value={"q1": 10, "median": 20, "q3": 30},
+    ):
         summary = score_annonces([1, 2])
 
     assert summary["eligible_for_scoring"] == 0
     assert summary["not_scored_missing_fields"] == 2
-    assert summary["scored"] == 0
+    assert summary["scored"] == 2
 
 
 def test_score_annonces_handles_missing_reference():
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.fetchall.return_value = [(1, 5000, "13001", "Appartement", "C")]
+    mock_cursor.fetchall.return_value = [
+        (1, 5000, "13001", "Appartement", "C", "Annonce", None, 50, None, None, [], [])
+    ]
     mock_cursor.fetchone.return_value = None
 
-    with patch("database.score_annonce.get_connection", return_value=mock_conn):
+    with patch("database.score_annonce.get_connection", return_value=mock_conn), patch(
+        "database.score_annonce.load_nb_transaction_stats",
+        return_value={"q1": 10, "median": 20, "q3": 30},
+    ):
         summary = score_annonces([1])
 
     assert summary["eligible_for_scoring"] == 1
     assert summary["not_scored_no_reference"] == 1
-    assert summary["scored"] == 0
+    assert summary["scored"] == 1
 
 
-def test_score_annonce_payloads_only_keeps_scores_strictly_above_20():
+def test_score_annonce_payloads_keeps_all_annonces_and_attaches_explanation():
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
@@ -186,16 +194,18 @@ def test_score_annonce_payloads_only_keeps_scores_strictly_above_20():
     ]
 
     with patch("database.score_annonce.get_connection", return_value=mock_conn), patch(
-        "database.score_annonce.evaluate_annonce",
-        side_effect=[20, 21],
+        "database.score_annonce.load_nb_transaction_stats",
+        return_value={"q1": 10, "median": 20, "q3": 30},
     ):
         retained, summary = score_annonce_payloads(annonces, min_score=20)
 
-    assert [annonce["url"] for annonce in retained] == ["http://score-21"]
-    assert retained[0]["score"] == 21
+    assert [annonce["url"] for annonce in retained] == ["http://score-20", "http://score-21"]
+    assert retained[0]["score_details"]["version"] == "2.1"
+    assert retained[0]["score_details"]["reasons"]
+    assert 0 <= retained[0]["score_confidence"] <= 100
     assert summary["scored"] == 2
-    assert summary["retained"] == 1
-    assert summary["filtered_below_min_score"] == 1
+    assert summary["retained"] == 2
+    assert summary["filtered_below_min_score"] == 0
 
 
 def test_run_pipeline_respects_flags_and_avoids_duplicates():

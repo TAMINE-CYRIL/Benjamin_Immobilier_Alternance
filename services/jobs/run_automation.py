@@ -9,6 +9,7 @@ from database.automation_runs import create_run, finish_run
 from database.create_tables import create_all_tables
 from database.migrations import apply_pending_migrations
 from database.reset_db import cleanup
+from database.score_annonce import score_annonces
 from main_immo import create_run_logger, run_pipeline
 from apps.database.audit_repo import record_audit_event
 from services.enrichment.orchestrator import EnrichmentService
@@ -98,6 +99,10 @@ async def run(args=None):
                 enrichment_status = "partial"
             enrichment_summary["status"] = enrichment_status
             summary["stages"]["enrichment"] = enrichment_summary
+
+            rescoring_summary = score_annonces(logger=logger)
+            rescoring_summary["status"] = "partial_success" if rescoring_summary["errors"] else "success"
+            summary["stages"]["rescoring"] = rescoring_summary
 
         if args.skip_cleanup:
             summary["stages"]["cleanup"] = {"status": "skipped"}

@@ -44,7 +44,6 @@ def get_annonces(
     energy_class: Optional[Literal["A", "B", "C", "D", "E", "F", "G"]] = None,
     source_site: Optional[str] = TEXT_FILTER,
     enrichment_status: Optional[Literal["pending", "success", "partial_success", "not_found", "failed"]] = None,
-    zonage: Optional[str] = TEXT_FILTER,
     parcel_surface_min: Optional[float] = Query(None, ge=0),
     parcel_surface_max: Optional[float] = Query(None, ge=0),
     has_parcel: Optional[bool] = None,
@@ -52,7 +51,7 @@ def get_annonces(
     center_lat: Optional[float] = Query(None, ge=-90, le=90),
     center_lon: Optional[float] = Query(None, ge=-180, le=180),
     radius_km: Optional[float] = Query(None, ge=0.1, le=100),
-    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "zonage", "relevance", "distance"] = "score",
+    sort: Literal["score", "price", "surface", "price_m2", "last_seen", "relevance", "distance"] = "score",
     direction: Literal["asc", "desc"] = "desc",
 ):
     """
@@ -112,7 +111,6 @@ def get_annonces(
         "energy_class": energy_class,
         "source_site": source_site,
         "enrichment_status": enrichment_status,
-        "zonage": zonage,
         "parcel_surface_min": parcel_surface_min,
         "parcel_surface_max": parcel_surface_max,
         "has_parcel": has_parcel,

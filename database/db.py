@@ -1,5 +1,6 @@
 from database.connection import get_connection
 from database.create_tables import create_tables
+from psycopg2.extras import Json
 
 def insert_annonces(annonces, logger=None):
     """
@@ -24,11 +25,17 @@ def insert_annonces(annonces, logger=None):
 
     insert_query = """
     INSERT INTO annonces (
-        title, url, city, surface, price, adjuged_price, zip_code, score, department, rooms,
+        title, url, city, surface, price, adjuged_price, zip_code, score,
+        score_confidence, score_risk_level, score_details, score_version, scored_at,
+        department, rooms,
         price_square_meter, agency, source_site, type_bien, energy_class,
-        sale_date, visit_date
+        sale_date, visit_date, description
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+        CASE WHEN %s IS NULL THEN NULL ELSE CURRENT_TIMESTAMP END,
+        %s, %s, %s, %s, %s, %s, %s, %s, %s
+    )
     ON CONFLICT (url, city, zip_code) DO UPDATE
     SET title = EXCLUDED.title,
         city = EXCLUDED.city,
@@ -37,6 +44,11 @@ def insert_annonces(annonces, logger=None):
         adjuged_price = EXCLUDED.adjuged_price,
         zip_code = EXCLUDED.zip_code,
         score = EXCLUDED.score,
+        score_confidence = EXCLUDED.score_confidence,
+        score_risk_level = EXCLUDED.score_risk_level,
+        score_details = EXCLUDED.score_details,
+        score_version = EXCLUDED.score_version,
+        scored_at = EXCLUDED.scored_at,
         department = EXCLUDED.department,
         rooms = EXCLUDED.rooms,
         price_square_meter = EXCLUDED.price_square_meter,
@@ -46,6 +58,7 @@ def insert_annonces(annonces, logger=None):
         energy_class = EXCLUDED.energy_class,
         sale_date = EXCLUDED.sale_date,
         visit_date = EXCLUDED.visit_date,
+        description = EXCLUDED.description,
         last_seen = CURRENT_TIMESTAMP
     RETURNING id, (xmax = 0) AS inserted;
     """
@@ -85,6 +98,11 @@ def insert_annonces(annonces, logger=None):
                         annonce.get("adjuged_price"),
                         annonce.get("zip_code"),
                         annonce.get("score"),
+                        annonce.get("score_confidence"),
+                        annonce.get("score_risk_level"),
+                        Json(annonce.get("score_details") or {}),
+                        annonce.get("score_version"),
+                        annonce.get("score_version"),
                         annonce.get("department"),
                         annonce.get("rooms"),
                         annonce.get("price_square_meter"),
@@ -94,6 +112,7 @@ def insert_annonces(annonces, logger=None):
                         annonce.get("energy_class"),
                         annonce.get("sale_date"),
                         annonce.get("visit_date"),
+                        annonce.get("description"),
                     ),
                 )
 

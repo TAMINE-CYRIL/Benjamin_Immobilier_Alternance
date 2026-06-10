@@ -11,6 +11,15 @@ import { formatDate, formatDistance, formatMoney } from "../utils";
 export function DetailPanel({ annonce, loading, onClose }) {
   if (!annonce && !loading) return null;
   const enrichment = annonce?.enrichment || {};
+  const scoring = annonce?.score_details || {};
+  const components = scoring.components || {};
+  const componentLabels = {
+    market_discount: "Prix et décote",
+    land_potential: "Potentiel foncier",
+    liquidity: "Liquidité",
+    listing_signals: "Signaux de l’annonce",
+    energy: "Énergie",
+  };
 
   return (
     <aside className="detail-panel">
@@ -35,6 +44,46 @@ export function DetailPanel({ annonce, loading, onClose }) {
             <dt>Dernière détection</dt><dd>{formatDate(annonce.last_seen)}</dd>
             {annonce.distance_m !== undefined ? <><dt>Distance</dt><dd>{formatDistance(annonce.distance_m)}</dd></> : null}
           </dl>
+          <section className="detail-section score-explanation">
+            <p className="eyebrow">Justification du score</p>
+            <div className="score-summary">
+              <strong>{annonce.score ?? "-"} / 100</strong>
+              <span>Confiance : {annonce.score_confidence ?? 0} %</span>
+              <span className={`risk-pill risk-${annonce.score_risk_level || "medium"}`}>
+                Risque {annonce.score_risk_level === "low" ? "faible" : annonce.score_risk_level === "high" ? "élevé" : "moyen"}
+              </span>
+            </div>
+            <div className="score-components">
+              {Object.entries(componentLabels).map(([key, label]) => (
+                <div className="score-component" key={key}>
+                  <span>{label}</span>
+                  <strong>{components[key] ?? "-"} / {{
+                    market_discount: 40,
+                    land_potential: 30,
+                    liquidity: 10,
+                    listing_signals: 15,
+                    energy: 5,
+                  }[key]}</strong>
+                </div>
+              ))}
+            </div>
+            {scoring.reasons?.length ? (
+              <>
+                <h3>Éléments favorables et constats</h3>
+                <ul className="score-reasons">
+                  {scoring.reasons.map((reason, index) => <li key={`${reason}-${index}`}>{reason}</li>)}
+                </ul>
+              </>
+            ) : null}
+            {scoring.risks?.length ? (
+              <>
+                <h3>Points de vigilance</h3>
+                <ul className="score-risks">
+                  {scoring.risks.map((risk, index) => <li key={`${risk}-${index}`}>{risk}</li>)}
+                </ul>
+              </>
+            ) : null}
+          </section>
           <section className="detail-section">
             <p className="eyebrow">Enrichissement foncier</p>
             <dl>
@@ -45,16 +94,11 @@ export function DetailPanel({ annonce, loading, onClose }) {
               <dd>{[enrichment.geocode_status, enrichment.geocode_score ? `score ${Number(enrichment.geocode_score).toFixed(2)}` : null, enrichment.geocode_type].filter(Boolean).join(" - ") || "-"}</dd>
               <dt>Requête</dt><dd>{enrichment.geocode_query || "-"}</dd>
               <dt>Cadastre</dt><dd>{enrichment.cadastre_status || "-"}</dd>
-              <dt>Urbanisme</dt><dd>{enrichment.gpu_status || "-"}</dd>
               <dt>Coordonnées</dt>
               <dd>{enrichment.latitude && enrichment.longitude ? `${enrichment.latitude}, ${enrichment.longitude}` : "-"}</dd>
               <dt>Parcelle</dt><dd>{enrichment.parcel_key || "-"}</dd>
               <dt>Surface parcelle</dt><dd>{enrichment.parcel_surface ? `${enrichment.parcel_surface} m2` : "-"}</dd>
               <dt>Commune cadastre</dt><dd>{enrichment.parcel_commune_code || "-"}</dd>
-              <dt>Zonage PLU</dt><dd>{enrichment.zonage || "-"}</dd>
-              <dt>Préscriptions</dt><dd>{enrichment.prescriptions?.length || 0}</dd>
-              <dt>Servitudes</dt><dd>{enrichment.servitudes?.length || 0}</dd>
-              <dt>Documents</dt><dd>{enrichment.documents?.length || 0}</dd>
               <dt>Erreur</dt><dd>{enrichment.error || "-"}</dd>
               <dt>Mis à jour</dt><dd>{enrichment.enriched_at || "-"}</dd>
             </dl>

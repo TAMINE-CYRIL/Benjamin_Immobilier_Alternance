@@ -100,7 +100,6 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
 
         <fieldset>
           <legend>Enrichissement</legend>
-          <input aria-label="Zonage" placeholder="Zonage" value={filters.zonage} onChange={(event) => update("zonage", event.target.value)} />
           <select aria-label="Statut d’enrichissement" value={filters.enrichment_status} onChange={(event) => update("enrichment_status", event.target.value)}>
             {enrichmentStatusOptions.map((option) => (
               <option key={option.value || "all"} value={option.value}>{option.label}</option>
@@ -126,7 +125,6 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
             <option value="surface">Surface</option>
             <option value="price_m2">Prix/m²</option>
             <option value="last_seen">Dernière vue</option>
-            <option value="zonage">Zonage</option>
             <option value="distance">Distance</option>
           </select>
           <select aria-label="Direction du tri" value={filters.direction} onChange={(event) => update("direction", event.target.value)}>

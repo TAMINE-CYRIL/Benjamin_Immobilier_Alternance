@@ -5,7 +5,7 @@ import json
 import os
 
 from database.db import insert_annonces
-from database.score_annonce import MIN_SCORE_TO_SAVE, score_annonce_payloads
+from database.score_annonce import score_annonce_payloads
 from scrapers.immobilier.scrape_atypiques import scrape_atypiques
 from scrapers.immobilier.scrape_avoventes import scrape_avoventes
 from scrapers.immobilier.scrape_bienici import scrape_bienici
@@ -257,7 +257,6 @@ async def run_pipeline(args, logger=None):
         if not args.no_score:
             annonces_to_save, scoring_summary = score_annonce_payloads(
                 all_annonces,
-                min_score=MIN_SCORE_TO_SAVE,
                 logger=logger,
             )
             global_summary["scoring"] = scoring_summary

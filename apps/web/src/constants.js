@@ -18,7 +18,6 @@ export const emptyFilters = {
   energy_class: "",
   source_site: "",
   enrichment_status: "",
-  zonage: "",
   parcel_surface_min: "",
   parcel_surface_max: "",
   has_parcel: "",
