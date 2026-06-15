@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { searchAnnonces } from "./api";
+import { removeMember, searchAnnonces } from "./api";
 
 
 describe("searchAnnonces", () => {
@@ -29,5 +29,25 @@ describe("searchAnnonces", () => {
     expect(query.get("recent_days")).toBe("7");
     expect(query.get("has_parcel")).toBe("true");
     expect(query.has("score_max")).toBe(false);
+  });
+});
+
+describe("removeMember", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("envoie une requête DELETE vers le membre ciblé", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true }),
+    });
+
+    await removeMember(42);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/members/42",
+      expect.objectContaining({ method: "DELETE", credentials: "include" })
+    );
   });
 });

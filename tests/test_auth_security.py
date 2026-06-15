@@ -14,6 +14,7 @@ from apps.api.routes.auth import (
     invite_member,
     login,
     members,
+    remove_member,
     request_password_reset,
 )
 from apps.api.auth import create_access_token, set_auth_cookie
@@ -358,6 +359,48 @@ def test_invite_member_resends_invitation_for_existing_user():
     send_email.assert_called_once()
 
 
+def test_invite_member_recreates_inactive_user():
+    current_user = {"id": 7, "email": "member@example.com", "is_active": True}
+    inactive_user = {
+        "id": 2,
+        "email": "removed@example.com",
+        "password_hash": "old-hash",
+        "is_active": False,
+        "created_at": "now",
+        "locked_until": None,
+    }
+    recreated_user = {
+        "id": 9,
+        "email": "removed@example.com",
+        "is_active": True,
+        "created_at": "later",
+    }
+    reset = {
+        "user_id": 9,
+        "email": "removed@example.com",
+        "token": "invite-token",
+        "expires_at": "later",
+    }
+
+    with patch("apps.api.routes.auth.get_user_by_email", return_value=inactive_user):
+        with patch("apps.api.routes.auth.delete_inactive_user", return_value=True) as delete:
+            with patch("apps.api.routes.auth.hash_password", return_value="new-hash"):
+                with patch("apps.api.routes.auth.create_user", return_value=recreated_user) as create:
+                    with patch("apps.api.routes.auth.create_password_reset_token", return_value=reset):
+                        with patch("apps.api.routes.auth.send_email"):
+                            with patch("apps.api.routes.auth.record_audit_event"):
+                                result = invite_member(
+                                    MemberInvitationRequest(email="removed@example.com"),
+                                    _request(),
+                                    current_user,
+                                )
+
+    assert result["created"] is True
+    assert result["user"]["id"] == 9
+    delete.assert_called_once_with(2)
+    create.assert_called_once_with("removed@example.com", "new-hash", is_active=True)
+
+
 def test_invite_member_exposes_email_configuration_error_in_development(monkeypatch):
     monkeypatch.setenv("APP_ENV", "development")
     current_user = {"id": 7, "email": "admin@example.com", "is_active": True}
@@ -421,3 +464,61 @@ def test_members_lists_dashboard_users():
         {"id": 8, "email": "member@example.com", "is_active": True, "created_at": "later"},
     ]
     list_users_mock.assert_called_once_with()
+
+
+def test_remove_member_deactivates_target_and_records_actor():
+    current_user = {"id": 7, "email": "actor@example.com", "is_active": True}
+    target = {
+        "id": 8,
+        "email": "member@example.com",
+        "is_active": True,
+        "created_at": "now",
+        "locked_until": None,
+    }
+    removed = {**target, "deleted": True}
+
+    with patch("apps.api.routes.auth.get_user_by_id", return_value=target):
+        with patch("apps.api.routes.auth.delete_user", return_value=removed) as delete:
+            with patch("apps.api.routes.auth.record_audit_event") as audit_event:
+                result = remove_member(8, _request(), current_user)
+
+    assert result["ok"] is True
+    assert result["removed_user_id"] == 8
+    delete.assert_called_once_with(8)
+    assert audit_event.call_args.args[0] == "member_removed"
+    assert audit_event.call_args.kwargs["user_id"] == 7
+    assert audit_event.call_args.kwargs["metadata"]["removed_by_user_id"] == 7
+
+
+def test_remove_member_rejects_last_active_user():
+    current_user = {"id": 8, "email": "actor@example.com", "is_active": True}
+    target = {
+        "id": 7,
+        "email": "member@example.com",
+        "is_active": True,
+        "created_at": "now",
+        "locked_until": None,
+    }
+    not_removed = {**target, "deleted": False}
+
+    with patch("apps.api.routes.auth.get_user_by_id", return_value=target):
+        with patch("apps.api.routes.auth.delete_user", return_value=not_removed):
+            with pytest.raises(HTTPException) as exc:
+                remove_member(7, _request(), current_user)
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == "Impossible de retirer le dernier membre actif."
+
+
+def test_remove_member_rejects_self_removal():
+    current_user = {"id": 7, "email": "member@example.com", "is_active": True}
+
+    with patch("apps.api.routes.auth.get_user_by_id") as get_user:
+        with patch("apps.api.routes.auth.delete_user") as delete:
+            with pytest.raises(HTTPException) as exc:
+                remove_member(7, _request(), current_user)
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Vous ne pouvez pas retirer votre propre acces."
+    get_user.assert_not_called()
+    delete.assert_not_called()

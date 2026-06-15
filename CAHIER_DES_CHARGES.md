@@ -75,8 +75,7 @@ Permettre aux utilisateurs de filtrer les opportunites detectees selon des crite
 
 - Frontend : Vue.js ou React.js.
 - Backend : Node.js ou Django.
-- Base de donnees : PostgreSQL avec PostGIS.
-- Moteur de recherche : ElasticSearch pour une recherche rapide.
+- Base de donnees et moteur de recherche : PostgreSQL avec PostGIS et recherche plein texte indexee.
 - Rafraichissement automatique des donnees avec synchronisation quotidienne.
 
 ## 5. Intelligence artificielle et analyse predictive
@@ -105,15 +104,14 @@ L'architecture recommandee repose sur une application web modulaire, capable d'i
 - Backend API : Node.js ou Django.
 - Scraping : Crawl4AI.
 - Enrichissement : Python et APIs REST.
-- Moteur de recherche : ElasticSearch.
-- Base de donnees : PostgreSQL avec PostGIS.
+- Base de donnees et moteur de recherche : PostgreSQL avec PostGIS et recherche plein texte indexee.
 
 ### 6.2 Flux de donnees
 
 1. Collecte automatisee des annonces immobilieres.
 2. Normalisation et stockage des donnees collectees.
 3. Enrichissement via APIs publiques et donnees open data.
-4. Indexation dans le moteur de recherche.
+4. Indexation plein texte et geographique dans PostgreSQL.
 5. Analyse, scoring et detection d'anomalies.
 6. Visualisation dans l'interface web.
 

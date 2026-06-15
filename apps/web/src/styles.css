@@ -419,6 +419,23 @@ select:focus {
   text-transform: uppercase;
 }
 
+.member-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.danger-button {
+  min-height: 34px;
+  border: 1px solid #fecaca;
+  color: #b42318;
+  background: #fff1f0;
+}
+
+.danger-button:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
 .search-workspace {
   display: grid;
   grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);

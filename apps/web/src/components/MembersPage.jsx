@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { inviteMember, listMembers } from "../api";
+import { inviteMember, listMembers, removeMember } from "../api";
 
-export function MembersPage() {
+export function MembersPage({ currentUserId }) {
   const [memberEmail, setMemberEmail] = useState("");
   const [memberLoading, setMemberLoading] = useState(false);
   const [memberMessage, setMemberMessage] = useState("");
   const [memberError, setMemberError] = useState("");
   const [members, setMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(false);
+  const [removingMemberId, setRemovingMemberId] = useState(null);
 
   useEffect(() => {
     loadMembers();
@@ -55,6 +56,29 @@ export function MembersPage() {
     }
   }
 
+  async function handleRemoveMember(member) {
+    const confirmed = window.confirm(
+      `Retirer l'accès de ${member.email} ? Cette personne ne pourra plus se connecter.`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingMemberId(member.id);
+    setMemberMessage("");
+    setMemberError("");
+
+    try {
+      await removeMember(member.id);
+      await loadMembers();
+      setMemberMessage(`L'accès de ${member.email} a été retiré.`);
+    } catch (err) {
+      setMemberError(err.message);
+    } finally {
+      setRemovingMemberId(null);
+    }
+  }
+
   return (
     <section className="member-panel">
       <div>
@@ -87,7 +111,19 @@ export function MembersPage() {
         {members.map((member) => (
           <div className="member-row" key={member.id}>
             <span>{member.email}</span>
-            <small>{member.is_active ? "Actif" : "Inactif"}</small>
+            <div className="member-actions">
+              <small>{member.id === currentUserId ? "Vous" : "Actif"}</small>
+              {member.id !== currentUserId ? (
+                <button
+                  className="danger-button"
+                  type="button"
+                  disabled={removingMemberId !== null}
+                  onClick={() => handleRemoveMember(member)}
+                >
+                  {removingMemberId === member.id ? "Retrait..." : "Retirer"}
+                </button>
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

@@ -26,7 +26,10 @@ from apps.database.password_reset_repo import consume_password_reset_token, crea
 from apps.database.users_repo import (
     clear_user_lock,
     create_user,
+    delete_inactive_user,
+    delete_user,
     get_user_by_email,
+    get_user_by_id,
     list_users,
     lock_user_for_minutes,
     update_user_password,
@@ -371,7 +374,24 @@ def invite_member(payload: MemberInvitationRequest, request: Request, current_us
                 "created_by_email": current_user.get("email"),
             },
         )
-
+    elif not user["is_active"]:
+        previous_user_id = user["id"]
+        if not delete_inactive_user(previous_user_id):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invitation impossible.")
+        temporary_password = secrets.token_urlsafe(48)
+        user = create_user(email, hash_password(temporary_password), is_active=True)
+        created = True
+        _record_audit_event(
+            "member_recreated",
+            user_id=user["id"],
+            email=user["email"],
+            ip_address=ip_address,
+            metadata={
+                "previous_user_id": previous_user_id,
+                "created_by_user_id": current_user["id"],
+                "created_by_email": current_user.get("email"),
+            },
+        )
     reset = create_password_reset_token(
         user["email"],
         ttl_minutes=PASSWORD_RESET_TTL_MINUTES,
@@ -425,6 +445,44 @@ def members(current_user=Depends(get_current_user)):
     Retourne les comptes ayant acces au dashboard.
     """
     return {"items": [public_user(user) for user in list_users()]}
+
+
+@router.delete("/members/{member_id}")
+def remove_member(member_id: int, request: Request, current_user=Depends(get_current_user)):
+    """
+    Retire l'acces d'un membre. Tous les membres actifs disposent de cette capacite.
+    """
+    if member_id == current_user["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous ne pouvez pas retirer votre propre acces.",
+        )
+
+    member = get_user_by_id(member_id)
+    if not member or not member["is_active"]:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membre introuvable.")
+
+    removed = delete_user(member_id)
+    if not removed:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membre introuvable.")
+    if not removed["deleted"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Impossible de retirer le dernier membre actif.",
+        )
+
+    _record_audit_event(
+        "member_removed",
+        user_id=current_user["id"],
+        email=removed["email"],
+        ip_address=_client_ip(request),
+        metadata={
+            "removed_user_id": removed["id"],
+            "removed_by_user_id": current_user["id"],
+            "removed_by_email": current_user.get("email"),
+        },
+    )
+    return {"ok": True, "removed_user_id": removed["id"]}
 
 
 @router.get("/me")

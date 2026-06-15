@@ -296,6 +296,10 @@ Ajout d'un acces depuis le dashboard :
 - Le nouveau membre recoit un lien a usage unique pour choisir lui-meme son mot de passe ; le mot de passe final n'est jamais envoye par e-mail ni stocke en clair.
 - Si le compte existe deja, aucun doublon n'est cree et une nouvelle invitation est envoyee.
 - Le dashboard recharge la liste des comptes apres invitation pour confirmer visuellement la creation ou l'existence du membre.
+- Tout utilisateur connecte peut retirer l'acces d'un membre via `DELETE /api/auth/members/{id}` ; il n'existe aucun role privilegie.
+- Le compte connecte ne peut pas retirer son propre acces.
+- Le retrait supprime le compte et ses jetons actifs, sans supprimer les evenements d'audit deja enregistres. Une nouvelle invitation cree un nouveau compte.
+- Le dernier membre actif ne peut pas etre retire afin de conserver un acces au dashboard.
 - La creation, l'envoi d'invitation, les echecs d'e-mail et la definition du mot de passe sont journalises dans `audit_events`.
 
 Un script de secours existe pour generer un token manuellement en cas d'incident SMTP :

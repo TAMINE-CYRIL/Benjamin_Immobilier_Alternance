@@ -86,6 +86,12 @@ export function listMembers() {
   return request("/api/auth/members");
 }
 
+export function removeMember(memberId) {
+  return request(`/api/auth/members/${memberId}`, {
+    method: "DELETE",
+  });
+}
+
 /**
  * Recherche les annonces selon les paramètres fournis.
  * @param {*} params Les critères de recherche.

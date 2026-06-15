@@ -51,7 +51,11 @@ export function Dashboard({ user, onLogout }) {
         </button>
       </nav>
 
-      {activeView === "annonces" ? <AnnoncesPage /> : <MembersPage />}
+      {activeView === "annonces" ? (
+        <AnnoncesPage />
+      ) : (
+        <MembersPage currentUserId={user.id} />
+      )}
     </main>
   );
 }

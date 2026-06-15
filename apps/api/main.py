@@ -9,12 +9,14 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
-load_dotenv()
-
 from apps.api.auth import CSRF_COOKIE_NAME, validate_security_config
 from apps.api.routes.auth import router as auth_router
 from apps.api.routes.annonces import router as annonces_router
 from apps.api.routes.jobs import router as jobs_router
+
+load_dotenv()
+
+
 
 
 @asynccontextmanager
