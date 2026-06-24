@@ -123,6 +123,24 @@ def test_gpu_client_collects_zone_prescriptions_and_servitudes():
     assert len(result["servitudes"]) == 1
 
 
+def test_gpu_client_falls_back_to_point_when_geometry_is_too_large():
+    http_client = FakeHttpClient([{"features": []} for _ in range(7)])
+    client = GpuClient(http_client=http_client)
+    large_geometry = {
+        "type": "Polygon",
+        "coordinates": [[
+            [5.0 + index / 10000, 43.0 + index / 10000]
+            for index in range(300)
+        ]],
+    }
+
+    client.fetch_urbanism(43.2965, 5.3698, geometry=large_geometry)
+
+    geom = http_client.calls[0][1]["geom"]
+    assert "Polygon" not in geom
+    assert "Point" in geom
+
+
 def test_enrichment_service_stores_not_found(monkeypatch):
     stored = []
 

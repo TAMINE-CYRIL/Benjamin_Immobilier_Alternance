@@ -11,6 +11,7 @@ STATUS_SUCCESS = "success"
 STATUS_PARTIAL = "partial_success"
 STATUS_FAILED = "failed"
 STATUS_NOT_FOUND = "not_found"
+GPU_ERROR_MESSAGE = "Urbanisme indisponible pour cette parcelle"
 
 
 def _base_enrichment(annonce):
@@ -118,6 +119,7 @@ class EnrichmentService:
                     enrichment["gpu_status"] = "success" if enrichment.get("zonage") else "not_found"
                 except Exception:
                     enrichment["gpu_status"] = "failed"
+                    enrichment["raw_gpu"] = {"error": GPU_ERROR_MESSAGE}
 
             enrichment["status"] = _final_status(enrichment)
             enrichment["diagnostic_message"] = _diagnostic(enrichment)

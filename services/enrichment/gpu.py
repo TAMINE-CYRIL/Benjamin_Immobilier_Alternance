@@ -6,6 +6,7 @@ from services.enrichment.http_client import JsonHttpClient
 
 
 GPU_API_BASE_URL = os.getenv("GPU_API_BASE_URL", "https://apicarto.ign.fr/api/gpu")
+MAX_GET_GEOMETRY_CHARS = 1800
 
 
 def _features(payload):
@@ -59,6 +60,8 @@ class GpuClient:
 
     def fetch_urbanism(self, latitude, longitude, geometry=None):
         geom = geometry or point_geometry(latitude, longitude)
+        if len(json.dumps(geom)) > MAX_GET_GEOMETRY_CHARS:
+            geom = point_geometry(latitude, longitude)
         raw = {}
 
         zone_payload = self._get_by_geom("zone-urba", geom)

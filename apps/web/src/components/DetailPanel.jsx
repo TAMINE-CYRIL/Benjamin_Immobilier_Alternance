@@ -1,14 +1,18 @@
 import React from "react";
-import { enrichmentStatusLabels } from "../constants";
+import { businessStatusLabels, businessStatusOptions, enrichmentStatusLabels } from "../constants";
 import { formatDate, formatDistance, formatMoney } from "../utils";
 
+
+function isUsefulValue(value) {
+  return value !== null && value !== undefined && value !== "";
+}
 
 /**
  * Composant de panneau de détails pour afficher les informations d'une annonce.
  * @param {*} annonce, loading, onClose 
  * @returns 
  */
-export function DetailPanel({ annonce, loading, onClose }) {
+export function DetailPanel({ annonce, loading, onClose, onTrackingChange, trackingLoading = false }) {
   if (!annonce && !loading) return null;
   const enrichment = annonce?.enrichment || {};
   const scoring = annonce?.score_details || {};
@@ -30,6 +34,32 @@ export function DetailPanel({ annonce, loading, onClose }) {
         <>
           <p className="eyebrow">{annonce.source_site || "Annonce"}</p>
           <h2>{annonce.title || "Sans titre"}</h2>
+          <section className="tracking-panel">
+            <button
+              type="button"
+              className={annonce.is_favorite ? "favorite-icon-button active" : "favorite-icon-button"}
+              disabled={trackingLoading}
+              aria-label={annonce.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+              title={annonce.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+              onClick={() => onTrackingChange?.({ is_favorite: !annonce.is_favorite })}
+            >
+              {annonce.is_favorite ? "♥" : "♡"}
+            </button>
+            <label>
+              <span>Statut commercial</span>
+              <select
+                value={annonce.business_status || "new"}
+                disabled={trackingLoading}
+                onChange={(event) => onTrackingChange?.({ business_status: event.target.value })}
+              >
+                {businessStatusOptions
+                  .filter((option) => option.value)
+                  .map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+              </select>
+            </label>
+          </section>
           <dl>
             <dt>Score</dt><dd>{annonce.score ?? "-"}</dd>
             <dt>Prix</dt><dd>{formatMoney(annonce.price)}</dd>
@@ -86,21 +116,16 @@ export function DetailPanel({ annonce, loading, onClose }) {
           </section>
           <section className="detail-section">
             <p className="eyebrow">Enrichissement foncier</p>
-            <dl>
+            <dl className="compact-dl">
               <dt>Statut</dt>
               <dd><span className={`status-pill status-${enrichment.status || "pending"}`}>{enrichmentStatusLabels[enrichment.status] || "En attente"}</span></dd>
-              <dt>Diagnostic</dt><dd>{enrichment.diagnostic_message || "-"}</dd>
-              <dt>Géocodage</dt>
-              <dd>{[enrichment.geocode_status, enrichment.geocode_score ? `score ${Number(enrichment.geocode_score).toFixed(2)}` : null, enrichment.geocode_type].filter(Boolean).join(" - ") || "-"}</dd>
-              <dt>Requête</dt><dd>{enrichment.geocode_query || "-"}</dd>
-              <dt>Cadastre</dt><dd>{enrichment.cadastre_status || "-"}</dd>
-              <dt>Coordonnées</dt>
-              <dd>{enrichment.latitude && enrichment.longitude ? `${enrichment.latitude}, ${enrichment.longitude}` : "-"}</dd>
-              <dt>Parcelle</dt><dd>{enrichment.parcel_key || "-"}</dd>
-              <dt>Surface parcelle</dt><dd>{enrichment.parcel_surface ? `${enrichment.parcel_surface} m2` : "-"}</dd>
-              <dt>Commune cadastre</dt><dd>{enrichment.parcel_commune_code || "-"}</dd>
-              <dt>Erreur</dt><dd>{enrichment.error || "-"}</dd>
-              <dt>Mis à jour</dt><dd>{enrichment.enriched_at || "-"}</dd>
+              {enrichment.diagnostic_message ? <><dt>Diagnostic</dt><dd>{enrichment.diagnostic_message}</dd></> : null}
+              {isUsefulValue(enrichment.parcel_key) ? <><dt>Parcelle</dt><dd>{enrichment.parcel_key}</dd></> : null}
+              {isUsefulValue(enrichment.parcel_surface) ? <><dt>Surface parcelle</dt><dd>{enrichment.parcel_surface} m2</dd></> : null}
+              {isUsefulValue(enrichment.zonage) ? <><dt>Zonage</dt><dd>{enrichment.zonage}</dd></> : null}
+              {isUsefulValue(enrichment.latitude) && isUsefulValue(enrichment.longitude) ? (
+                <><dt>Coordonnées</dt><dd>{`${Number(enrichment.latitude).toFixed(5)}, ${Number(enrichment.longitude).toFixed(5)}`}</dd></>
+              ) : null}
             </dl>
           </section>
           {annonce.url ? <a className="source-link" href={annonce.url} target="_blank" rel="noreferrer">Ouvrir la source</a> : null}
