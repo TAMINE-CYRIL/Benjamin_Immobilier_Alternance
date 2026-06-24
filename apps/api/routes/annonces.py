@@ -1,15 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from typing import Literal, Optional
 
+from pydantic import BaseModel
+
 from apps.api.auth import get_current_user
 from apps.database.audit_repo import record_audit_event
-from apps.database.annonces_repo import fetch_annonce_by_id, search_annonces
+from apps.database.annonces_repo import fetch_annonce_by_id, search_annonces, update_annonce_tracking
 
 router = APIRouter()
 
 TEXT_FILTER = Query(None, min_length=1, max_length=100)
 ZIP_FILTER = Query(None, min_length=2, max_length=10, pattern=r"^[0-9A-Za-z -]+$")
 DEPARTMENT_FILTER = Query(None, min_length=1, max_length=3, pattern=r"^[0-9A-Za-z]+$")
+BusinessStatus = Literal["new", "to_review", "contacted", "visit_planned", "follow_up", "rejected"]
+
+
+class AnnonceTrackingPayload(BaseModel):
+    business_status: Optional[BusinessStatus] = None
+    is_favorite: Optional[bool] = None
 
 
 def _validate_range(label, minimum, maximum):
@@ -44,6 +52,8 @@ def get_annonces(
     energy_class: Optional[Literal["A", "B", "C", "D", "E", "F", "G"]] = None,
     source_site: Optional[str] = TEXT_FILTER,
     enrichment_status: Optional[Literal["pending", "success", "partial_success", "not_found", "failed"]] = None,
+    business_status: Optional[BusinessStatus] = None,
+    is_favorite: Optional[bool] = None,
     parcel_surface_min: Optional[float] = Query(None, ge=0),
     parcel_surface_max: Optional[float] = Query(None, ge=0),
     has_parcel: Optional[bool] = None,
@@ -111,6 +121,8 @@ def get_annonces(
         "energy_class": energy_class,
         "source_site": source_site,
         "enrichment_status": enrichment_status,
+        "business_status": business_status,
+        "is_favorite": is_favorite,
         "parcel_surface_min": parcel_surface_min,
         "parcel_surface_max": parcel_surface_max,
         "has_parcel": has_parcel,
@@ -139,6 +151,43 @@ def get_annonce(annonce_id: int, user=Depends(get_current_user)):
             user_id=user["id"],
             email=user.get("email"),
             metadata={"annonce_id": annonce_id},
+        )
+    except Exception:
+        pass
+
+    return annonce
+
+
+@router.patch("/annonces/{annonce_id}/tracking")
+def patch_annonce_tracking(
+    annonce_id: int,
+    payload: AnnonceTrackingPayload,
+    user=Depends(get_current_user),
+):
+    if payload.business_status is None and payload.is_favorite is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Au moins un champ de suivi doit etre fourni",
+        )
+
+    annonce = update_annonce_tracking(
+        annonce_id,
+        business_status=payload.business_status,
+        is_favorite=payload.is_favorite,
+    )
+    if not annonce:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Annonce introuvable")
+
+    try:
+        record_audit_event(
+            "annonce_tracking_updated",
+            user_id=user["id"],
+            email=user.get("email"),
+            metadata={
+                "annonce_id": annonce_id,
+                "business_status": payload.business_status,
+                "is_favorite": payload.is_favorite,
+            },
         )
     except Exception:
         pass

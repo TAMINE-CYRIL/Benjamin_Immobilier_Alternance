@@ -54,6 +54,9 @@ def create_tables():
         sale_date TEXT,    
         visit_date TEXT,
         description TEXT,
+        business_status TEXT NOT NULL DEFAULT 'new',
+        is_favorite BOOLEAN NOT NULL DEFAULT FALSE,
+        status_updated_at TIMESTAMP(0),
         first_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         last_seen TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
         search_vector tsvector,
@@ -73,6 +76,11 @@ def create_tables():
     ALTER TABLE annonces ADD COLUMN IF NOT EXISTS score_details JSONB DEFAULT '{}'::jsonb;
     ALTER TABLE annonces ADD COLUMN IF NOT EXISTS score_version TEXT;
     ALTER TABLE annonces ADD COLUMN IF NOT EXISTS scored_at TIMESTAMP(0);
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS business_status TEXT NOT NULL DEFAULT 'new';
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS is_favorite BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE annonces ADD COLUMN IF NOT EXISTS status_updated_at TIMESTAMP(0);
+    UPDATE annonces SET business_status = 'new' WHERE business_status IS NULL;
+    UPDATE annonces SET is_favorite = FALSE WHERE is_favorite IS NULL;
     UPDATE annonces SET first_seen = last_seen WHERE first_seen IS NULL;
     ALTER TABLE annonces ALTER COLUMN first_seen SET DEFAULT CURRENT_TIMESTAMP;
     """)
@@ -92,6 +100,8 @@ def create_tables():
         "CREATE INDEX IF NOT EXISTS idx_annonces_energy_class ON annonces(energy_class);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_first_seen ON annonces(first_seen);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_last_seen ON annonces(last_seen);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_business_status ON annonces(business_status);",
+        "CREATE INDEX IF NOT EXISTS idx_annonces_is_favorite ON annonces(is_favorite);",
         "CREATE INDEX IF NOT EXISTS idx_annonces_search_vector ON annonces USING GIN(search_vector);",
     ]
     for statement in index_statements:
@@ -565,6 +575,9 @@ def create_annonces_archive_table():
         sale_date TEXT,
         visit_date TEXT,
         description TEXT,
+        business_status TEXT,
+        is_favorite BOOLEAN,
+        status_updated_at TIMESTAMP(0),
         first_seen TIMESTAMP(0),
         last_seen TIMESTAMP(0),
         enrichment_snapshot JSONB,
@@ -581,6 +594,9 @@ def create_annonces_archive_table():
     ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS score_details JSONB;
     ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS score_version TEXT;
     ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS scored_at TIMESTAMP(0);
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS business_status TEXT;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS is_favorite BOOLEAN;
+    ALTER TABLE annonces_archive ADD COLUMN IF NOT EXISTS status_updated_at TIMESTAMP(0);
     UPDATE annonces_archive SET first_seen = last_seen WHERE first_seen IS NULL;
     """)
 

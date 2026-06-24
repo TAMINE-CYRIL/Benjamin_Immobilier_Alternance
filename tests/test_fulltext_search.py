@@ -113,8 +113,8 @@ def test_search_annonces_with_sort_relevance():
     with patch("apps.database.annonces_repo.get_connection") as mock_conn:
         mock_cursor = MagicMock()
         mock_cursor.fetchone.return_value = [1]
-        # Mock une ligne retournée avec les colonnes attendues (44 colonnes + relevance_rank)
-        mock_row = list(range(44)) + [0.8]
+        # Mock une ligne retournée avec les colonnes attendues (47 colonnes + relevance_rank)
+        mock_row = list(range(47)) + [0.8]
         mock_cursor.fetchall.return_value = [tuple(mock_row)]
         mock_conn.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
         

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { removeMember, searchAnnonces } from "./api";
+import { removeMember, searchAnnonces, updateAnnonceTracking } from "./api";
 
 
 describe("searchAnnonces", () => {
@@ -19,6 +19,8 @@ describe("searchAnnonces", () => {
       energy_class: "D",
       recent_days: "7",
       has_parcel: "true",
+      business_status: "contacted",
+      is_favorite: "true",
       score_max: "",
     });
 
@@ -28,7 +30,33 @@ describe("searchAnnonces", () => {
     expect(query.get("energy_class")).toBe("D");
     expect(query.get("recent_days")).toBe("7");
     expect(query.get("has_parcel")).toBe("true");
+    expect(query.get("business_status")).toBe("contacted");
+    expect(query.get("is_favorite")).toBe("true");
     expect(query.has("score_max")).toBe(false);
+  });
+});
+
+describe("updateAnnonceTracking", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("envoie une requête PATCH vers le suivi de l'annonce", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: 7, business_status: "contacted", is_favorite: true }),
+    });
+
+    await updateAnnonceTracking(7, { business_status: "contacted", is_favorite: true });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/annonces/7/tracking",
+      expect.objectContaining({
+        method: "PATCH",
+        credentials: "include",
+        body: JSON.stringify({ business_status: "contacted", is_favorite: true }),
+      })
+    );
   });
 });
 

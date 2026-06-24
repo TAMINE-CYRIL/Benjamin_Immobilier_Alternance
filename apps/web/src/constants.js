@@ -18,6 +18,8 @@ export const emptyFilters = {
   energy_class: "",
   source_site: "",
   enrichment_status: "",
+  business_status: "",
+  is_favorite: "",
   parcel_surface_min: "",
   parcel_surface_max: "",
   has_parcel: "",
@@ -65,6 +67,22 @@ export const enrichmentStatusOptions = [
 
 export const enrichmentStatusLabels = Object.fromEntries(
   enrichmentStatusOptions
+    .filter((option) => option.value)
+    .map((option) => [option.value, option.label]),
+);
+
+export const businessStatusOptions = [
+  { value: "", label: "Tous statuts" },
+  { value: "new", label: "Nouveau" },
+  { value: "to_review", label: "À analyser" },
+  { value: "contacted", label: "Contacté" },
+  { value: "visit_planned", label: "Visite prévue" },
+  { value: "follow_up", label: "À suivre" },
+  { value: "rejected", label: "Écarté" },
+];
+
+export const businessStatusLabels = Object.fromEntries(
+  businessStatusOptions
     .filter((option) => option.value)
     .map((option) => [option.value, option.label]),
 );

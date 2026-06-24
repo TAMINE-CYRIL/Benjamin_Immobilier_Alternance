@@ -90,3 +90,34 @@ def test_jobs_runs_authenticated_access_is_audited():
     assert response.status_code == 200
     list_runs.assert_called_once_with(limit=5)
     audit_event.assert_called_once()
+
+
+def test_annonce_tracking_patch_updates_and_audits():
+    app.dependency_overrides[get_current_user] = lambda: {
+        "id": 1,
+        "email": "user@example.com",
+        "is_active": True,
+    }
+    client = TestClient(app, base_url="http://localhost")
+    client.cookies.set("csrf_token", "known-token")
+    updated_annonce = {
+        "id": 42,
+        "business_status": "contacted",
+        "is_favorite": True,
+    }
+
+    try:
+        with patch("apps.api.routes.annonces.update_annonce_tracking", return_value=updated_annonce) as update_tracking:
+            with patch("apps.api.routes.annonces.record_audit_event") as audit_event:
+                response = client.patch(
+                    "/api/annonces/42/tracking",
+                    headers={"X-CSRF-Token": "known-token"},
+                    json={"business_status": "contacted", "is_favorite": True},
+                )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert response.json() == updated_annonce
+    update_tracking.assert_called_once_with(42, business_status="contacted", is_favorite=True)
+    audit_event.assert_called_once()

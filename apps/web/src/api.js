@@ -115,3 +115,10 @@ export function searchAnnonces(params) {
 export function getAnnonce(id) {
   return request(`/api/annonces/${id}`);
 }
+
+export function updateAnnonceTracking(id, payload) {
+  return request(`/api/annonces/${id}/tracking`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

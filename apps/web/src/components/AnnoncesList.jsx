@@ -1,5 +1,5 @@
 import React from "react";
-import { enrichmentStatusLabels } from "../constants";
+import { businessStatusLabels, enrichmentStatusLabels } from "../constants";
 import { formatDistance, formatMoney, formatScore, getScoreLevel } from "../utils";
 
 /**
@@ -52,6 +52,10 @@ export function AnnoncesList({ annonces, selectedId, onSelect }) {
                 {annonce.distance_m !== undefined ? <span>{formatDistance(annonce.distance_m)}</span> : null}
               </span>
               <span className="annonce-card-badges">
+                {annonce.is_favorite ? <span className="favorite-pill" title="Favori">♥</span> : null}
+                <span className={`business-pill business-${annonce.business_status || "new"}`}>
+                  {businessStatusLabels[annonce.business_status] || "Nouveau"}
+                </span>
                 <span className={`status-pill status-${annonce.enrichment?.status || "pending"}`}>
                   {enrichmentStatusLabels[annonce.enrichment?.status] || "En attente"}
                 </span>

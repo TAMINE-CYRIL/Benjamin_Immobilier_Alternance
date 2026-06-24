@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  businessStatusOptions,
   enrichmentStatusOptions,
   propertyTypeOptions,
   sourceOptions,
@@ -99,7 +100,17 @@ export function Filters({ filters, onChange, onSubmit, onReset }) {
         </fieldset>
 
         <fieldset>
-          <legend>Enrichissement</legend>
+          <legend>Suivi et enrichissement</legend>
+          <select aria-label="Statut commercial" value={filters.business_status} onChange={(event) => update("business_status", event.target.value)}>
+            {businessStatusOptions.map((option) => (
+              <option key={option.value || "all"} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <select aria-label="Favori" value={filters.is_favorite} onChange={(event) => update("is_favorite", event.target.value)}>
+            <option value="">Favoris et non favoris</option>
+            <option value="true">Favoris seulement</option>
+            <option value="false">Non favoris seulement</option>
+          </select>
           <select aria-label="Statut d’enrichissement" value={filters.enrichment_status} onChange={(event) => update("enrichment_status", event.target.value)}>
             {enrichmentStatusOptions.map((option) => (
               <option key={option.value || "all"} value={option.value}>{option.label}</option>

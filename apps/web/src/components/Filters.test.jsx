@@ -37,6 +37,8 @@ describe("Filters", () => {
 
     fireEvent.change(screen.getByLabelText("Classe DPE"), { target: { value: "D" } });
     fireEvent.change(screen.getByLabelText("Ancienneté"), { target: { value: "7" } });
+    fireEvent.change(screen.getByLabelText("Statut commercial"), { target: { value: "contacted" } });
+    fireEvent.change(screen.getByLabelText("Favori"), { target: { value: "true" } });
     fireEvent.change(screen.getByLabelText("Présence d’une parcelle"), { target: { value: "true" } });
     fireEvent.change(screen.getByLabelText("Surface cadastrale minimale"), { target: { value: "300" } });
     fireEvent.click(screen.getByRole("button", { name: "Filtrer" }));
@@ -44,6 +46,8 @@ describe("Filters", () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       energy_class: "D",
       recent_days: "7",
+      business_status: "contacted",
+      is_favorite: "true",
       has_parcel: "true",
       parcel_surface_min: "300",
     }));

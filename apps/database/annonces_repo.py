@@ -42,6 +42,9 @@ ANNONCE_FIELDS = """
     p.contenance AS parcel_surface,
     p.commune_code AS parcel_commune_code,
     a.description,
+    a.business_status,
+    a.is_favorite,
+    a.status_updated_at,
     a.score_confidence,
     a.score_risk_level,
     a.score_details,
@@ -145,11 +148,14 @@ def _row_to_annonce(row, include_distance=False):
         "first_seen": row[17],
         "last_seen": row[18],
         "description": row[38],
-        "score_confidence": row[39],
-        "score_risk_level": row[40],
-        "score_details": row[41] or {},
-        "score_version": row[42],
-        "scored_at": row[43],
+        "business_status": row[39] or "new",
+        "is_favorite": bool(row[40]),
+        "status_updated_at": row[41],
+        "score_confidence": row[42],
+        "score_risk_level": row[43],
+        "score_details": row[44] or {},
+        "score_version": row[45],
+        "scored_at": row[46],
         "enrichment": {
             "status": row[19] or "pending",
             "latitude": row[20],
@@ -174,7 +180,7 @@ def _row_to_annonce(row, include_distance=False):
     }
 
     if include_distance:
-        annonce["distance_m"] = row[44]
+        annonce["distance_m"] = row[47]
 
     return annonce
 
@@ -216,6 +222,17 @@ def _build_filters(filters):
     if enrichment_status:
         clauses.append("COALESCE(e.status, 'pending') = %s")
         params.append(enrichment_status)
+
+    business_status = filters.get("business_status")
+    if business_status:
+        clauses.append("a.business_status = %s")
+        params.append(business_status)
+
+    is_favorite = filters.get("is_favorite")
+    if is_favorite is True:
+        clauses.append("a.is_favorite IS TRUE")
+    elif is_favorite is False:
+        clauses.append("a.is_favorite IS FALSE")
 
     energy_class = filters.get("energy_class")
     if energy_class:
@@ -366,3 +383,41 @@ def fetch_annonce_by_id(annonce_id):
         return None
 
     return _row_to_annonce(row)
+
+
+def update_annonce_tracking(annonce_id, business_status=None, is_favorite=None):
+    """
+    Met à jour le suivi commercial d'une annonce sans modifier ses données scrapées.
+    """
+    assignments = []
+    params = []
+
+    if business_status is not None:
+        assignments.append("business_status = %s")
+        params.append(business_status)
+    if is_favorite is not None:
+        assignments.append("is_favorite = %s")
+        params.append(is_favorite)
+
+    if not assignments:
+        return fetch_annonce_by_id(annonce_id)
+
+    assignments.append("status_updated_at = CURRENT_TIMESTAMP")
+    params.append(annonce_id)
+
+    sql = f"""
+        UPDATE annonces
+        SET {', '.join(assignments)}
+        WHERE id = %s
+        RETURNING id
+    """
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            row = cur.fetchone()
+        conn.commit()
+
+    if not row:
+        return None
+    return fetch_annonce_by_id(annonce_id)

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getAnnonce, searchAnnonces } from "../api";
+import { getAnnonce, searchAnnonces, updateAnnonceTracking } from "../api";
 import { emptyFilters } from "../constants";
 import { AnnoncesList } from "./AnnoncesList";
 import AnnoncesMap from "./AnnoncesMap";
@@ -15,6 +15,7 @@ export function AnnoncesPage() {
   const [selected, setSelected] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [trackingLoading, setTrackingLoading] = useState(false);
 
   const totalPages = useMemo(() => Math.max(Math.ceil(data.total / data.page_size), 1), [data]);
 
@@ -63,6 +64,37 @@ export function AnnoncesPage() {
       setSelected(null);
     } finally {
       setDetailLoading(false);
+    }
+  }
+
+  async function handleTrackingChange(payload) {
+    if (!selectedId) return;
+    setTrackingLoading(true);
+    setError("");
+    try {
+      const updated = await updateAnnonceTracking(selectedId, payload);
+      const nextSelected = {
+        ...updated,
+        ...(selected?.distance_m !== undefined ? { distance_m: selected.distance_m } : {}),
+      };
+      setSelected(nextSelected);
+      setData((current) => ({
+        ...current,
+        items: current.items.map((item) => (
+          item.id === updated.id
+            ? {
+                ...item,
+                business_status: updated.business_status,
+                is_favorite: updated.is_favorite,
+                status_updated_at: updated.status_updated_at,
+              }
+            : item
+        )),
+      }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTrackingLoading(false);
     }
   }
 
@@ -137,6 +169,8 @@ export function AnnoncesPage() {
       <DetailPanel
         annonce={selected}
         loading={detailLoading}
+        trackingLoading={trackingLoading}
+        onTrackingChange={handleTrackingChange}
         onClose={() => {
           setSelected(null);
           setSelectedId(null);
