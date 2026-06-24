@@ -134,6 +134,13 @@ def _empty_source_summary(name):
 def _compute_run_status(summary):
     if summary["normalized_total"] == 0:
         return "failed"
+    db_summary = summary.get("db") or {}
+    db_errors = db_summary.get("errors") or 0
+    db_written = (db_summary.get("inserted") or 0) + (db_summary.get("updated") or 0)
+    if db_errors and db_written == 0:
+        return "failed"
+    if db_errors:
+        return "partial_success"
     if summary["failed_sources"] or summary["scoring"].get("errors"):
         return "partial_success"
     return "success"

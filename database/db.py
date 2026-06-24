@@ -1,4 +1,5 @@
 from database.connection import get_connection
+from database.create_tables import create_tables
 from psycopg2.extras import Json
 
 def insert_annonces(annonces, logger=None):
@@ -33,7 +34,7 @@ def insert_annonces(annonces, logger=None):
     VALUES (
         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
         CASE WHEN %s IS NULL THEN NULL ELSE CURRENT_TIMESTAMP END,
-        %s, %s, %s, %s, %s, %s, %s, %s, %s
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
     )
     ON CONFLICT (url, city, zip_code) DO UPDATE
     SET title = EXCLUDED.title,
