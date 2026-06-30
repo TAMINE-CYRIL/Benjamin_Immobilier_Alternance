@@ -116,7 +116,7 @@ def test_cleanup_archives_before_deleting_old_annonces():
 
     with patch("database.reset_db.create_annonces_archive_table") as mock_create_archive:
         with patch("database.reset_db.get_connection", return_value=mock_conn):
-            deleted = cleanup(days=30, logger=MagicMock())
+            deleted = cleanup(logger=MagicMock())
 
     assert deleted == 3
     assert mock_create_archive.called
@@ -125,8 +125,8 @@ def test_cleanup_archives_before_deleting_old_annonces():
     delete_sql = mock_cursor.execute.call_args_list[1].args[0]
     assert "INSERT INTO annonces_archive" in archive_sql
     assert "DELETE FROM annonces" in delete_sql
-    assert mock_cursor.execute.call_args_list[0].args[1] == ("last_seen older than 30 days", 30)
-    assert mock_cursor.execute.call_args_list[1].args[1] == (30,)
+    assert mock_cursor.execute.call_args_list[0].args[1] == ("last_seen older than 14 days", 14)
+    assert mock_cursor.execute.call_args_list[1].args[1] == (14,)
     assert "first_seen" in archive_sql
 
 

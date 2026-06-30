@@ -29,7 +29,7 @@ def parse_args():
     parser.add_argument("--skip-scraping", action="store_true", help="Ne pas lancer le scraping")
     parser.add_argument("--skip-enrichment", action="store_true", help="Ne pas lancer l'enrichissement")
     parser.add_argument("--skip-cleanup", action="store_true", help="Ne pas nettoyer les annonces anciennes")
-    parser.add_argument("--cleanup-days", type=int, default=30, help="Age des annonces a archiver puis supprimer")
+    parser.add_argument("--cleanup-days", type=int, default=14, help="Age des annonces a archiver puis supprimer")
     parser.add_argument("--output-json", default=os.path.join("data", "automation", "latest_run.json"))
     return parser.parse_args()
 

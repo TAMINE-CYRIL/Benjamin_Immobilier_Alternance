@@ -2,7 +2,7 @@ from database.connection import get_connection
 from database.create_tables import create_annonces_archive_table
 
 
-def cleanup(days=30, logger=None, archive=True):
+def cleanup(days=14, logger=None, archive=True):
     """
     Archive puis supprime les annonces qui n'ont pas ete vues depuis plus de N jours.
     """

@@ -199,7 +199,7 @@ L'orchestrateur V2 lance en une seule commande :
 - insertion ou mise a jour des annonces
 - scoring DVF
 - enrichissement géographique et cadastral
-- archivage puis nettoyage des annonces non revues depuis 30 jours
+- archivage puis nettoyage des annonces non revues depuis 14 jours
 - ecriture d'un log dans `logs/`
 - stockage du statut du run dans la table `automation_runs`
 
@@ -264,7 +264,7 @@ Restauration depuis une sauvegarde :
 
 Les fichiers `.dump.gpg` sont déchiffrés temporairement pendant la restauration puis supprimés.
 
-Par defaut, les annonces non revues depuis 30 jours sont copiees dans `annonces_archive` avec un snapshot JSONB de leur enrichissement, puis supprimees de `annonces`.
+Par defaut, les annonces non revues depuis 14 jours sont copiees dans `annonces_archive` avec un snapshot JSONB de leur enrichissement, puis supprimees de `annonces`.
 
 ### 7. Demarrer l'API
 
