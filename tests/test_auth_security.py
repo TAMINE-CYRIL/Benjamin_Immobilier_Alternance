@@ -172,6 +172,14 @@ def test_jwt_secret_default_is_rejected_in_production(monkeypatch):
         create_access_token(1)
 
 
+def test_jwt_secret_placeholder_is_rejected_in_production(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET", "replace-with-a-random-secret-of-at-least-32-characters")
+
+    with pytest.raises(RuntimeError):
+        create_access_token(1)
+
+
 def test_auth_cookie_is_secure_in_production(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("JWT_SECRET", "x" * 40)

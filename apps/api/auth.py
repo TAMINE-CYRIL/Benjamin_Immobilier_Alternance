@@ -18,6 +18,10 @@ CSRF_COOKIE_NAME = os.getenv("CSRF_COOKIE_NAME", "csrf_token")
 JWT_TTL_SECONDS = int(os.getenv("JWT_TTL_SECONDS", "86400"))
 DEFAULT_JWT_SECRET = "change-me-in-production"
 PRODUCTION_ENVS = {"prod", "production"}
+KNOWN_INSECURE_SECRETS = {
+    DEFAULT_JWT_SECRET,
+    "replace-with-a-strong-random-secret-of-at-least-32-characters",
+}
 
 
 def is_production():
@@ -37,7 +41,14 @@ def cookie_secure_enabled():
 
 def get_jwt_secret():
     secret = os.getenv("JWT_SECRET", DEFAULT_JWT_SECRET)
-    if is_production() and (not secret or secret == DEFAULT_JWT_SECRET or len(secret) < 32):
+    normalized_secret = secret.lower()
+    if is_production() and (
+        not secret
+        or secret in KNOWN_INSECURE_SECRETS
+        or "replace" in normalized_secret
+        or "change-me" in normalized_secret
+        or len(secret) < 32
+    ):
         raise RuntimeError("JWT_SECRET must be set to a strong value in production")
     return secret
 

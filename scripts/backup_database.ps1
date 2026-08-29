@@ -1,16 +1,18 @@
 param(
-    [string]$ProjectPath = "C:\Users\arris\Downloads\Benjamin_Immobilier_Alternance",
+    [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
     [string]$BackupDir = "",
     [string]$PgDumpPath = "pg_dump",
     [string]$GpgPath = "gpg",
     [string]$GpgRecipient = "",
     [int]$RetentionDays = 30,
-    [switch]$RestrictAcl
+    [switch]$RestrictAcl,
+    [switch]$AllowUnencrypted
 )
 
 $ErrorActionPreference = "Stop"
 
-if (-not $BackupDir) {
+$UsingDefaultBackupDir = -not $BackupDir
+if ($UsingDefaultBackupDir) {
     $BackupDir = Join-Path $ProjectPath "data\backups"
 }
 
@@ -24,6 +26,14 @@ if (Test-Path $EnvPath) {
 }
 
 if (-not $env:PG_DB) { throw "PG_DB est manquant dans l'environnement ou .env" }
+if ($env:APP_ENV -in @("prod", "production")) {
+    if ($UsingDefaultBackupDir) {
+        throw "BackupDir doit pointer vers un stockage distinct du projet en production"
+    }
+    if (-not $GpgRecipient -and -not $AllowUnencrypted) {
+        throw "GpgRecipient est obligatoire en production sauf dérogation explicite -AllowUnencrypted"
+    }
+}
 
 New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
 

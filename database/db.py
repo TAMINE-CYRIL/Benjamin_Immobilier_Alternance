@@ -1,5 +1,5 @@
 from database.connection import get_connection
-from database.create_tables import create_tables
+from database.create_tables import create_tables as create_tables
 from psycopg2.extras import Json
 
 def insert_annonces(annonces, logger=None):

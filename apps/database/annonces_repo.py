@@ -2,6 +2,17 @@ import unicodedata
 
 from database.connection import get_connection
 
+EFFECTIVE_BUSINESS_STATUS = """
+    CASE
+        WHEN COALESCE(a.business_status, 'new') = 'new'
+             AND a.first_seen >= CURRENT_TIMESTAMP - INTERVAL '1 day'
+        THEN 'new'
+        WHEN COALESCE(a.business_status, 'new') = 'new'
+        THEN 'to_review'
+        ELSE a.business_status
+    END
+"""
+
 ANNONCE_FIELDS = """
     a.id,
     a.title,
@@ -42,7 +53,7 @@ ANNONCE_FIELDS = """
     p.contenance AS parcel_surface,
     p.commune_code AS parcel_commune_code,
     a.description,
-    a.business_status,
+    {effective_business_status} AS business_status,
     a.is_favorite,
     a.status_updated_at,
     a.score_confidence,
@@ -50,7 +61,7 @@ ANNONCE_FIELDS = """
     a.score_details,
     a.score_version,
     a.scored_at
-"""
+""".format(effective_business_status=EFFECTIVE_BUSINESS_STATUS)
 
 SORT_COLUMNS = {
     "score": "a.score",
@@ -225,7 +236,7 @@ def _build_filters(filters):
 
     business_status = filters.get("business_status")
     if business_status:
-        clauses.append("a.business_status = %s")
+        clauses.append(f"({EFFECTIVE_BUSINESS_STATUS}) = %s")
         params.append(business_status)
 
     is_favorite = filters.get("is_favorite")

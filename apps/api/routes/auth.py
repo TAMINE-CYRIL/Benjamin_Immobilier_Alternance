@@ -97,7 +97,8 @@ def _client_ip(request: Request):
     Récupère l'adresse IP du client à partir de l'en-tête "x-forwarded-for" ou de la connexion directe.
     """
     forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
+    trust_proxy = os.getenv("TRUST_PROXY", "false").lower() in {"1", "true", "yes", "on"}
+    if trust_proxy and forwarded_for:
         return forwarded_for.split(",")[0].strip()
     if request.client:
         return request.client.host

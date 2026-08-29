@@ -2,13 +2,14 @@ import argparse
 import getpass
 import sys
 from pathlib import Path
-from apps.api.auth import hash_password
-from apps.database.users_repo import create_user, get_user_by_email
-from database.create_tables import create_users_table
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+from apps.api.auth import hash_password  # noqa: E402
+from apps.database.users_repo import create_user, get_user_by_email  # noqa: E402
+from database.create_tables import create_users_table  # noqa: E402
 
 
 def main():

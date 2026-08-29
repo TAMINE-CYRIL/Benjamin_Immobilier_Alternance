@@ -13,6 +13,8 @@ from apps.api.auth import CSRF_COOKIE_NAME, validate_security_config
 from apps.api.routes.auth import router as auth_router
 from apps.api.routes.annonces import router as annonces_router
 from apps.api.routes.jobs import router as jobs_router
+from apps.api.routes.health import router as health_router
+from utils.production import validate_production_config
 
 load_dotenv()
 
@@ -22,6 +24,7 @@ load_dotenv()
 @asynccontextmanager
 async def lifespan(_app):
     validate_security_config()
+    validate_production_config()
     yield
 
 
@@ -89,3 +92,4 @@ async def security_headers(request, call_next):
 app.include_router(auth_router, prefix="/api")
 app.include_router(annonces_router, prefix="/api")
 app.include_router(jobs_router, prefix="/api")
+app.include_router(health_router, prefix="/api")

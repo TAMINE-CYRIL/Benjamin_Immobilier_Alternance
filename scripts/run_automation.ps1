@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectPath = "C:\Users\xanot\Documents\INFO\Benjamin_Immobilier_Alternance",
+    [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
     [string]$PythonPath = "",
     [int]$MaxPages = 1,
     [int]$EnrichmentLimit = 100

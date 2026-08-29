@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$BackupPath,
-    [string]$ProjectPath = "C:\Users\arris\Downloads\Benjamin_Immobilier_Alternance",
+    [string]$ProjectPath = (Split-Path -Parent $PSScriptRoot),
     [string]$PgRestorePath = "pg_restore",
     [string]$GpgPath = "gpg"
 )
